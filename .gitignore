@@ -1,3 +1,6 @@
+# Paper images — read-only, generated externally
+paper/images/
+
 # Large files — do not commit
 checkpoints/
 *.pt

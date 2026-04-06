@@ -1,0 +1,25 @@
+{
+  "experiments": {
+    "robust_alignment_all": {
+      "results": {
+        "spmc_frs": {"median_rotation_error_deg": null, "mean_rotation_error_deg": null, "median_time_s": null},
+        "spmc": {"median_rotation_error_deg": null, "mean_rotation_error_deg": null, "median_time_s": null},
+        "frs": {"median_rotation_error_deg": null, "mean_rotation_error_deg": null, "median_time_s": null}
+      }
+    },
+    "robust_alignment_high_outliers": {
+      "results": {
+        "spmc_frs": {"median_rotation_error_deg": null, "p90_rotation_error_deg": null},
+        "spmc": {"median_rotation_error_deg": null, "p90_rotation_error_deg": null},
+        "frs": {"median_rotation_error_deg": null, "p90_rotation_error_deg": null}
+      }
+    },
+    "computational_complexity": {
+      "results": {
+        "spmc_frs": {"time_at_1e6_points_s": null, "time_at_1e7_points_s": null},
+        "spmc": {"time_at_1e6_points_s": null, "time_at_1e7_points_s": null},
+        "frs": {"time_at_1e6_points_s": null, "time_at_1e7_points_s": null}
+      }
+    }
+  }
+}

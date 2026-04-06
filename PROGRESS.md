@@ -1,37 +1,28 @@
 # Progress
 
 ## What Works
-
-<!-- What has been successfully reproduced so far. -->
+- SPMC algorithm (closed-form via 1D circular cross-correlation after mean alignment)
+- FRS algorithm (iterative axis-by-axis rotation search with axis direction angles)
+- SPMC+FRS hybrid algorithm (SPMC initialization + FRS refinement)
+- Synthetic dataset generator: 5 template patterns (A1-A5), 7 configs (B1-B7), 100 rotations
+- Evaluation pipeline: angular error computation, timing, aggregation
+- Baseline: identity rotation (no registration) for reference
 
 ## Results
-
-<!-- Reproduced numbers compared to the paper's reported numbers. -->
+- Pending: first full evaluation run on compute cluster
+- Expected: SPMC+FRS median error < 5° on all configs (paper reports < 1°)
+- Expected: SPMC and FRS individually worse than hybrid
+- Expected: all methods < 1 second per evaluation
 
 ## Remaining
-
-<!-- What still needs to be done to reach higher milestones. -->
+- Full evaluation on 3500 evaluations × 3 methods
+- Validation of O(n) complexity
+- Comparison against reference numbers
 
 ## Issues
-
-<!-- Blockers, bugs, or difficulties encountered. -->
+- Compute node execution required (local node lacks numpy)
+- Git operations slow due to large paper image files in git index
 
 ## Deviations from Paper
-
-<!-- Do not edit this section unless you deviated from the paper's original setup.
-     For each deviation, document: what the paper used, what you substituted, and why.
-
-     ACCEPTABLE deviations (data/resource/scale substitutions — milestones still valid):
-       - Replaced a proprietary dataset with a public one
-       - Used a smaller model of the same architecture
-       - Scaled down training (fewer epochs, smaller batch)
-       - Used a different library for the same algorithm
-
-     UNACCEPTABLE deviations (algorithm substitutions — milestones above 'none' are void):
-       - Replaced the paper's algorithm with a fundamentally different one
-       - Wrote a generic model trained to approximate the method's outputs
-         instead of implementing the method's computational steps
-
-     The test: could someone reading your code identify which algorithm from
-     the paper you implemented? If not, you replaced the method. -->
-
+- Dataset: paper uses 5 specific template patterns (A1-A5) with specific point counts and characteristics. We replicate the pattern generation approach (localized trajectory, complex trajectory, small islands, large islands, non-uniform density) but use similar generation methods rather than exact replication.
+- No FPFH+QUASAR baseline implemented (complex C++ library dependencies). Identity rotation baseline used instead.

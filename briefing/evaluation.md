@@ -1,15 +1,49 @@
 # Evaluation
 
-How success is measured. Describe only the metrics, targets, and evaluation procedure — do NOT describe the paper's method or how they achieved these results. Think of this as a general evaluation protocal for other scientists trying to solve the same problem, where they should not see this paper's solution.
-
 ## Metrics
 
-<!-- What metrics are used? How are they computed? What does higher/lower mean? -->
+### Primary Metric: Rotational Angular Error
+The angular error between the estimated rotation matrix R_est and ground truth rotation matrix R_true. Computed as:
+```
+error = arccos((trace(R_true^T * R_est) - 1) / 2) * (180/pi)
+```
+This gives the minimum rotation angle (in degrees) needed to go from R_est to R_true. Lower is better.
+
+### Secondary Metric: Computation Time
+Wall-clock time in seconds to compute the rotation estimate. Lower is better.
+
+### Constraint: Outlier Handling
+The method must maintain accuracy across varying outlier ratios (0% to 90%) and noise levels (Gaussian noise with std 0.01).
 
 ## Baselines and Targets
 
-<!-- What performance levels exist as reference points? Include the paper's reported numbers as targets, and any standard baselines. A scientist agent should know what "good" looks like. -->
+Based on the paper's results:
+- **FPFH+QUASAR baseline**: Median angular error varies widely (0.04° to >100°) depending on dataset difficulty; median computation ~23 seconds
+- **Target (SPMC+FRS)**: Median angular error < 1° across all datasets; computation < 1 second
+- **Random baseline**: For random rotation guesses, median error would be ~57° (half of 180° range)
 
 ## Evaluation Protocol
 
-<!-- How should evaluation be run? What data split, what conditions? Any important details about how to compare fairly (e.g., fixed seeds, specific test sets, averaging over runs). -->
+### Experiment 1: Synthetic Spherical Pattern Registration
+- 5 template spherical patterns (A1–A5) with distinct characteristics
+- 7 source configurations per template (B1–B7):
+  - B1: no noise, no outliers (one-to-one correspondence)
+  - B2: Gaussian noise (std=0.01), no outliers
+  - B3: 10% outliers + noise
+  - B4: 25% outliers + noise
+  - B5: 50% outliers + noise
+  - B6: 75% outliers + noise
+  - B7: 90% outliers + noise
+- 100 random rotations (R100) applied per configuration
+- Total: 5 × 7 × 100 = 3500 evaluations per method
+- Report median and distribution of angular errors across all configurations
+
+### Experiment 2: Point Cloud Registration (ModelNet40)
+- Complete-to-complete (Comp2Comp): both source and target have 2500 points from same object
+- Partial-to-complete (Part2Comp): source is partial view, target is complete object
+- Report rotation error (degrees) and translation error (meters)
+
+### Experiment 3: Spherical Image Rotation Estimation
+- Template: 2D world map projected onto sphere
+- Source: same image with added clutter (0% to ~19%) and random rotations
+- Report median angular error

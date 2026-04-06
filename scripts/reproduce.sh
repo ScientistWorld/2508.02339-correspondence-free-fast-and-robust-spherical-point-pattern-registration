@@ -1,24 +1,41 @@
 #!/bin/bash
 # Reproduce the paper's results end-to-end.
 #
-# This script runs inside the compute container and should call
-# scripts/baseline.sh and scripts/method.sh to run baselines and
-# the paper's method, each of which calls scripts/evaluate.sh.
+# This script runs inside the compute container and should:
+#   1. Generate the synthetic dataset
+#   2. Run the paper's method (SPMC, FRS, SPMC+FRS)
+#   3. Run the baseline
+#   4. Run evaluation and write scoring/scores.json
 #
 # Assumes:
-#   - Container is built (environment/container.sif)
-#   - Data and models are downloaded (via scripts/download.sh)
+#   - Container is built
 #   - Working directory is /home/user
-#
-# This is the "gold standard" reproduction — 
-# You do not need to run this, but keep this in good shape
-# so other agents can easily run a full loop of reproduction and get the paper's numbers.
 
 set -e
-
 cd /home/user
 
-# TODO: implement full reproduction pipeline
-# e.g.:
-#   bash scripts/baseline.sh
-#   bash scripts/method.sh
+echo "=========================================="
+echo "End-to-End Reproduction"
+echo "=========================================="
+
+# Step 1: Ensure dataset
+echo "[1/4] Generating dataset..."
+python -c "from data.dataset import generate_dataset; generate_dataset('data/rvad')"
+
+# Step 2: Run the paper's methods
+echo "[2/4] Running paper's methods..."
+python scripts/run_experiment.py
+
+# Step 3: Run baseline
+echo "[3/4] Running baseline..."
+bash scripts/baseline.sh || true
+
+# Step 4: Evaluate
+echo "[4/4] Evaluating..."
+bash scripts/evaluate.sh
+
+echo ""
+echo "=========================================="
+echo "Reproduction complete!"
+echo "Results: scoring/scores.json"
+echo "=========================================="
