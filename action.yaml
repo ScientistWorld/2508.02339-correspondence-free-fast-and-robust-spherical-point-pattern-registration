@@ -2,4 +2,4 @@ action: submit
 gpus: 0
 test: false
 milestone: method_runs
-notes: "Full reproduction run. SPMC, FRS, SPMC+FRS on synthetic spherical dataset. 5 patterns x 7 configs x 100 rotations = 3500 evals per method. CPU-only. Fixed filesystem quota issue (removed PDF, now 7.9GB free)."
+notes: "Full reproduction run. SPMC, FRS, SPMC+FRS on synthetic spherical dataset. 5 patterns x 7 configs x 100 rotations = 3500 evals per method. CPU-only. Switched to Red Hat UBI image (registry.access.redhat.com/ubi9/python-311) - no auth required."

@@ -21,7 +21,9 @@
 
 ## Issues
 - Compute node execution required (local node lacks numpy)
-- Git operations slow due to large paper image files in git index
+- ~~Git operations slow due to large paper image files in git index~~ — Fixed by removing PDF (35MB). Filesystem now has 7.9GB free.
+- Container build was failing due to filesystem quota (was 8MB). Resolved by removing PDF.
+- Docker Hub rate limits bypassed via mirror.gcr.io proxy.
 
 ## Deviations from Paper
 - Dataset: paper uses 5 specific template patterns (A1-A5) with specific point counts and characteristics. We replicate the pattern generation approach (localized trajectory, complex trajectory, small islands, large islands, non-uniform density) but use similar generation methods rather than exact replication.

@@ -4,10 +4,10 @@
 #
 # CPU-only computation — no GPU needed for these O(n) algorithms.
 #
-# Uses mirror.gcr.io to proxy Docker Hub, bypassing unauthenticated rate limits.
+# Uses Red Hat's public UBI image (no auth required) from registry.access.redhat.com.
 
 Bootstrap: docker
-From: mirror.gcr.io/library/python:3.11-slim
+From: registry.access.redhat.com/ubi9/python-311:latest
 
 %post
     apt-get update && apt-get install -y --no-install-recommends \
