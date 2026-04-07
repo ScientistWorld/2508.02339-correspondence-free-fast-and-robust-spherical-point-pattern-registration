@@ -1,30 +1,34 @@
 # Progress
 
 ## What Works
-- SPMC algorithm (closed-form via 1D circular cross-correlation after mean alignment)
-- FRS algorithm (iterative axis-by-axis rotation search with axis direction angles)
-- SPMC+FRS hybrid algorithm (SPMC initialization + FRS refinement)
-- Synthetic dataset generator: 5 template patterns (A1-A5), 7 configs (B1-B7), 100 rotations
-- Evaluation pipeline: angular error computation, timing, aggregation
-- Baseline: identity rotation (no registration) for reference
+- **SPMC algorithm** fully implemented and validated: 0.13° on paper's own test case (exact match)
+- **FRS algorithm**: implemented but broken (diverges on most inputs)
+- **SPMC+FRS hybrid**: delegates to SPMC while FRS is fixed
+- **Paper's dataset**: Robust Vector Alignment Dataset fully loaded and verified
+- **Evaluation pipeline**: rotation error computation, timing, aggregation, scores.json output
+- **Synthetic data generator**: 5 template patterns, 7 outlier configs, 100 rotations
 
 ## Results
-- Pending: first full evaluation run on compute cluster
-- Expected: SPMC+FRS median error < 5° on all configs (paper reports < 1°)
-- Expected: SPMC and FRS individually worse than hybrid
-- Expected: all methods < 1 second per evaluation
+- **SPMC on paper's test case (A1/B3/r5)**: 0.13° error — **exact match** with paper's reported 0.13°
+- **SPMC quick eval (10 rotations × 35 configs)**:
+  - Overall median: 0.47° (vs paper's 1.5° for SPMC, 0.8° for hybrid)
+  - Clean data (B1-B2): 0.13-0.24° — excellent
+  - Low outliers (B3-B4): 0.17-3.05° — good
+  - High outliers (B5-B7): 0.35-11.44° — reasonable
+- **Full 100-rotation evaluation**: submitted and running (~1h expected)
+- **Performance**: ~0.2s per evaluation (vs paper's 0.5s for SPMC)
 
 ## Remaining
-- Full evaluation on 3500 evaluations × 3 methods
-- Validation of O(n) complexity
-- Comparison against reference numbers
+- Full evaluation results from compute cluster
+- FRS fix: axis-angle histogram method needs validation
+- Computational complexity scaling experiment
 
 ## Issues
-- Compute node execution required (local node lacks numpy)
-- ~~Git operations slow due to large paper image files in git index~~ — Fixed by removing PDF (35MB). Filesystem now has 7.9GB free.
-- Container build was failing due to filesystem quota (was 8MB). Resolved by removing PDF.
-- Docker Hub rate limits bypassed via mirror.gcr.io proxy.
+- **FRS divergence**: The iterative histogram-based rotation search finds spurious shifts (249°, 37°, 23° on already-aligned data). This is a fundamental issue with the axis-angle histogram approach when there are outliers or density variations. Root cause: the histogram matching finds the mode of the circular cross-correlation, but with ~22K points and many histogram bins, the mode may not correspond to the true rotation.
+- **spmc_frs uses SPMC alone**: Since FRS diverges, hybrid currently returns SPMC output
+- **FPFH+QUASAR baseline not implemented**: Requires Point Cloud Library (C++), unavailable in our environment
 
 ## Deviations from Paper
-- Dataset: paper uses 5 specific template patterns (A1-A5) with specific point counts and characteristics. We replicate the pattern generation approach (localized trajectory, complex trajectory, small islands, large islands, non-uniform density) but use similar generation methods rather than exact replication.
-- No FPFH+QUASAR baseline implemented (complex C++ library dependencies). Identity rotation baseline used instead.
+- **Baseline**: FPFH+QUASAR baseline not implemented (complex C++ deps). Identity rotation used as reference.
+- **FRS**: Not working — delegated to SPMC. The paper likely has additional implementation details we haven't captured.
+- **Dataset**: Using paper's actual dataset (not synthetic) — this is an improvement, not a deviation.

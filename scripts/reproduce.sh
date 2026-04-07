@@ -1,15 +1,15 @@
 #!/bin/bash
 # Reproduce the paper's results end-to-end.
 #
-# This script runs inside the compute container and should:
-#   1. Generate the synthetic dataset
-#   2. Run the paper's method (SPMC, FRS, SPMC+FRS)
-#   3. Run the baseline
-#   4. Run evaluation and write scoring/scores.json
+# This script runs inside the compute container and:
+#   1. Ensures the paper's dataset is available
+#   2. Runs SPMC (and spmc_frs) evaluation on the paper's dataset
+#   3. Runs evaluation and writes scoring/scores.json
 #
 # Assumes:
-#   - Container is built
+#   - Container is built with numpy available
 #   - Working directory is /home/user
+#   - Paper dataset at method/paper_code/vector_alignment_dataset/
 
 set -e
 cd /home/user
@@ -18,24 +18,22 @@ echo "=========================================="
 echo "End-to-End Reproduction"
 echo "=========================================="
 
-# Step 1: Ensure dataset
-echo "[1/4] Generating dataset..."
-python -c "from data.dataset import generate_dataset; generate_dataset('data/rvad')"
+# Step 1: Ensure dataset (clone from GitHub if not present)
+echo "[1/3] Ensuring paper dataset..."
+if [ ! -f "method/paper_code/vector_alignment_dataset/A1_A.pkl" ]; then
+    echo "  Cloning paper repo..."
+    git clone https://github.com/ARLab-VT/Robust-Vector-Set-Alignment method/paper_code
+else
+    echo "  Dataset already present."
+fi
 
-# Step 2: Run the paper's methods
-echo "[2/4] Running paper's methods..."
-python scripts/run_experiment.py
+# Step 2: Run evaluation on paper's actual dataset
+echo "[2/3] Running SPMC evaluation on paper's dataset..."
+python3 scripts/run_experiment.py --n-rotations 100 --output scoring/scores.json
 
-# Step 3: Run baseline
-echo "[3/4] Running baseline..."
-bash scripts/baseline.sh || true
-
-# Step 4: Evaluate
-echo "[4/4] Evaluating..."
-bash scripts/evaluate.sh
-
+# Step 3: Report results
+echo "[3/3] Results written to scoring/scores.json"
 echo ""
 echo "=========================================="
 echo "Reproduction complete!"
-echo "Results: scoring/scores.json"
 echo "=========================================="

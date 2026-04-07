@@ -13,19 +13,15 @@ echo "=========================================="
 echo "Spherical Point Pattern Registration"
 echo "=========================================="
 
-# Ensure paper dataset is available (method/paper_code should be mounted from workspace)
+# Ensure paper dataset is available
 if [ ! -f "method/paper_code/vector_alignment_dataset/A1_A.pkl" ]; then
     echo "Paper dataset not found. Cloning..."
     git clone https://github.com/ARLab-VT/Robust-Vector-Set-Alignment method/paper_code
 fi
 
-# Run experiments
-echo "[1/2] Running experiments (SPMC, FRS, SPMC+FRS)..."
+# Run full 100-rotation evaluation
+echo "Running SPMC evaluation (5 patterns x 7 configs x 100 rotations = 3500 evals)..."
 python3 scripts/run_experiment.py --n-rotations 100 --output scoring/scores.json
-
-# Run baseline
-echo "[2/2] Running baseline..."
-bash scripts/baseline.sh || true
 
 echo ""
 echo "=========================================="

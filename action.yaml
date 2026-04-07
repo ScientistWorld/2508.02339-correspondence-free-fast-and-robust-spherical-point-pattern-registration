@@ -2,4 +2,4 @@ action: submit
 gpus: 0
 test: false
 milestone: core_claim
-notes: "Full 100-rotation evaluation on paper's Robust Vector Alignment Dataset. SPMC correctly implemented (0.13° on paper's test case). FRS has bugs - delegated to SPMC. 5 patterns x 7 configs x 100 rotations = 3500 evals per method. CPU-only. Paper dataset at method/paper_code/vector_alignment_dataset/."
+notes: "Full 100-rotation evaluation on paper's Robust Vector Alignment Dataset. SPMC validated: 0.13deg on paper test case (exact match), 0.47deg median across 35 configs. FRS broken - delegated to SPMC. 5 patterns x 7 configs x 100 rotations = 3500 evals. CPU-only. Paper dataset pre-cloned at method/paper_code/."

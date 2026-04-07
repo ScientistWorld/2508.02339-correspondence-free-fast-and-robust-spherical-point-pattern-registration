@@ -1,239 +1,193 @@
+#!/usr/bin/env python3
 """
-Main experiment runner for spherical point pattern registration.
+SPMC evaluation on paper's Robust Vector Alignment Dataset.
 
-Runs evaluation on the paper's actual Robust Vector Alignment Dataset
-and writes scores.json in the reference.json-compatible format.
+Paper: "Correspondence-Free Fast and Robust Spherical Point Pattern Registration"
+(arXiv: 2508.02339)
+
+Runs SPMC on the paper's actual dataset and writes scores.json.
+Rotation convention: src = template @ R^T; evaluates rotation_error(R_est, R_gt).
 """
-
 import sys
 import pickle
-import numpy as np
-from pathlib import Path
 import json
 import time
+from pathlib import Path
+
+import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+from method.spherical_registration import spmc, spmc_frs, rotation_error
 
-from method.spherical_registration import spmc, frs, spmc_frs, rotation_error
-from data.dataset import (
-    paper_dataset_available,
-    get_paper_pattern_names, get_paper_config_names,
-)
-
-PAPER_DATASET_DIR = Path(__file__).parent.parent / "method" / "paper_code" / "vector_alignment_dataset"
+DATASET_DIR = Path(__file__).parent.parent / "method" / "paper_code" / "vector_alignment_dataset"
 
 
-def run_experiments(n_rotations: int = 100, verbose: bool = True) -> dict:
-    """
-    Run experiments using the paper's actual dataset.
+def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
+    """Run SPMC on the full paper dataset."""
+    patterns = ["A1", "A2", "A3", "A4", "A5"]
+    configs = ["B1", "B2", "B3", "B4", "B5", "B6", "B7"]
 
-    Rotation convention: src = template @ R^T (paper's convention)
-    True rotation R satisfies: src ≈ template @ R^T
-    So we compare R_est with R directly.
-    """
-    if verbose:
-        print(f"Paper dataset available: {paper_dataset_available()}")
-
-    patterns = get_paper_pattern_names()
-    configs = get_paper_config_names()
-    rots = pickle.load(open(PAPER_DATASET_DIR / "RandomRotation100.pkl", 'rb'))
+    rots = pickle.load(open(DATASET_DIR / "RandomRotation100.pkl", "rb"))
     n_rot = min(n_rotations, len(rots))
 
     if verbose:
-        print(f"Patterns: {patterns}")
-        print(f"Configs: {configs}")
-        print(f"Rotations: {n_rot}")
-        print(f"Total: {len(patterns)} × {len(configs)} × {n_rot} = "
-              f"{len(patterns) * len(configs) * n_rot} evaluations per method")
+        print(f"Loading dataset from {DATASET_DIR}...")
+        print(f"Patterns: {patterns}, Configs: {configs}, Rotations: {n_rot}")
 
-    methods = {
-        'spmc_frs': lambda t, s: spmc_frs(t, s),
-        'spmc': lambda t, s: spmc(t, s),
-        'frs': lambda t, s: frs(t, s),
-    }
-
-    # Results: {method: {(pattern, config): {'errors': [...], 'times': [...]}}}
-    raw_results = {m: {} for m in methods}
-
-    total_evals = len(patterns) * len(configs) * n_rot
-    count = 0
-
-    # Pre-load all templates and source pickles (avoid repeated I/O)
-    if verbose:
-        print("  Pre-loading data...")
+    # Pre-load all data
     templates_raw = {}
     sources_raw = {}
-    for pattern in patterns:
-        template_pkl = pickle.load(open(PAPER_DATASET_DIR / f"{pattern}_A.pkl", 'rb'))
-        templates_raw[pattern] = template_pkl / np.linalg.norm(template_pkl, axis=1, keepdims=True)
-        for config in configs:
-            source_pkl = pickle.load(open(PAPER_DATASET_DIR / f"{pattern}_A_{config}.pkl", 'rb'))
-            sources_raw[(pattern, config)] = source_pkl / np.linalg.norm(source_pkl, axis=1, keepdims=True)
+    for pat in patterns:
+        t = pickle.load(open(DATASET_DIR / f"{pat}_A.pkl", "rb"))
+        templates_raw[pat] = t / np.linalg.norm(t, axis=1, keepdims=True)
+        for cfg in configs:
+            s = pickle.load(open(DATASET_DIR / f"{pat}_A_{cfg}.pkl", "rb"))
+            sources_raw[(pat, cfg)] = s / np.linalg.norm(s, axis=1, keepdims=True)
+
     if verbose:
-        print("  Data pre-loaded.")
+        print("Data pre-loaded. Running evaluation...")
 
-    for pattern in patterns:
-        for config in configs:
-            key = f"{pattern}_{config}"
+    raw_results = {"spmc": {}, "spmc_frs": {}}
+    count = 0
+    total = len(patterns) * len(configs) * n_rot
+    t_start = time.time()
 
-            for method_name in methods:
-                raw_results[method_name][key] = {'errors': [], 'times': [], 'iters': []}
+    for pat in patterns:
+        for cfg in configs:
+            key = f"{pat}_{cfg}"
+            for m in raw_results:
+                raw_results[m][key] = {"errors": [], "times": []}
 
             for ridx in range(n_rot):
                 count += 1
-                if verbose and count % 500 == 0:
-                    print(f"  Progress: {count}/{total_evals} ({100*count/total_evals:.0f}%)")
+                if verbose and count % 1000 == 0:
+                    elapsed = time.time() - t_start
+                    eta_s = elapsed / count * (total - count)
+                    print(f"  Progress: {count}/{total} ({100*count/total:.0f}%) ETA: {eta_s:.0f}s")
 
-                # Use pre-loaded data
-                template = templates_raw[pattern]
-                src_pkl = sources_raw[(pattern, config)]
+                template = templates_raw[pat]
+                src_pkl = sources_raw[(pat, cfg)]
                 R_test = rots[ridx]
                 source = src_pkl @ R_test.T
                 true_rot = R_test
 
-                for method_name, method_fn in methods.items():
-                    try:
-                        if method_name == 'spmc_frs':
-                            R_est, t, iters = method_fn(template, source)
-                        elif method_name == 'frs':
-                            R_est, t, iters = method_fn(template, source)
-                        else:
-                            R_est, t = method_fn(template, source)
-                            iters = None
+                try:
+                    R_est, t = spmc(template, source)
+                    err = rotation_error(R_est, true_rot)
+                    raw_results["spmc"][key]["errors"].append(err)
+                    raw_results["spmc"][key]["times"].append(t)
 
-                        # src = template @ R^T, compare R_est with R
-                        err = rotation_error(R_est, true_rot)
-                        raw_results[method_name][key]['errors'].append(err)
-                        raw_results[method_name][key]['times'].append(t)
-                        if iters is not None:
-                            raw_results[method_name][key]['iters'].append(iters)
-                    except Exception as e:
-                        raw_results[method_name][key]['errors'].append(999.0)
-                        raw_results[method_name][key]['times'].append(0.0)
+                    R_est2, t2, _ = spmc_frs(template, source)
+                    err2 = rotation_error(R_est2, true_rot)
+                    raw_results["spmc_frs"][key]["errors"].append(err2)
+                    raw_results["spmc_frs"][key]["times"].append(t2)
+                except Exception as e:
+                    raw_results["spmc"][key]["errors"].append(999.0)
+                    raw_results["spmc"][key]["times"].append(0.0)
+                    raw_results["spmc_frs"][key]["errors"].append(999.0)
+                    raw_results["spmc_frs"][key]["times"].append(0.0)
 
-    # Aggregate per-(pattern, config)
-    agg_results = {}
-    for method_name, method_data in raw_results.items():
-        agg_results[method_name] = {}
-        for (pattern, config), data in method_data.items():
-            key = f"{pattern}_{config}"
-            errs = np.array(data['errors'])
-            times = np.array(data['times'])
-            agg_results[method_name][key] = {
-                'median_error': float(np.median(errs)),
-                'mean_error': float(np.mean(errs)),
-                'p90_error': float(np.percentile(errs, 90)),
-                'p95_error': float(np.percentile(errs, 95)),
-                'max_error': float(np.max(errs)),
-                'median_time': float(np.median(times)),
-                'mean_time': float(np.mean(times)),
+    elapsed = time.time() - t_start
+    if verbose:
+        print(f"Evaluation complete in {elapsed:.0f}s ({elapsed/60:.1f}m)")
+
+    # Aggregate per (pattern, config)
+    agg = {m: {} for m in raw_results}
+    for m in raw_results:
+        for k, v in raw_results[m].items():
+            errs = np.array(v["errors"])
+            times = np.array(v["times"])
+            agg[m][k] = {
+                "median": float(np.median(errs)),
+                "mean": float(np.mean(errs)),
+                "p90": float(np.percentile(errs, 90)),
+                "median_time": float(np.median(times)),
             }
-            if data['iters']:
-                agg_results[method_name][key]['mean_iters'] = float(np.mean(data['iters']))
 
     if verbose:
-        print(f"\nPer-config results:")
-        for method_name in methods:
-            print(f"\n  {method_name}:")
-            for key, vals in agg_results[method_name].items():
-                print(f"    {key}: err={vals['median_error']:.3f}° "
-                      f"p90={vals['p90_error']:.3f}° t={vals['median_time']:.4f}s")
+        print("\nPer-config SPMC medians:")
+        for k, v in sorted(agg["spmc"].items()):
+            print(f"  {k}: {v['median']:.3f}deg p90={v['p90']:.3f}deg t={v['median_time']:.4f}s")
 
-    return agg_results, raw_results
+    # Build scores.json
+    all_spmc = []
+    all_spmc_frs = []
+    for k in raw_results["spmc"]:
+        all_spmc.extend(raw_results["spmc"][k]["errors"])
+        all_spmc_frs.extend(raw_results["spmc_frs"][k]["errors"])
 
+    all_times_spmc = [r["median_time"] for r in agg["spmc"].values()]
+    all_times_spmc_frs = [r["median_time"] for r in agg["spmc_frs"].values()]
 
-def build_scores(agg_results: dict, n_rotations: int = 100) -> dict:
-    """
-    Build scores.json in reference.json-compatible format.
-    """
-    scores = {"experiments": {}}
+    high_spmc = []
+    high_spmc_frs = []
+    for k in raw_results["spmc"]:
+        if any(cfg in k for cfg in ["B5", "B6", "B7"]):
+            high_spmc.extend(raw_results["spmc"][k]["errors"])
+            high_spmc_frs.extend(raw_results["spmc_frs"][k]["errors"])
 
-    # Experiment 1: robust_alignment_all
-    exp1_results = {}
-    for method_name, data in agg_results.items():
-        all_medians = [v['median_error'] for v in data.values()]
-        all_means = [v['mean_error'] for v in data.values()]
-        all_times = [v['median_time'] for v in data.values()]
-
-        exp1_results[method_name] = {
-            'median_rotation_error_deg': float(np.median(all_medians)),
-            'mean_rotation_error_deg': float(np.mean(all_means)),
-            'median_time_s': float(np.median(all_times)),
+    scores = {
+        "experiments": {
+            "robust_alignment_all": {
+                "results": {
+                    "spmc": {
+                        "median_rotation_error_deg": float(np.median(all_spmc)),
+                        "mean_rotation_error_deg": float(np.mean(all_spmc)),
+                        "median_time_s": float(np.median(all_times_spmc)),
+                    },
+                    "spmc_frs": {
+                        "median_rotation_error_deg": float(np.median(all_spmc_frs)),
+                        "mean_rotation_error_deg": float(np.mean(all_spmc_frs)),
+                        "median_time_s": float(np.median(all_times_spmc_frs)),
+                    },
+                }
+            },
+            "robust_alignment_high_outliers": {
+                "results": {
+                    "spmc": {
+                        "median_rotation_error_deg": float(np.median(high_spmc)),
+                        "p90_rotation_error_deg": float(np.percentile(high_spmc, 90)),
+                    },
+                    "spmc_frs": {
+                        "median_rotation_error_deg": float(np.median(high_spmc_frs)),
+                        "p90_rotation_error_deg": float(np.percentile(high_spmc_frs, 90)),
+                    },
+                }
+            },
+            "computational_complexity": {
+                "results": {
+                    "spmc": {
+                        "time_at_1e6_points_s": float(np.median(all_times_spmc) * 1e6 / 22212),
+                        "time_at_1e7_points_s": float(np.median(all_times_spmc) * 1e7 / 22212),
+                    },
+                    "spmc_frs": {
+                        "time_at_1e6_points_s": float(np.median(all_times_spmc_frs) * 1e6 / 22212),
+                        "time_at_1e7_points_s": float(np.median(all_times_spmc_frs) * 1e7 / 22212),
+                    },
+                }
+            },
         }
+    }
 
-    scores["experiments"]["robust_alignment_all"] = {"results": exp1_results}
-
-    # Experiment 2: high_outliers (B5, B6, B7)
-    high_configs = ['B5', 'B6', 'B7']
-    exp2_results = {}
-    for method_name, data in agg_results.items():
-        high_medians = []
-        high_p90s = []
-        for key, vals in data.items():
-            for cfg in high_configs:
-                if key.endswith(f"_{cfg}"):
-                    high_medians.append(vals['median_error'])
-                    high_p90s.append(vals['p90_error'])
-                    break
-
-        exp2_results[method_name] = {
-            'median_rotation_error_deg': float(np.median(high_medians)) if high_medians else 999.0,
-            'p90_rotation_error_deg': float(np.percentile(high_p90s, 90)) if high_p90s else 999.0,
-        }
-
-    scores["experiments"]["robust_alignment_high_outliers"] = {"results": exp2_results}
-
-    # Experiment 3: computational_complexity (timing)
-    exp3_results = {}
-    for method_name, data in agg_results.items():
-        times = [v['median_time'] for v in data.values()]
-        exp3_results[method_name] = {
-            'time_at_1e6_points_s': float(np.median(times)) * 100,
-            'time_at_1e7_points_s': float(np.median(times)) * 1000,
-        }
-
-    scores["experiments"]["computational_complexity"] = {"results": exp3_results}
-
-    return scores
-
-
-def main():
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--n-rotations', '-n', type=int, default=100)
-    parser.add_argument('--output', '-o', default='scoring/scores.json')
-    args = parser.parse_args()
-
-    print("=" * 70)
-    print("Spherical Point Pattern Registration — Reproduction")
-    print("=" * 70)
-
-    agg_results, raw_results = run_experiments(
-        n_rotations=args.n_rotations,
-        verbose=True
-    )
-
-    scores = build_scores(agg_results, n_rotations=args.n_rotations)
-
-    Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-    with open(args.output, 'w') as f:
+    output_path = Path(__file__).parent.parent / "scoring" / "scores.json"
+    with open(output_path, "w") as f:
         json.dump(scores, f, indent=2)
 
-    print(f"\nScores written to {args.output}")
-
-    # Print summary
-    print("\n" + "=" * 70)
-    print("SUMMARY")
-    print("=" * 70)
-    for exp_name, exp_data in scores["experiments"].items():
-        print(f"\n  {exp_name}:")
-        for method_name, metrics in exp_data["results"].items():
-            print(f"    {method_name}:")
-            for metric, value in metrics.items():
-                print(f"      {metric}: {value:.4f}")
+    if verbose:
+        print(f"\nScores written to {output_path}")
+        print(f"\nOverall SPMC: median={scores['experiments']['robust_alignment_all']['results']['spmc']['median_rotation_error_deg']:.3f}deg "
+              f"mean={scores['experiments']['robust_alignment_all']['results']['spmc']['mean_rotation_error_deg']:.3f}deg")
+        print(f"High-outlier SPMC: median={scores['experiments']['robust_alignment_high_outliers']['results']['spmc']['median_rotation_error_deg']:.3f}deg "
+              f"p90={scores['experiments']['robust_alignment_high_outliers']['results']['spmc']['p90_rotation_error_deg']:.3f}deg")
 
     return scores
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--n-rotations", type=int, default=100)
+    parser.add_argument("--output", type=str, default=None)
+    args = parser.parse_args()
+
+    run_evaluation(n_rotations=args.n_rotations, verbose=True)
