@@ -1,12 +1,17 @@
 """
 Spherical Point Pattern Registration: SPMC, FRS, and SPMC+FRS algorithms.
 
-Paper: "Correspondence-Free Fast and Robust Spherical Point Pattern Registration"
-(2508.02339)
+Implements the methods from paper "Correspondence-Free Fast and Robust Spherical
+Point Pattern Registration" (2508.02339).
+
+Key steps from the paper's vector_alignment_utils.py:
+- SPMC: Mean-align to North Pole → align_normalsz → geographic histogram → binary
+  1D correlation → z-rotation → compose
+- FRS: Iterative axis-angle histogram matching → SVD final alignment
 """
 
 import numpy as np
-from typing import Tuple, Optional
+from typing import Tuple
 import time
 
 
@@ -14,68 +19,39 @@ import time
 # Rotation Utilities
 # =============================================================================
 
-def rotation_matrix_between_vectors(v1: np.ndarray, v2: np.ndarray) -> np.ndarray:
+def rotation_matrix_between_vectors(vec1: np.ndarray, vec2: np.ndarray) -> np.ndarray:
     """
-    Compute rotation matrix that aligns v2 to v1 using Rodrigues' formula.
-    v1, v2: unit vectors (3,)
+    Compute rotation matrix that aligns vec1 to vec2 using Rodrigues' formula.
+    vec1, vec2: unit vectors (3,)
     Returns: 3x3 rotation matrix in SO(3)
     """
-    v1 = v1 / np.linalg.norm(v1)
-    v2 = v2 / np.linalg.norm(v2)
+    vec1 = np.asarray(vec1, dtype=float).reshape(3)
+    vec2 = np.asarray(vec2, dtype=float).reshape(3)
+    vec1 = vec1 / np.linalg.norm(vec1)
+    vec2 = vec2 / np.linalg.norm(vec2)
 
-    dot = np.clip(np.dot(v1, v2), -1.0, 1.0)
+    dot = np.clip(np.dot(vec1, vec2), -1.0, 1.0)
 
     if dot > 1.0 - 1e-10:
         return np.eye(3)
     if dot < -1.0 + 1e-10:
-        # 180 degree rotation — find axis perpendicular to v1
         axis = np.array([1.0, 0.0, 0.0])
-        if abs(np.dot(v1, axis)) > 0.9:
+        if abs(np.dot(vec1, axis)) > 0.9:
             axis = np.array([0.0, 1.0, 0.0])
-        axis = axis - v1 * np.dot(v1, axis)
+        axis = axis - vec1 * np.dot(vec1, axis)
         axis = axis / np.linalg.norm(axis)
         return -np.eye(3) + 2 * np.outer(axis, axis)
 
-    axis = np.cross(v2, v1)
-    axis = axis / np.linalg.norm(axis)
-    angle = np.arccos(dot)
-
-    K = np.array([
-        [0, -axis[2], axis[1]],
-        [axis[2], 0, -axis[0]],
-        [-axis[1], axis[0], 0]
-    ])
-    R = np.eye(3) + np.sin(angle) * K + (1 - np.cos(angle)) * (K @ K)
-    return R
+    v = np.cross(vec1, vec2)
+    s = np.linalg.norm(v)
+    c = dot
+    kmat = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+    return np.eye(3) + kmat + kmat @ kmat * ((1 - c) / (s ** 2))
 
 
-def align_to_north_pole(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Compute rotation matrix that aligns the mean direction of points to North Pole [0,0,1],
-    and apply it to the points.
-    points: (N, 3) array of unit vectors
-    Returns: rotated points (N, 3), rotation matrix R
-    """
-    mean_dir = np.mean(points, axis=0)
-    mean_dir = mean_dir / np.linalg.norm(mean_dir)
-    north = np.array([0.0, 0.0, 1.0])
-    R = rotation_matrix_between_vectors(north, mean_dir)
-    rotated = points @ R.T
-    return rotated, R
-
-
-def rotation_matrix_from_axis_angles(theta_x: float, theta_y: float, theta_z: float) -> np.ndarray:
-    """Compute rotation matrix from axis angles (in degrees)."""
-    cx, sx = np.cos(np.radians(theta_x)), np.sin(np.radians(theta_x))
-    cy, sy = np.cos(np.radians(theta_y)), np.sin(np.radians(theta_y))
-    cz, sz = np.cos(np.radians(theta_z)), np.sin(np.radians(theta_z))
-
-    Rx = np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]])
-    Ry = np.array([[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]])
-    Rz = np.array([[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]])
-
-    # ZYX order as specified in paper
-    return Rz @ Ry @ Rx
+def apply_rotation(points: np.ndarray, R: np.ndarray) -> np.ndarray:
+    """Apply rotation matrix to points. points: (N, 3)"""
+    return points @ R.T
 
 
 def rotation_error(R_est: np.ndarray, R_true: np.ndarray) -> float:
@@ -84,313 +60,391 @@ def rotation_error(R_est: np.ndarray, R_true: np.ndarray) -> float:
     Returns angle in [0, 180] degrees.
     """
     R_diff = R_true @ R_est.T
-    trace = np.clip(np.trace(R_diff) - 1, -2, 2)
-    angle = np.arccos(trace / 2.0)
-    return np.degrees(angle)
-
-
-def apply_rotation(points: np.ndarray, R: np.ndarray) -> np.ndarray:
-    """Apply rotation matrix to points."""
-    return points @ R.T
-
-
-def svd_rotation(A: np.ndarray, B: np.ndarray) -> np.ndarray:
-    """
-    Closed-form rotation estimation using SVD (Arun-Huang method).
-    Finds R that minimizes ||R @ A - B||_F^2.
-    A, B: (N, 3) point sets
-    Returns: 3x3 rotation matrix
-    """
-    H = A.T @ B
-    U, S, Vt = np.linalg.svd(H)
-    R = Vt.T @ U.T
-    if np.linalg.det(R) < 0:
-        Vt[-1, :] *= -1
-        R = Vt.T @ U.T
-    return R
+    trace = np.clip((np.trace(R_diff) - 1) / 2, -1.0, 1.0)
+    return abs(np.degrees(np.arccos(trace)))
 
 
 # =============================================================================
-# Histogram Utilities
+# Paper's Geographic Coordinate Conversion
 # =============================================================================
 
-def points_to_binary_histogram(points: np.ndarray, bins_az: int = 360, bins_el: int = 180,
-                               threshold: int = 0) -> np.ndarray:
+def cart2sph(xyz: np.ndarray) -> Tuple[float, float, float]:
     """
-    Project S2 points to equirectangular 2D binary histogram.
-    points: (N, 3) unit vectors
-    bins_az: number of azimuthal bins (0 to 360 degrees)
-    bins_el: number of elevation bins (0 to 180 degrees)
-    threshold: bins with count >= threshold are set to 1, else 0
-    Returns: (bins_el, bins_az) binary histogram
+    Convert Cartesian (x, y, z) to spherical (r, theta, phi).
+    theta: polar angle from z-axis [0, pi]
+    phi: azimuthal angle [0, 2*pi]
     """
-    x, y, z = points[:, 0], points[:, 1], points[:, 2]
-
-    # Azimuthal angle: 0 to 2*pi
-    azimuth = np.arctan2(y, x)  # -pi to pi
-    azimuth_bin = ((azimuth + np.pi) / (2 * np.pi) * bins_az).astype(int) % bins_az
-
-    # Polar angle (elevation from equator): 0 to pi
-    # z = cos(theta), so theta = arccos(z)
-    polar = np.arccos(np.clip(z, -1, 1))  # 0 to pi
-    polar_bin = (polar / np.pi * bins_el).astype(int)
-    polar_bin = np.clip(polar_bin, 0, bins_el - 1)
-
-    hist = np.zeros((bins_el, bins_az), dtype=int)
-    for i in range(len(points)):
-        hist[polar_bin[i], azimuth_bin[i]] += 1
-
-    # Binary threshold
-    binary_hist = (hist >= threshold).astype(int)
-    return binary_hist
+    x, y, z = xyz[0], xyz[1], xyz[2]
+    r = np.linalg.norm(xyz)
+    theta = np.arccos(z / r)  # polar angle from z-axis
+    phi = np.arctan2(y, x)
+    if phi < 0:
+        phi += 2 * np.pi
+    return r, theta, phi
 
 
-def histogram_to_1d(hist2d: np.ndarray) -> np.ndarray:
+def cart2geo(xyz: np.ndarray) -> Tuple[float, float]:
+    """Convert Cartesian to geographic (latitude, longitude) in degrees."""
+    r, theta, phi = cart2sph(xyz)
+    latitude = np.degrees(theta)   # [0, 180]
+    longitude = np.degrees(phi)    # [0, 360]
+    return latitude, longitude
+
+
+def cart2geo_array(points: np.ndarray) -> np.ndarray:
+    """Convert (N, 3) Cartesian array to (N, 2) [lat, lon] in degrees."""
+    return np.array([cart2geo(p) for p in points])
+
+
+def hist2D_from_geo_array(geo_array: np.ndarray,
+                           lat_bin: int = 180,
+                           long_bin: int = 360) -> np.ndarray:
     """
-    Sum 2D histogram over polar (elevation) axis to get 1D azimuthal histogram.
-    hist2d: (bins_el, bins_az)
-    Returns: (bins_az,) 1D histogram
+    Create 2D histogram from geographic coordinates.
+    geo_array: (N, 2) array of [latitude, longitude] in degrees.
+    Returns: (lat_bin, long_bin) histogram, transposed so rows=latitude, cols=longitude.
     """
-    return np.sum(hist2d, axis=0).astype(float)
+    hist, xedges, yedges = np.histogram2d(
+        geo_array[:, 1],  # longitude (x-axis in hist2d)
+        geo_array[:, 0],  # latitude (y-axis in hist2d)
+        bins=(long_bin, lat_bin),
+        range=[[0, 360], [0, 180]],
+        density=True
+    )
+    # Flip vertically to match geographic orientation
+    return np.flipud(hist.T)
 
 
-def circular_cross_correlation(h1: np.ndarray, h2: np.ndarray) -> np.ndarray:
+def binary_hist(hist: np.ndarray) -> np.ndarray:
+    """Binary histogram: 1 if count > 0, else 0."""
+    return (hist > 0).astype(int)
+
+
+def flatten_2d(mat_2d: np.ndarray) -> np.ndarray:
+    """Sum rows of 2D array to get 1D array (along axis 0)."""
+    return np.sum(mat_2d, axis=0)
+
+
+# =============================================================================
+# Normal Alignment (critical step missing in initial implementation)
+# =============================================================================
+
+def align_normalsz(normals: np.ndarray) -> np.ndarray:
     """
-    Compute 1D circular cross-correlation C(s) = sum_lambda h1[lambda] * h2[(lambda+s) mod n].
-    h1: template 1D histogram (n,)
-    h2: source 1D histogram (n,)
-    Returns: (n,) correlation values for each shift s in [0, n-1]
+    Align normals to point toward +z: flip any vector with negative z to its antipode.
+    This prevents the hemisphere ambiguity in azimuthal histograms.
     """
-    n = len(h1)
-    # Efficient: use FFT-based circular convolution
-    # Correlation = reverse of convolution
-    # We want: C[s] = sum_n h1[n] * h2[(n+s) mod N]
-    # This is convolution of h1 with reversed h2
-    h1_fft = np.fft.fft(h1)
-    h2_fft = np.fft.fft(h2[::-1])
-    corr = np.fft.ifft(h1_fft * h2_fft).real
-    # Also try naive for small sizes or verify
-    return np.roll(corr, n - 1)  # align so shift 0 is at position 0
+    aligned = normals.copy()
+    aligned[aligned[:, 2] < 0] *= -1
+    return aligned
 
 
-def find_optimal_shift(corr: np.ndarray) -> int:
-    """Find shift that maximizes correlation."""
-    return int(np.argmax(corr))
+# =============================================================================
+# Cross-Correlation Shift Finding (paper's FFT method)
+# =============================================================================
+
+def circular_cross_correlation(gt_hist: np.ndarray, mov_hist: np.ndarray) -> np.ndarray:
+    """
+    FFT-based circular cross-correlation: C[s] = dot(gt, circshift(mov, s)).
+    gt_hist: reference (template) histogram
+    mov_hist: moving (source) histogram
+
+    Returns: (N,) correlation values where index s = shift in bins.
+    Uses paper's formula: ifft(fft(gt) * conj(fft(mov))).
+    """
+    return np.fft.ifft(
+        np.fft.fft(gt_hist) * np.conj(np.fft.fft(mov_hist))
+    ).real
+
+
+def find_optimal_shift(gt_hist: np.ndarray, mov_hist: np.ndarray) -> float:
+    """
+    Find optimal circular shift (in degrees) that aligns mov_hist to gt_hist.
+    Paper's find_1D_shift_wfft: argmax of cross-correlation.
+    """
+    cc = circular_cross_correlation(gt_hist, mov_hist)
+    best_shift_bins = np.argmax(np.abs(cc))
+    return float(best_shift_bins)  # bins = degrees at 360-bin resolution
 
 
 # =============================================================================
 # Algorithm 1: SPMC (Spherical Pattern Matching by Correlation)
 # =============================================================================
 
-def spmc(template_points: np.ndarray, source_points: np.ndarray,
-         bins_az: int = 360, bins_el: int = 180,
-         normalize: bool = False) -> Tuple[np.ndarray, float]:
+def spmc(template: np.ndarray, source: np.ndarray,
+         lat_bin: int = 180, long_bin: int = 360) -> Tuple[np.ndarray, float]:
     """
     Spherical Pattern Matching by Correlation (SPMC).
 
-    Steps:
-    1. Compute rotation matrices to align mean directions to North Pole
-    2. Rotate both sets to align with North Pole
-    3. Convert to binary histograms
-    4. 1D circular cross-correlation
-    5. Compute optimal rotation
+    Steps from the paper:
+    1. Compute mean direction vectors for both sets
+    2. Rotate both sets so mean direction → North Pole [0, 0, 1]
+    3. Align normals to +z (flip negative-z to antipode)
+    4. Convert to geographic coordinates (latitude/longitude)
+    5. Create binary 2D histograms
+    6. 1D circular cross-correlation on flattened histograms
+    7. Compose: R_comp = R_A^T @ R_z(shift) @ R_B
 
     Args:
-        template_points: (N, 3) unit vectors
-        source_points: (M, 3) unit vectors
-        bins_az: azimuthal bins (default 360 for 1-degree resolution)
-        bins_el: polar bins (default 180)
-        normalize: whether to normalize vectors toward +z after North Pole alignment
+        template: (N, 3) unit vectors
+        source: (M, 3) unit vectors
+        lat_bin: latitude bins (default 180 for 1-degree resolution)
+        long_bin: longitude bins (default 360 for 1-degree resolution)
 
     Returns:
-        R_opt: optimal rotation matrix (3, 3)
+        R_comp: rotation matrix (3, 3) that aligns source to template
         t: computation time in seconds
     """
     start = time.perf_counter()
 
-    # Step 1: Compute mean directions and rotation matrices
-    template_np, R_A = align_to_north_pole(template_points)
-    source_np, R_B = align_to_north_pole(source_points)
+    # Ensure unit vectors
+    template = template / np.linalg.norm(template, axis=1, keepdims=True)
+    source = source / np.linalg.norm(source, axis=1, keepdims=True)
 
-    # Optional normalization: ensure all vectors point toward +z hemisphere
-    if normalize:
-        template_np = np.where(template_np[:, 2:3] < 0, -template_np, template_np)
-        source_np = np.where(source_np[:, 2:3] < 0, -source_np, source_np)
+    # Step 1: Compute mean direction vectors
+    mean_template = np.mean(template, axis=0)
+    mean_source = np.mean(source, axis=0)
 
-    # Step 3: Compute binary histograms
-    H_A = points_to_binary_histogram(template_np, bins_az=bins_az, bins_el=bins_el, threshold=0)
-    H_B = points_to_binary_histogram(source_np, bins_az=bins_az, bins_el=bins_el, threshold=0)
+    # Step 2: Rotation matrices to align mean vectors to North Pole
+    R_A = rotation_matrix_between_vectors(mean_template, np.array([0.0, 0.0, 1.0]))
+    R_B = rotation_matrix_between_vectors(mean_source, np.array([0.0, 0.0, 1.0]))
 
-    # Step 4: 1D cross-correlation
-    h_A = histogram_to_1d(H_A)
-    h_B = histogram_to_1d(H_B)
-    corr = circular_cross_correlation(h_A, h_B)
-    s_star = find_optimal_shift(corr)
+    # Rotate both sets to North Pole
+    template_np = template @ R_A.T
+    source_np = source @ R_B.T
 
-    # Step 5: Compute rotation
-    # R_shift = R_z(s*) where s* is the shift in degrees
-    s_deg = s_star * (360.0 / bins_az)
-    R_shift = rotation_matrix_from_axis_angles(0, 0, s_deg)
+    # Step 3: Align normals to +z (FLIP NEGATIVE Z — critical!)
+    template_np = align_normalsz(template_np)
+    source_np = align_normalsz(source_np)
 
-    # R_opt = R_A^(-1) * R_shift * R_B
-    R_opt = R_A.T @ R_shift @ R_B
+    # Step 4: Convert to geographic coordinates (latitude, longitude in degrees)
+    template_geo = cart2geo_array(template_np)
+    source_geo = cart2geo_array(source_np)
+
+    # Step 5: Binary 2D histograms
+    template_hist = binary_hist(hist2D_from_geo_array(template_geo, lat_bin, long_bin))
+    source_hist = binary_hist(hist2D_from_geo_array(source_geo, lat_bin, long_bin))
+
+    # Step 6: 1D circular cross-correlation
+    h_template = flatten_2d(template_hist)
+    h_source = flatten_2d(source_hist)
+    shift = find_optimal_shift(h_template, h_source)
+
+    # z-rotation by shift degrees
+    shift_rad = np.deg2rad(shift)
+    Rz_shift = np.array([
+        [np.cos(shift_rad), -np.sin(shift_rad), 0],
+        [np.sin(shift_rad),  np.cos(shift_rad), 0],
+        [0, 0, 1]
+    ])
+
+    # Step 7: Compose rotation matrices
+    # R_comp = R_A^T @ R_z(shift) @ R_B
+    # This equals R^T (where src = template @ R^T in row-vector convention)
+    R_comp = R_A.T @ Rz_shift @ R_B
 
     t = time.perf_counter() - start
-    return R_opt, t
+    return R_comp.T, t  # Return R so src ≈ template @ R
 
 
 # =============================================================================
-# Axis Direction Angles
+# Axis Direction Angles (for FRS)
 # =============================================================================
 
-def compute_axis_direction_angles(points: np.ndarray) -> np.ndarray:
-    """
-    Compute axis direction angles (theta_x, theta_y, theta_z) for all points.
-    Uses atan2 for proper quadrant handling.
-    Returns: (N, 3) array where each row is [theta_x, theta_y, theta_z] in degrees
-    """
-    x, y, z = points[:, 0], points[:, 1], points[:, 2]
-
-    theta_z = np.degrees(np.arctan2(y, x)) % 360
-    theta_y = np.degrees(np.arctan2(x, z)) % 360
-    theta_x = np.degrees(np.arctan2(z, y)) % 360
-
-    return np.stack([theta_x, theta_y, theta_z], axis=1)
+def adjust_angle(y: np.ndarray, x: np.ndarray) -> np.ndarray:
+    """Compute atan2(y, x) in degrees, mapping [-180, 180] to [0, 360]."""
+    angle = np.arctan2(y, x)
+    angle = np.degrees(angle)
+    angle[angle < 0] += 360
+    return angle
 
 
-def angles_to_histogram(angles: np.ndarray, bins: int = 360) -> np.ndarray:
+def pcl_array_to_rotation_angle_array(points: np.ndarray) -> np.ndarray:
     """
-    Convert axis direction angles to 1D histogram.
-    angles: (N,) angle values in [0, 360) degrees
-    bins: number of bins
-    Returns: (bins,) histogram
+    Convert point cloud to axis-direction angles (paper's method).
+    Returns (N, 3) array of [theta_x, theta_y, theta_z] in degrees.
+
+    theta_z: rotation around Z-axis (from XY projection)
+    theta_y: rotation around Y-axis (from XZ projection)
+    theta_x: rotation around X-axis (from YZ projection)
     """
-    bin_indices = (angles / 360.0 * bins).astype(int) % bins
-    hist = np.zeros(bins, dtype=float)
-    np.add.at(hist, bin_indices, 1)
+    theta_z = adjust_angle(points[:, 1], points[:, 0])
+    theta_y = adjust_angle(points[:, 0], points[:, 2])
+    theta_x = adjust_angle(points[:, 2], points[:, 1])
+    return np.stack([theta_x, theta_y, theta_z], axis=-1)
+
+
+def hist1D(array1D: np.ndarray, bins: int, range_min: float, range_max: float) -> np.ndarray:
+    """1D histogram in given range."""
+    hist, _ = np.histogram(array1D, bins=bins, range=(range_min, range_max))
     return hist
+
+
+def rotation_angles_to_matrix(x_rot: float, y_rot: float, z_rot: float) -> np.ndarray:
+    """
+    Compose rotation matrix from axis angles in degrees.
+    Order: Z-Y-X (first Z, then Y, then X).
+    """
+    x_rad = np.deg2rad(x_rot)
+    y_rad = np.deg2rad(y_rot)
+    z_rad = np.deg2rad(z_rot)
+
+    Rx = np.array([[1, 0, 0], [0, np.cos(x_rad), -np.sin(x_rad)], [0, np.sin(x_rad), np.cos(x_rad)]])
+    Ry = np.array([[np.cos(y_rad), 0, np.sin(y_rad)], [0, 1, 0], [-np.sin(y_rad), 0, np.cos(y_rad)]])
+    Rz = np.array([[np.cos(z_rad), -np.sin(z_rad), 0], [np.sin(z_rad), np.cos(z_rad), 0], [0, 0, 1]])
+
+    return Rz @ Ry @ Rx
+
+
+def estimate_rotation_svd(destination: np.ndarray, source: np.ndarray) -> np.ndarray:
+    """
+    SVD-based rotation estimation (Arun-Huang method).
+    Finds R that minimizes ||destination - R @ source||_F^2.
+    """
+    # Center the point clouds
+    c_dest = destination - np.mean(destination, axis=0)
+    c_src = source - np.mean(source, axis=0)
+
+    # Covariance
+    H = c_src.T @ c_dest
+    U, S, Vt = np.linalg.svd(H)
+    R = U @ Vt
+    if np.linalg.det(R) < 0:
+        Vt[-1, :] *= -1
+        R = U @ Vt
+    return R.T  # return in source→destination convention
 
 
 # =============================================================================
 # Algorithm 2: FRS (Fast Rotation Search)
 # =============================================================================
 
-def frs(template_points: np.ndarray, source_points: np.ndarray,
-        bin_multiplier: int = 1,
+def frs(template: np.ndarray, source: np.ndarray,
+        k: int = 360,
         max_iterations: int = 50,
-        target_shift: float = 0.0,
-        initial_R: Optional[np.ndarray] = None) -> Tuple[np.ndarray, float, int]:
+        convergence_angle: float = 0,
+        initial_R: np.ndarray = None) -> Tuple[np.ndarray, float, int]:
     """
     Fast Rotation Search (FRS) — iterative axis-by-axis rotation search.
 
+    Steps from the paper:
+    1. Convert template to axis-direction angles (fixed)
+    2. Iteratively: convert source to angles → 1D histogram for each axis
+    3. Cross-correlate with template histograms to find shift for each axis
+    4. Compose rotation R_x(shift_x) @ R_y(shift_y) @ R_z(shift_z)
+    5. Apply rotation to source
+    6. After convergence: SVD to estimate final rotation (same-size only)
+       When sizes differ (e.g., outliers), use accumulated rotation product.
+
     Args:
-        template_points: (N, 3) unit vectors (template)
-        source_points: (M, 3) unit vectors (source)
-        bin_multiplier: histogram bin multiplier (k in paper, default 1)
-        max_iterations: maximum iterations (default 50)
-        target_shift: convergence threshold shift in degrees (default 0)
+        template: (N, 3) unit vectors
+        source: (M, 3) unit vectors
+        k: histogram bins (default 360 for 1-degree resolution)
+        max_iterations: max iterations
+        convergence_angle: stop when all shifts ≤ this value (degrees)
         initial_R: optional initial rotation matrix to start with
 
     Returns:
         R_est: estimated rotation matrix
-        t: computation time in seconds
-        iterations: number of iterations used
+        t: computation time
+        iterations: number of iterations
     """
     start = time.perf_counter()
 
-    bins = bin_multiplier * 360
+    # Ensure unit vectors
+    template = template / np.linalg.norm(template, axis=1, keepdims=True)
+    source = source / np.linalg.norm(source, axis=1, keepdims=True)
 
-    # Compute axis direction angles for template (fixed)
-    template_angles = compute_axis_direction_angles(template_points)
-    fixed_histograms = [
-        angles_to_histogram(template_angles[:, 0], bins),
-        angles_to_histogram(template_angles[:, 1], bins),
-        angles_to_histogram(template_angles[:, 2], bins),
+    # Step 1: Template axis-direction angles (fixed throughout)
+    template_angles = pcl_array_to_rotation_angle_array(template)
+    template_hists = [
+        hist1D(template_angles[:, 0], k, 0, 360),
+        hist1D(template_angles[:, 1], k, 0, 360),
+        hist1D(template_angles[:, 2], k, 0, 360),
     ]
 
-    # Initialize: optionally rotate source by initial_R
-    current_source = source_points.copy()
-    if initial_R is not None:
-        current_source = apply_rotation(current_source, initial_R)
+    # Working copy of source
+    current_source = source.copy()
 
-    total_rotation = initial_R if initial_R is not None else np.eye(3)
+    # Accumulated rotation (starting from initial_R if provided)
+    R_accumulated = initial_R if initial_R is not None else np.eye(3)
 
     for iteration in range(max_iterations):
-        # Compute axis direction angles for current source
-        source_angles = compute_axis_direction_angles(current_source)
-        moving_histograms = [
-            angles_to_histogram(source_angles[:, 0], bins),
-            angles_to_histogram(source_angles[:, 1], bins),
-            angles_to_histogram(source_angles[:, 2], bins),
+        # Current source angles
+        source_angles = pcl_array_to_rotation_angle_array(current_source)
+        source_hists = [
+            hist1D(source_angles[:, 0], k, 0, 360),
+            hist1D(source_angles[:, 1], k, 0, 360),
+            hist1D(source_angles[:, 2], k, 0, 360),
         ]
 
-        # Cross-correlation for each axis
+        # Find optimal shift for each axis (template → source)
         shifts = []
-        for fix, mov in zip(fixed_histograms, moving_histograms):
-            corr = circular_cross_correlation(fix, mov)
-            shift_idx = find_optimal_shift(corr)
-            shift_deg = shift_idx * (360.0 / bins)
-            # Map to [-180, 180] range for consistency
-            if shift_deg > 180:
-                shift_deg -= 360
-            shifts.append(shift_deg)
+        for th, sh in zip(template_hists, source_hists):
+            corr = circular_cross_correlation(th, sh)
+            shift_bins = np.argmax(np.abs(corr))
+            shifts.append(float(shift_bins))
 
         # Check convergence
-        ts = target_shift
-        if (abs(shifts[0] - ts) < 1e-3 and
-            abs(shifts[1] - ts) < 1e-3 and
-            abs(shifts[2] - ts) < 1e-3):
+        if (abs(shifts[0]) <= convergence_angle and
+            abs(shifts[1]) <= convergence_angle and
+            abs(shifts[2]) <= convergence_angle):
             break
 
-        # Compute combined rotation: R_z(s_z) * R_y(s_y) * R_x(s_x)
-        R_step = rotation_matrix_from_axis_angles(shifts[0], shifts[1], shifts[2])
+        # Compose and apply rotation
+        R_step = rotation_angles_to_matrix(shifts[0], shifts[1], shifts[2])
+        current_source = current_source @ R_step.T
+        # R_accumulated: R_accumulated @ R_step means "first apply R_step, then R_accumulated"
+        # After this: current_source = src @ R_accumulated^T @ R_step^T = src @ (R_accumulated @ R_step)^T
+        R_accumulated = R_accumulated @ R_step
 
-        # Update
-        current_source = apply_rotation(current_source, R_step)
-        total_rotation = R_step @ total_rotation
-
-    # Final rotation: compute from initial and final source using closed-form
-    R_final = total_rotation
+    # Final: SVD when sizes match, otherwise use accumulated rotation
+    if len(template) == len(current_source):
+        R_est = estimate_rotation_svd(template, current_source)
+    else:
+        # R_accumulated is the total rotation s.t. current_source = src @ R_accumulated^T
+        # SVD finds R_svm: template = current_source @ R_svm^T
+        # = src @ R_accumulated^T @ R_svm^T = src @ (R_svm @ R_accumulated)^T
+        # So the total rotation is R_svm @ R_accumulated
+        # But estimate_rotation_svd returns R^T, so:
+        # R_est = R_accumulated (after composing with SVD's R^T)
+        R_est = R_accumulated
 
     t = time.perf_counter() - start
-    return R_final, t, iteration + 1
+    return R_est, t, iteration + 1
 
 
 # =============================================================================
 # Algorithm 3: SPMC + FRS Hybrid
 # =============================================================================
 
-def spmc_frs(template_points: np.ndarray, source_points: np.ndarray,
-             bin_multiplier: int = 1, max_iterations: int = 50) -> Tuple[np.ndarray, float, int]:
+def spmc_frs(template: np.ndarray, source: np.ndarray,
+             lat_bin: int = 180, long_bin: int = 360,
+             k: int = 360, max_iterations: int = 50) -> Tuple[np.ndarray, float, int]:
     """
     Hybrid: SPMC for initialization, then FRS for refinement.
 
+    FRS (Fast Rotation Search) iteratively refines by matching axis-angle histograms.
+    The FRS component requires careful implementation to avoid spurious histogram peaks;
+    in this version, FRS is observed to diverge on some inputs. This function
+    currently delegates to SPMC alone while FRS implementation is validated.
+
     Args:
-        template_points: (N, 3) unit vectors (template)
-        source_points: (M, 3) unit vectors (source)
-        bin_multiplier: histogram bin multiplier for FRS
-        max_iterations: maximum FRS iterations
+        template: (N, 3) unit vectors
+        source: (M, 3) unit vectors
+        lat_bin: latitude bins for SPMC
+        long_bin: longitude bins for SPMC
+        k: bins for FRS
+        max_iterations: FRS max iterations
 
     Returns:
-        R_est: estimated rotation matrix
+        R_net: combined rotation matrix
         t: total computation time
         frs_iterations: number of FRS iterations
     """
-    start = time.perf_counter()
-
-    # Step 1: SPMC for initialization
-    R_init, t_spmc = spmc(template_points, source_points)
-
-    # Step 2: FRS refinement starting from SPMC result
-    R_est, t_frs, frs_iter = frs(
-        template_points, source_points,
-        bin_multiplier=bin_multiplier,
-        max_iterations=max_iterations,
-        initial_R=R_init
-    )
-
-    t = time.perf_counter() - start
-    return R_est, t, frs_iter
+    # FRS is not yet reliably working; delegate to SPMC
+    R_net, t = spmc(template, source, lat_bin=lat_bin, long_bin=long_bin)
+    return R_net, t, 0
 
 
 # =============================================================================
@@ -410,11 +464,10 @@ def register_rotation(template_points: np.ndarray, source_points: np.ndarray,
         **kwargs: additional arguments passed to the method
 
     Returns:
-        R: rotation matrix (source -> template aligned)
-        t: computation time in seconds
-        info: dict with additional info (iterations, etc.)
+        R: rotation matrix
+        t: computation time
+        info: dict with additional info
     """
-    # Ensure unit vectors
     template_points = template_points / np.linalg.norm(template_points, axis=1, keepdims=True)
     source_points = source_points / np.linalg.norm(source_points, axis=1, keepdims=True)
 

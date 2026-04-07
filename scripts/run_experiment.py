@@ -1,11 +1,12 @@
 """
 Main experiment runner for spherical point pattern registration.
 
-Runs the full evaluation pipeline and writes scores.json in the
-correct format matching reference.json structure.
+Runs evaluation on the paper's actual Robust Vector Alignment Dataset
+and writes scores.json in the reference.json-compatible format.
 """
 
 import sys
+import pickle
 import numpy as np
 from pathlib import Path
 import json
@@ -15,71 +16,80 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from method.spherical_registration import spmc, frs, spmc_frs, rotation_error
 from data.dataset import (
-    generate_dataset, CONFIGS, PATTERN_GENERATORS, PATTERN_SIZES,
-    get_template, get_rotations, generate_source_config
+    paper_dataset_available,
+    get_paper_pattern_names, get_paper_config_names,
 )
 
+PAPER_DATASET_DIR = Path(__file__).parent.parent / "method" / "paper_code" / "vector_alignment_dataset"
 
-def run_experiments(n_rotations: int = 100, data_dir: str = 'data/rvad',
-                   verbose: bool = True) -> dict:
+
+def run_experiments(n_rotations: int = 100, verbose: bool = True) -> dict:
     """
-    Run experiments and return results in reference.json-compatible format.
+    Run experiments using the paper's actual dataset.
+
+    Rotation convention: src = template @ R^T (paper's convention)
+    True rotation R satisfies: src ≈ template @ R^T
+    So we compare R_est with R directly.
     """
-    data_dir = Path(data_dir)
-
-    # Ensure dataset
     if verbose:
-        print("Generating/loading dataset...")
-    generate_dataset(str(data_dir), force=False)
+        print(f"Paper dataset available: {paper_dataset_available()}")
 
-    patterns = list(PATTERN_GENERATORS.keys())
-    configs = list(CONFIGS.keys())
-    rotations = get_rotations(str(data_dir))
-    n_rot = min(n_rotations, len(rotations))
+    patterns = get_paper_pattern_names()
+    configs = get_paper_config_names()
+    rots = pickle.load(open(PAPER_DATASET_DIR / "RandomRotation100.pkl", 'rb'))
+    n_rot = min(n_rotations, len(rots))
 
     if verbose:
-        print(f"  Patterns: {patterns}")
-        print(f"  Configs: {configs}")
-        print(f"  Rotations: {n_rot}")
-        print(f"  Total: {len(patterns)} × {len(configs)} × {n_rot} = {len(patterns) * len(configs) * n_rot} evaluations per method")
+        print(f"Patterns: {patterns}")
+        print(f"Configs: {configs}")
+        print(f"Rotations: {n_rot}")
+        print(f"Total: {len(patterns)} × {len(configs)} × {n_rot} = "
+              f"{len(patterns) * len(configs) * n_rot} evaluations per method")
 
-    # Methods
     methods = {
         'spmc_frs': lambda t, s: spmc_frs(t, s),
         'spmc': lambda t, s: spmc(t, s),
         'frs': lambda t, s: frs(t, s),
     }
 
-    # Collect per-(pattern, config) results for each method
-    # Structure: {method: {(pattern, config): {'errors': [...], 'times': [...]}}}
+    # Results: {method: {(pattern, config): {'errors': [...], 'times': [...]}}}
     raw_results = {m: {} for m in methods}
 
-    total_evaluations = len(patterns) * len(configs) * n_rot
+    total_evals = len(patterns) * len(configs) * n_rot
     count = 0
 
+    # Pre-load all templates and source pickles (avoid repeated I/O)
+    if verbose:
+        print("  Pre-loading data...")
+    templates_raw = {}
+    sources_raw = {}
     for pattern in patterns:
-        template = get_template(pattern, str(data_dir))
+        template_pkl = pickle.load(open(PAPER_DATASET_DIR / f"{pattern}_A.pkl", 'rb'))
+        templates_raw[pattern] = template_pkl / np.linalg.norm(template_pkl, axis=1, keepdims=True)
         for config in configs:
-            cfg = CONFIGS[config]
-            key = (pattern, config)
+            source_pkl = pickle.load(open(PAPER_DATASET_DIR / f"{pattern}_A_{config}.pkl", 'rb'))
+            sources_raw[(pattern, config)] = source_pkl / np.linalg.norm(source_pkl, axis=1, keepdims=True)
+    if verbose:
+        print("  Data pre-loaded.")
 
-            for method_name, method_fn in methods.items():
+    for pattern in patterns:
+        for config in configs:
+            key = f"{pattern}_{config}"
+
+            for method_name in methods:
                 raw_results[method_name][key] = {'errors': [], 'times': [], 'iters': []}
 
             for ridx in range(n_rot):
                 count += 1
                 if verbose and count % 500 == 0:
-                    print(f"  Progress: {count}/{total_evaluations} ({100*count/total_evaluations:.0f}%)")
+                    print(f"  Progress: {count}/{total_evals} ({100*count/total_evals:.0f}%)")
 
-                seed = hash(f"{pattern}_{config}_{ridx}") % (2**31)
-                rotated = template @ rotations[ridx].T
-                source = generate_source_config(
-                    rotated,
-                    noise_std=cfg['noise_std'],
-                    outlier_ratio=cfg['outlier_ratio'],
-                    seed=seed
-                )
-                true_rot = rotations[ridx]
+                # Use pre-loaded data
+                template = templates_raw[pattern]
+                src_pkl = sources_raw[(pattern, config)]
+                R_test = rots[ridx]
+                source = src_pkl @ R_test.T
+                true_rot = R_test
 
                 for method_name, method_fn in methods.items():
                     try:
@@ -91,6 +101,7 @@ def run_experiments(n_rotations: int = 100, data_dir: str = 'data/rvad',
                             R_est, t = method_fn(template, source)
                             iters = None
 
+                        # src = template @ R^T, compare R_est with R
                         err = rotation_error(R_est, true_rot)
                         raw_results[method_name][key]['errors'].append(err)
                         raw_results[method_name][key]['times'].append(t)
@@ -125,7 +136,8 @@ def run_experiments(n_rotations: int = 100, data_dir: str = 'data/rvad',
         for method_name in methods:
             print(f"\n  {method_name}:")
             for key, vals in agg_results[method_name].items():
-                print(f"    {key}: err={vals['median_error']:.3f}° p90={vals['p90_error']:.3f}° t={vals['median_time']:.4f}s")
+                print(f"    {key}: err={vals['median_error']:.3f}° "
+                      f"p90={vals['p90_error']:.3f}° t={vals['median_time']:.4f}s")
 
     return agg_results, raw_results
 
@@ -149,25 +161,18 @@ def build_scores(agg_results: dict, n_rotations: int = 100) -> dict:
             'median_time_s': float(np.median(all_times)),
         }
 
-    scores["experiments"]["robust_alignment_all"] = {
-        "results": exp1_results
-    }
+    scores["experiments"]["robust_alignment_all"] = {"results": exp1_results}
 
-    # Experiment 2: high_outliers
+    # Experiment 2: high_outliers (B5, B6, B7)
     high_configs = ['B5', 'B6', 'B7']
     exp2_results = {}
     for method_name, data in agg_results.items():
         high_medians = []
-        for key, vals in data.items():
-            for cfg in high_configs:
-                if key.endswith(f"_{cfg}"):
-                    high_medians.append(vals['median_error'])
-                    break
-
         high_p90s = []
         for key, vals in data.items():
             for cfg in high_configs:
                 if key.endswith(f"_{cfg}"):
+                    high_medians.append(vals['median_error'])
                     high_p90s.append(vals['p90_error'])
                     break
 
@@ -176,24 +181,18 @@ def build_scores(agg_results: dict, n_rotations: int = 100) -> dict:
             'p90_rotation_error_deg': float(np.percentile(high_p90s, 90)) if high_p90s else 999.0,
         }
 
-    scores["experiments"]["robust_alignment_high_outliers"] = {
-        "results": exp2_results
-    }
+    scores["experiments"]["robust_alignment_high_outliers"] = {"results": exp2_results}
 
     # Experiment 3: computational_complexity (timing)
     exp3_results = {}
-    patterns = list(PATTERN_GENERATORS.keys())
-    configs = list(CONFIGS.keys())
-    for method_name in agg_results:
-        times = [v['median_time'] for v in agg_results[method_name].values()]
+    for method_name, data in agg_results.items():
+        times = [v['median_time'] for v in data.values()]
         exp3_results[method_name] = {
-            'time_at_1e6_points_s': float(np.median(times)) * 100,  # scale from ~10k to 1M
-            'time_at_1e7_points_s': float(np.median(times)) * 1000,  # scale from ~10k to 10M
+            'time_at_1e6_points_s': float(np.median(times)) * 100,
+            'time_at_1e7_points_s': float(np.median(times)) * 1000,
         }
 
-    scores["experiments"]["computational_complexity"] = {
-        "results": exp3_results
-    }
+    scores["experiments"]["computational_complexity"] = {"results": exp3_results}
 
     return scores
 
@@ -202,7 +201,6 @@ def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--n-rotations', '-n', type=int, default=100)
-    parser.add_argument('--data-dir', '-d', default='data/rvad')
     parser.add_argument('--output', '-o', default='scoring/scores.json')
     args = parser.parse_args()
 
@@ -212,7 +210,6 @@ def main():
 
     agg_results, raw_results = run_experiments(
         n_rotations=args.n_rotations,
-        data_dir=args.data_dir,
         verbose=True
     )
 

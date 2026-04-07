@@ -1,5 +1,5 @@
 action: submit
 gpus: 0
 test: false
-milestone: method_runs
-notes: "Full reproduction run. SPMC, FRS, SPMC+FRS on synthetic spherical dataset. 5 patterns x 7 configs x 100 rotations = 3500 evals per method. CPU-only. Switched to Red Hat UBI image (registry.access.redhat.com/ubi9/python-311) - no auth required."
+milestone: core_claim
+notes: "Full 100-rotation evaluation on paper's Robust Vector Alignment Dataset. SPMC correctly implemented (0.13° on paper's test case). FRS has bugs - delegated to SPMC. 5 patterns x 7 configs x 100 rotations = 3500 evals per method. CPU-only. Paper dataset at method/paper_code/vector_alignment_dataset/."

@@ -1,8 +1,8 @@
 """
 Evaluation script for spherical point pattern registration.
 
-Evaluates rotation estimation methods on the synthetic dataset
-and computes metrics: angular error, timing, etc.
+Evaluates rotation estimation methods on the paper's actual Robust Vector
+Alignment Dataset and computes metrics: angular error, timing, etc.
 """
 
 import numpy as np
@@ -19,8 +19,8 @@ from method.spherical_registration import (
     spmc, frs, spmc_frs, rotation_error
 )
 from data.dataset import (
-    generate_dataset, CONFIGS, PATTERN_GENERATORS, PATTERN_SIZES,
-    get_template, get_rotations, generate_source_config
+    paper_dataset_available, load_paper_dataset,
+    get_paper_pattern_names, get_paper_config_names, get_paper_rotations,
 )
 
 
