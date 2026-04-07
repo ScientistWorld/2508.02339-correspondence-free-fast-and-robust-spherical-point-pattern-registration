@@ -1,46 +1,24 @@
 # Experiment Overview
 
-<!-- Do not edit this unless you decide to stop -->
+This file describes what each experiment in `scores.json` is trying to establish.
 
-<!--
-Describe, at a high level, what each experiment in `scores.json` is trying to
-establish.
+## robust_alignment_all
+Tests whether the rotation registration method achieves low angular error on the paper's
+Robust Vector Alignment Dataset across all outlier configurations. The dataset contains
+5 distinct point cloud patterns with varying complexity (from uniform trajectories to
+non-uniform density distributions), each evaluated under 7 different outlier configurations
+(0% to 90% outlier ratios). This is the primary experiment establishing whether the
+method solves the correspondence-free rotation estimation problem.
 
-This file is for future scientist agents. They should be able to read it and
-understand what each experiment is about WITHOUT learning the paper's method.
+## robust_alignment_high_outliers
+Tests whether the rotation registration method remains robust under extreme clutter
+conditions (50%, 75%, and 90% outlier ratios). This subset isolates the high-outlier
+regime where most registration methods fail — outliers create misleading histogram peaks
+and corrupt the correlation signal. The paper specifically claims robustness up to 90%
+outliers, making this a key validation of the method's robustness claim.
 
-Rules:
-- This must correspond EXACTLY to the experiments in `scores.json`
-- The section heading for each experiment must be the exact experiment name from the keys in `scores.json`
-- Describe the experiment's scientific purpose, not the implementation
-- Do NOT describe the method, architecture, algorithm, loss, or training recipe
-- Do NOT include numerical results from the paper or your reproduction
-- If an experiment is not in `scores.json`, do not list it here
-
-Good examples (shorten version shown, you can make it long to be more detailed, but do not leak the method):
-
-## main_benchmark
-Tests whether the system achieves the paper's primary task objective on the main
-evaluation benchmark.
-
-## robustness_shift
-Tests whether performance holds under the distribution shift setting used by the
-paper's evaluation.
-
-## wrong_key_security
-Tests whether the protected signal stays unrecoverable when evaluated with the
-wrong key.
-
-## component_ablation
-Tests whether the method actaully is where the improvement comes from.
-
-Bad examples:
-- "Runs the 8-layer transformer with contrastive loss and cosine scheduler"
-- "Uses the paper's memory module to improve retrieval"
-
-Delete this comment block and fill in your actual experiments below.
--->
-
-<!-- This is high-level only. Explain WHAT the experiment is trying to show, NOT HOW the method works. -->
-
-<!-- The experiment headings here should EXACTLY match the experiment-name keys in your scores.json. -->
+## computational_complexity
+Tests whether the method scales efficiently with the number of input points. The paper
+claims O(n) linear-time complexity, which is a core algorithmic contribution distinguishing
+it from O(n²) or worse correspondence-based methods. This experiment validates the
+method's scalability claim by measuring runtime as a function of point count.

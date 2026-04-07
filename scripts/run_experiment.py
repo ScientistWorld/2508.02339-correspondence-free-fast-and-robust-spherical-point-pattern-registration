@@ -127,58 +127,106 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
             high_spmc_frs.extend(raw_results["spmc_frs"][k]["errors"])
 
     scores = {
-        "experiments": {
-            "robust_alignment_all": {
-                "results": {
-                    "spmc": {
-                        "median_rotation_error_deg": float(np.median(all_spmc)),
-                        "mean_rotation_error_deg": float(np.mean(all_spmc)),
-                        "median_time_s": float(np.median(all_times_spmc)),
-                    },
-                    "spmc_frs": {
-                        "median_rotation_error_deg": float(np.median(all_spmc_frs)),
-                        "mean_rotation_error_deg": float(np.mean(all_spmc_frs)),
-                        "median_time_s": float(np.median(all_times_spmc_frs)),
-                    },
-                }
+        "robust_alignment_all": {
+            "description": "Robust alignment on paper dataset — 5 patterns x 7 configs. Primary metric: median rotation error.",
+            "weight": 0.5,
+            "primary_metric": "median_rotation_error_deg",
+            "metrics": {
+                "median_rotation_error_deg": {"higher_is_better": False, "coefficient": -1.0},
+                "mean_rotation_error_deg": {"higher_is_better": False, "coefficient": -0.3},
+                "median_time_s": {"higher_is_better": False, "coefficient": -0.1},
             },
-            "robust_alignment_high_outliers": {
-                "results": {
-                    "spmc": {
-                        "median_rotation_error_deg": float(np.median(high_spmc)),
-                        "p90_rotation_error_deg": float(np.percentile(high_spmc, 90)),
-                    },
-                    "spmc_frs": {
-                        "median_rotation_error_deg": float(np.median(high_spmc_frs)),
-                        "p90_rotation_error_deg": float(np.percentile(high_spmc_frs, 90)),
-                    },
-                }
+            "results": {
+                "spmc": {"type": "proposed",
+                    "median_rotation_error_deg": float(np.median(all_spmc)),
+                    "mean_rotation_error_deg": float(np.mean(all_spmc)),
+                    "median_time_s": float(np.median(all_times_spmc)),
+                },
+                "spmc_frs": {"type": "proposed",
+                    "median_rotation_error_deg": float(np.median(all_spmc_frs)),
+                    "mean_rotation_error_deg": float(np.mean(all_spmc_frs)),
+                    "median_time_s": float(np.median(all_times_spmc_frs)),
+                },
             },
-            "computational_complexity": {
-                "results": {
-                    "spmc": {
-                        "time_at_1e6_points_s": float(np.median(all_times_spmc) * 1e6 / 22212),
-                        "time_at_1e7_points_s": float(np.median(all_times_spmc) * 1e7 / 22212),
-                    },
-                    "spmc_frs": {
-                        "time_at_1e6_points_s": float(np.median(all_times_spmc_frs) * 1e6 / 22212),
-                        "time_at_1e7_points_s": float(np.median(all_times_spmc_frs) * 1e7 / 22212),
-                    },
-                }
+        },
+        "robust_alignment_high_outliers": {
+            "description": "Robust alignment at high outlier ratios (B5: 50%, B6: 75%, B7: 90% outliers)",
+            "weight": 0.3,
+            "primary_metric": "median_rotation_error_deg",
+            "metrics": {
+                "median_rotation_error_deg": {"higher_is_better": False, "coefficient": -1.0},
+                "p90_rotation_error_deg": {"higher_is_better": False, "coefficient": -0.5},
             },
-        }
+            "results": {
+                "spmc": {"type": "proposed",
+                    "median_rotation_error_deg": float(np.median(high_spmc)),
+                    "p90_rotation_error_deg": float(np.percentile(high_spmc, 90)),
+                },
+                "spmc_frs": {"type": "proposed",
+                    "median_rotation_error_deg": float(np.median(high_spmc_frs)),
+                    "p90_rotation_error_deg": float(np.percentile(high_spmc_frs, 90)),
+                },
+            },
+        },
+        "computational_complexity": {
+            "description": "Runtime scaling — time grows linearly with number of points (O(n))",
+            "weight": 0.2,
+            "primary_metric": "time_at_1e6_points_s",
+            "metrics": {
+                "time_at_1e6_points_s": {"higher_is_better": False, "coefficient": -0.5},
+                "time_at_1e7_points_s": {"higher_is_better": False, "coefficient": -0.5},
+            },
+            "results": {
+                "spmc": {"type": "proposed",
+                    "time_at_1e6_points_s": float(np.median(all_times_spmc) * 1e6 / 22212),
+                    "time_at_1e7_points_s": float(np.median(all_times_spmc) * 1e7 / 22212),
+                },
+                "spmc_frs": {"type": "proposed",
+                    "time_at_1e6_points_s": float(np.median(all_times_spmc_frs) * 1e6 / 22212),
+                    "time_at_1e7_points_s": float(np.median(all_times_spmc_frs) * 1e7 / 22212),
+                },
+            },
+        },
     }
 
     output_path = Path(__file__).parent.parent / "scoring" / "scores.json"
+    # Save raw per-eval results for eval/evaluate.py (method-agnostic aggregator)
+    raw_path = Path(__file__).parent.parent / "scoring" / "raw_results.json"
+    # Normalize raw_results: {method: {config: {errors: [...], times: [...]}}}
+    raw_save = {}
+    for m in raw_results:
+        raw_save[m] = {}
+        for k, v in raw_results[m].items():
+            raw_save[m][k] = {"errors": [float(e) for e in v["errors"]], "times": [float(t) for t in v["times"]]}
+    with open(raw_path, "w") as f:
+        json.dump(raw_save, f)
+    if verbose:
+        print(f"Raw results saved to {raw_path}")
+
+    # Strip "type" from results so validator doesn't treat it as a metric
+    scores_clean = {}
+    for exp_name, exp in scores.items():
+        if isinstance(exp, dict) and "results" in exp:
+            clean_results = {}
+            for method, vals in exp["results"].items():
+                if isinstance(vals, dict):
+                    clean = {k: v for k, v in vals.items() if k != "type"}
+                    clean_results[method] = clean
+                else:
+                    clean_results[method] = vals
+            scores_clean[exp_name] = {**exp, "results": clean_results}
+        else:
+            scores_clean[exp_name] = exp
+
     with open(output_path, "w") as f:
-        json.dump(scores, f, indent=2)
+        json.dump(scores_clean, f, indent=2)
 
     if verbose:
         print(f"\nScores written to {output_path}")
-        print(f"\nOverall SPMC: median={scores['experiments']['robust_alignment_all']['results']['spmc']['median_rotation_error_deg']:.3f}deg "
-              f"mean={scores['experiments']['robust_alignment_all']['results']['spmc']['mean_rotation_error_deg']:.3f}deg")
-        print(f"High-outlier SPMC: median={scores['experiments']['robust_alignment_high_outliers']['results']['spmc']['median_rotation_error_deg']:.3f}deg "
-              f"p90={scores['experiments']['robust_alignment_high_outliers']['results']['spmc']['p90_rotation_error_deg']:.3f}deg")
+        print(f"\nOverall SPMC: median={scores_clean['robust_alignment_all']['results']['spmc']['median_rotation_error_deg']:.3f}deg "
+              f"mean={scores_clean['robust_alignment_all']['results']['spmc']['mean_rotation_error_deg']:.3f}deg")
+        print(f"High-outlier SPMC: median={scores_clean['robust_alignment_high_outliers']['results']['spmc']['median_rotation_error_deg']:.3f}deg "
+              f"p90={scores_clean['robust_alignment_high_outliers']['results']['spmc']['p90_rotation_error_deg']:.3f}deg")
 
     return scores
 

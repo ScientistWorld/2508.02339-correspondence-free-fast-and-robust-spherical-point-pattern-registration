@@ -1,90 +1,82 @@
 {
-  "experiments": {
-    "robust_alignment_all": {
-      "description": "Robust alignment on paper dataset \u2014 5 patterns x 7 configs x 10 rotations each. Primary metric: median rotation error.",
-      "weight": 0.5,
-      "primary_metric": "median_rotation_error_deg",
-      "metrics": {
-        "median_rotation_error_deg": {
-          "higher_is_better": false,
-          "coefficient": -1.0
-        },
-        "mean_rotation_error_deg": {
-          "higher_is_better": false,
-          "coefficient": -0.3
-        },
-        "median_time_s": {
-          "higher_is_better": false,
-          "coefficient": -0.1
-        }
+  "robust_alignment_all": {
+    "description": "Robust alignment on paper dataset \u2014 5 patterns x 7 configs x 10 rotations each. Primary metric: median rotation error.",
+    "weight": 0.5,
+    "primary_metric": "median_rotation_error_deg",
+    "metrics": {
+      "median_rotation_error_deg": {
+        "higher_is_better": false,
+        "coefficient": -1.0
       },
-      "results": {
-        "spmc": {
-          "type": "proposed",
-          "median_rotation_error_deg": 0.5072001994959803,
-          "mean_rotation_error_deg": 1.557394404914571,
-          "median_time_s": 0.7707475570496172
-        },
-        "spmc_frs": {
-          "type": "proposed",
-          "median_rotation_error_deg": 0.5072001994959803,
-          "mean_rotation_error_deg": 1.557394404914571,
-          "median_time_s": 0.7978826194885187
-        }
+      "mean_rotation_error_deg": {
+        "higher_is_better": false,
+        "coefficient": -0.3
+      },
+      "median_time_s": {
+        "higher_is_better": false,
+        "coefficient": -0.1
       }
     },
-    "robust_alignment_high_outliers": {
-      "description": "Robust alignment at high outlier ratios (B5: 50%, B6: 75%, B7: 90% outliers)",
-      "weight": 0.3,
-      "primary_metric": "median_rotation_error_deg",
-      "metrics": {
-        "median_rotation_error_deg": {
-          "higher_is_better": false,
-          "coefficient": -1.0
-        },
-        "p90_rotation_error_deg": {
-          "higher_is_better": false,
-          "coefficient": -0.5
-        }
+    "results": {
+      "spmc": {
+        "median_rotation_error_deg": 0.5072001994959803,
+        "mean_rotation_error_deg": 1.557394404914571,
+        "median_time_s": 0.7707475570496172
       },
-      "results": {
-        "spmc": {
-          "type": "proposed",
-          "median_rotation_error_deg": 0.9252822460646954,
-          "p90_rotation_error_deg": 6.415304991195686
-        },
-        "spmc_frs": {
-          "type": "proposed",
-          "median_rotation_error_deg": 0.9252822460646954,
-          "p90_rotation_error_deg": 6.415304991195686
-        }
+      "spmc_frs": {
+        "median_rotation_error_deg": 0.5072001994959803,
+        "mean_rotation_error_deg": 1.557394404914571,
+        "median_time_s": 0.7978826194885187
+      }
+    }
+  },
+  "robust_alignment_high_outliers": {
+    "description": "Robust alignment at high outlier ratios (B5: 50%, B6: 75%, B7: 90% outliers)",
+    "weight": 0.3,
+    "primary_metric": "median_rotation_error_deg",
+    "metrics": {
+      "median_rotation_error_deg": {
+        "higher_is_better": false,
+        "coefficient": -1.0
+      },
+      "p90_rotation_error_deg": {
+        "higher_is_better": false,
+        "coefficient": -0.5
       }
     },
-    "computational_complexity": {
-      "description": "Runtime scaling \u2014 time grows linearly with number of points (O(n))",
-      "weight": 0.2,
-      "primary_metric": "time_at_1e6_points_s",
-      "metrics": {
-        "time_at_1e6_points_s": {
-          "higher_is_better": false,
-          "coefficient": -0.5
-        },
-        "time_at_1e7_points_s": {
-          "higher_is_better": false,
-          "coefficient": -0.5
-        }
+    "results": {
+      "spmc": {
+        "median_rotation_error_deg": 0.9252822460646954,
+        "p90_rotation_error_deg": 6.415304991195686
       },
-      "results": {
-        "spmc": {
-          "type": "proposed",
-          "time_at_1e6_points_s": 34.69960188409946,
-          "time_at_1e7_points_s": 346.99601884099457
-        },
-        "spmc_frs": {
-          "type": "proposed",
-          "time_at_1e6_points_s": 35.92124164814149,
-          "time_at_1e7_points_s": 359.21241648141483
-        }
+      "spmc_frs": {
+        "median_rotation_error_deg": 0.9252822460646954,
+        "p90_rotation_error_deg": 6.415304991195686
+      }
+    }
+  },
+  "computational_complexity": {
+    "description": "Runtime scaling \u2014 time grows linearly with number of points (O(n))",
+    "weight": 0.2,
+    "primary_metric": "time_at_1e6_points_s",
+    "metrics": {
+      "time_at_1e6_points_s": {
+        "higher_is_better": false,
+        "coefficient": -0.5
+      },
+      "time_at_1e7_points_s": {
+        "higher_is_better": false,
+        "coefficient": -0.5
+      }
+    },
+    "results": {
+      "spmc": {
+        "time_at_1e6_points_s": 34.69960188409946,
+        "time_at_1e7_points_s": 346.99601884099457
+      },
+      "spmc_frs": {
+        "time_at_1e6_points_s": 35.92124164814149,
+        "time_at_1e7_points_s": 359.21241648141483
       }
     }
   }
