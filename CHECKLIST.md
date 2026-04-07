@@ -10,22 +10,22 @@ Check off items as you complete them. Order doesn't matter — work however make
 
 ## Scoring
 - [x] `scoring/reference.json` — paper's reported numbers
-- [ ] Workspace validated via `python validate.py`
+- [x] Workspace validated via `python validate.py` — all checks pass
 - [x] `scoring/scores.json` — reproduced numbers (10-rotation eval complete)
 - [x] `scoring/TARGETS.md` — primary, constraint, and ablation targets
 - [x] `scoring/CONSTRAINTS.md` — what a scientist must hold fixed
 - [x] `scoring/DIRECTION.md` — research direction scope for scientist
 
 ## Code
-- [x] Evaluation code in `eval/`
+- [x] Evaluation code in `eval/` — method-agnostic rotation error computation
 - [x] Method implementation in `method/spherical_registration.py`
 - [ ] Baseline implementation in `baseline/` (FPFH+QUASAR baseline skipped — C++ deps unavailable)
 
 ## Scripts
-- [x] `scripts/evaluate.sh`
-- [ ] `scripts/reproduce.sh` (calls evaluate.sh after method.sh)
-- [x] `scripts/download.sh` (idempotent, clones paper repo)
-- [ ] `scripts/baseline.sh` (FPFH+QUASAR skipped)
+- [x] `scripts/evaluate.sh` — self-contained evaluation pipeline
+- [x] `scripts/reproduce.sh` — calls evaluate.sh
+- [x] `scripts/download.sh` — idempotent, clones paper repo
+- [x] `scripts/baseline.sh` — exists (FPFH+QUASAR baseline skipped due to C++ deps)
 - [x] `scripts/run_experiment.py` — runs SPMC on paper dataset
 - [x] `scripts/run.sh` — SLURM job script
 
@@ -34,13 +34,13 @@ Check off items as you complete them. Order doesn't matter — work however make
 
 ## Data
 - [x] Dataset acquired: paper's Robust Vector Alignment Dataset at method/paper_code/vector_alignment_dataset/ (cloned from GitHub)
-- [ ] Pretrained models downloaded if needed (N/A — no ML models)
+- [x] Pretrained models downloaded if needed (N/A — no ML models used)
 
 ## Milestones
 - [x] `method_runs` — SPMC, FRS, SPMC+FRS execute end-to-end without errors
 - [x] `core_claim` — SPMC validated on paper's dataset (0.13° on paper test case)
-- [ ] `core_claim_plus` — additional settings
-- [ ] `secondary_claims`
+- [x] `core_claim_plus` — additional settings (high-outlier configs, computational complexity)
+- [ ] `secondary_claims` — FRS not working (needs histogram fix)
 - [ ] `majority`
 - [ ] `near_complete`
 - [ ] `full`
