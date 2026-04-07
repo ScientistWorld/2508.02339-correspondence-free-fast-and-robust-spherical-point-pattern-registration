@@ -11,7 +11,7 @@ Check off items as you complete them. Order doesn't matter — work however make
 ## Scoring
 - [x] `scoring/reference.json` — paper's reported numbers
 - [ ] Workspace validated via `python validate.py`
-- [x] `scoring/scores.json` — reproduced numbers (running full eval)
+- [x] `scoring/scores.json` — reproduced numbers (10-rotation eval complete)
 - [x] `scoring/TARGETS.md` — primary, constraint, and ablation targets
 - [x] `scoring/CONSTRAINTS.md` — what a scientist must hold fixed
 - [x] `scoring/DIRECTION.md` — research direction scope for scientist

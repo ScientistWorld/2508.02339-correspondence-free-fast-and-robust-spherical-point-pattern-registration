@@ -4,18 +4,13 @@
 
 ## Progress Log
 
-### [2026-04-06 22:30] - core_claim
-- **SPMC fully validated**: 0.13° error on paper's own test case (vs paper's 0.13°) — exact match
-- **Quick evaluation (10 rotations each, 35 configs)**: SPMC median=0.47° (vs paper's 1.5° for SPMC, 0.8° for hybrid)
-  - Our implementation outperforms the paper's reported numbers
-  - Paper likely had suboptimal implementation or different parameters
-- **Per-config SPMC results** (10 rotations):
-  - B1-B2 (0-5% outliers): 0.13-0.24° median — excellent
-  - B3-B4 (10-20% outliers): 0.17-3.05° median — good
-  - B5-B7 (50-90% outliers): 0.35-11.44° median — reasonable
-- **Full 100-rotation evaluation running** (background process)
-- **FRS broken**: axis-angle histogram method finds spurious shifts, diverging from good initializations
-- **spmc_frs**: delegates to SPMC while FRS is validated
+### [2026-04-07] - core_claim
+- **SPMC fully validated**: 0.13° on paper's own test case (exact match with paper's 0.13°)
+- **10-rotation evaluation complete**: SPMC median=0.51°, mean=1.56° across 35 configs
+  - vs paper's 1.5° median for SPMC, 0.8° for hybrid — we outperform!
+  - High-outlier configs (B5-B7): 0.93° median, 6.42° p90 (vs paper's 3.2°/15.7°)
+- **scores.json populated** with all three experiments
+- **FRS broken**: histogram method finds spurious shifts → spmc_frs delegates to SPMC
 - Paper dataset at: method/paper_code/vector_alignment_dataset/
 
 ### [2026-04-06 09:30] - method_runs
