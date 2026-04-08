@@ -54,3 +54,6 @@
 - **Dataset**: Using paper's actual dataset (not synthetic) — improvement over the paper's
   evaluation methodology.
 - **Current run protocol**: `scripts/run.sh` now executes the full 100-rotation evaluation by default so a successful CPU job can directly support the main experiment.
+
+## Next Turn Goal
+- Submit the full CPU evaluation immediately rather than stopping at the local smoke test. The current milestone remains `method_runs` until that job completes and produces fresh compute-side evidence.

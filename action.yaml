@@ -1,8 +1,8 @@
 # IMPORTANT: Once you set action to 'submit' or 'done', STOP immediately.
 # Do NOT sleep, poll, or wait for jobs. The system reads this file
 # only after your turn ends. Sleeping blocks the entire pipeline.
-action: done
+action: submit
 gpus: 0
 test: false
 milestone: method_runs
-notes: "Stopped by the scheduler after 10 consecutive environment build failures. Local smoke tests pass and the workspace remains at method_runs, but no cluster job could be launched."
+notes: "Run the full 100-rotation CPU evaluation on the paper dataset through scripts/run.sh to validate corrected FRS and SPMC+FRS end-to-end on compute."

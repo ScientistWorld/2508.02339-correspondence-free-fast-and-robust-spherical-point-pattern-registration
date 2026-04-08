@@ -1,9 +1,9 @@
 #!/bin/bash
 # Install Python packages into the container overlay.
 #
-# Install only the runtime dependency needed by this reproduction.
-# Keep setup conservative so container retries do not depend on extra tooling.
+# Python dependencies belong here, not in container.def.
+# Keep the environment minimal because the reproduction is CPU-only.
 
-set -e
+set -euo pipefail
 
-python3 -m pip install numpy
+uv pip install --system numpy

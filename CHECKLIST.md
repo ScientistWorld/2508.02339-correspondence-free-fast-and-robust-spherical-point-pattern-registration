@@ -9,9 +9,9 @@ Check off items as you complete them. Order doesn't matter — work however make
 - [x] `briefing/overview.md`
 
 ## Scoring
-- [x] `scoring/reference.json` — paper's reported numbers
+- [x] `scoring/reference.json` — paper's reported / paper-derived comparison targets
 - [x] Workspace validated via `python validate.py` — all checks pass
-- [x] `scoring/scores.json` — reproduced numbers exist, but must be regenerated after the final FRS/hybrid fixes
+- [x] `scoring/scores.json` — local smoke-test numbers exist
 - [x] `scoring/TARGETS.md` — primary, constraint, and ablation targets
 - [x] `scoring/CONSTRAINTS.md` — what a scientist must hold fixed
 - [x] `scoring/DIRECTION.md` — research direction scope for scientist
@@ -27,7 +27,7 @@ Check off items as you complete them. Order doesn't matter — work however make
 - [x] `scripts/download.sh` — idempotent, clones paper repo
 - [x] `scripts/baseline.sh` — exists (FPFH+QUASAR baseline skipped due to C++ deps)
 - [x] `scripts/run_experiment.py` — runs SPMC, FRS, and SPMC+FRS on the paper dataset
-- [x] `scripts/run.sh` — Ray job script
+- [x] `scripts/run.sh` — Ray job script for full 100-rotation CPU validation
 
 ## Environment
 - [x] `environment/container.def` + `environment/setup.sh`
@@ -49,5 +49,6 @@ Check off items as you complete them. Order doesn't matter — work however make
 - **SPMC fully working**: exact agreement with the released code on audited spot checks
 - **FRS fixed in code**: final source-to-source SVD step now matches the released implementation
 - **spmc_frs fixed in code**: the hybrid now uses the actual SPMC initialization plus FRS refinement path
+- **Next action**: submit one CPU job for the full 100-rotation evaluation through `scripts/run.sh`
 - **Paper's baseline (FPFH+QUASAR)**: Not implemented — requires C++ dependencies (Point Cloud Library) that are unavailable
 - **Identity rotation baseline**: Used as reference (999° error)
