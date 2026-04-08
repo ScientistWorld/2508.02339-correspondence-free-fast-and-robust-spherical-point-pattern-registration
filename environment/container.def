@@ -3,16 +3,20 @@
 # Build:  apptainer build container.sif container.def
 #
 # CPU-only computation — no GPU needed for these O(n) algorithms.
-# Avoid OCI registry fetches entirely because the scheduler repeatedly receives
-# malformed registry metadata responses. Use RPM bootstrap instead of
-# debootstrap because the build host does not have the debootstrap binary.
+# Use a public Quay base image to avoid the previous GHCR auth failure, the
+# malformed Docker Hub metadata responses, and the fakeroot limitations of yum
+# bootstrap on this cluster.
 
-Bootstrap: yum
-OSVersion: 9
-MirrorURL: http://dl.rockylinux.org/pub/rocky/%{OSVERSION}/BaseOS/x86_64/os/
-Include: ca-certificates,python3,python3-pip
+Bootstrap: docker
+From: quay.io/centos/centos:stream9
 
 %post
+    dnf install -y \
+        ca-certificates \
+        python3 \
+        python3-pip && \
+    dnf clean all
+
     mkdir -p /home/user/data /home/user/checkpoints
     chmod 755 /home/user
 
