@@ -7,10 +7,11 @@
 set -euo pipefail
 
 export HOME=/home/user
-export PYTHONUSERBASE="${HOME}/.local"
+export PYTHON_TARGET="${HOME}/python-packages/lib/python3.10/site-packages"
 
-mkdir -p "${PYTHONUSERBASE}"
+mkdir -p "${PYTHON_TARGET}"
 
-# The build runs under fakeroot and cannot reliably write into /usr/local.
-# Install into the user site instead of using a system prefix.
-python3 -m pip install --user numpy
+# The build runs under fakeroot and cannot reliably write into /usr/local, and
+# user-site installs are disabled by the scheduler wrapper. Install into an
+# explicit writable target under /home/user instead.
+python3 -m pip install --target "${PYTHON_TARGET}" numpy
