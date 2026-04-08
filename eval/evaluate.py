@@ -72,14 +72,13 @@ def build_scores_json(scores: dict, output_path: str):
     output = {
         "robust_alignment_all": {
             "results": {
-                k: {"type": "proposed", **v}
+                k: {**v}
                 for k, v in scores.items()
             }
         },
         "robust_alignment_high_outliers": {
             "results": {
                 k: {
-                    "type": "proposed",
                     "median_rotation_error_deg": scores[k].get("median_rotation_error_deg_high", scores[k]["median_rotation_error_deg"]),
                     "p90_rotation_error_deg": scores[k].get("p90_rotation_error_deg_high", 999.0),
                 }
@@ -89,7 +88,6 @@ def build_scores_json(scores: dict, output_path: str):
         "computational_complexity": {
             "results": {
                 k: {
-                    "type": "proposed",
                     "time_at_1e6_points_s": scores[k]["time_at_1e6_points_s"],
                     "time_at_1e7_points_s": scores[k]["time_at_1e7_points_s"],
                 }

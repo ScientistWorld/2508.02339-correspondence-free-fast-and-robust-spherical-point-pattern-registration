@@ -17,7 +17,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from method.spherical_registration import spmc, spmc_frs, rotation_error
+from method.spherical_registration import spmc, frs, spmc_frs, rotation_error
 
 DATASET_DIR = Path(__file__).parent.parent / "method" / "paper_code" / "vector_alignment_dataset"
 
@@ -47,7 +47,7 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
     if verbose:
         print("Data pre-loaded. Running evaluation...")
 
-    raw_results = {"spmc": {}, "spmc_frs": {}}
+    raw_results = {"spmc": {}, "frs": {}, "spmc_frs": {}}
     count = 0
     total = len(patterns) * len(configs) * n_rot
     t_start = time.time()
@@ -77,6 +77,11 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
                     raw_results["spmc"][key]["errors"].append(err)
                     raw_results["spmc"][key]["times"].append(t)
 
+                    R_est_frs, t_frs, _ = frs(template, source)
+                    err_frs = rotation_error(R_est_frs, true_rot)
+                    raw_results["frs"][key]["errors"].append(err_frs)
+                    raw_results["frs"][key]["times"].append(t_frs)
+
                     R_est2, t2, _ = spmc_frs(template, source)
                     err2 = rotation_error(R_est2, true_rot)
                     raw_results["spmc_frs"][key]["errors"].append(err2)
@@ -84,6 +89,8 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
                 except Exception as e:
                     raw_results["spmc"][key]["errors"].append(999.0)
                     raw_results["spmc"][key]["times"].append(0.0)
+                    raw_results["frs"][key]["errors"].append(999.0)
+                    raw_results["frs"][key]["times"].append(0.0)
                     raw_results["spmc_frs"][key]["errors"].append(999.0)
                     raw_results["spmc_frs"][key]["times"].append(0.0)
 
@@ -110,21 +117,14 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
             print(f"  {k}: {v['median']:.3f}deg p90={v['p90']:.3f}deg t={v['median_time']:.4f}s")
 
     # Build scores.json
-    all_spmc = []
-    all_spmc_frs = []
-    for k in raw_results["spmc"]:
-        all_spmc.extend(raw_results["spmc"][k]["errors"])
-        all_spmc_frs.extend(raw_results["spmc_frs"][k]["errors"])
-
-    all_times_spmc = [r["median_time"] for r in agg["spmc"].values()]
-    all_times_spmc_frs = [r["median_time"] for r in agg["spmc_frs"].values()]
-
-    high_spmc = []
-    high_spmc_frs = []
-    for k in raw_results["spmc"]:
-        if any(cfg in k for cfg in ["B5", "B6", "B7"]):
-            high_spmc.extend(raw_results["spmc"][k]["errors"])
-            high_spmc_frs.extend(raw_results["spmc_frs"][k]["errors"])
+    all_errors = {m: [] for m in raw_results}
+    all_times = {m: [r["median_time"] for r in agg[m].values()] for m in raw_results}
+    high_errors = {m: [] for m in raw_results}
+    for method_name, method_results in raw_results.items():
+        for key, vals in method_results.items():
+            all_errors[method_name].extend(vals["errors"])
+            if any(cfg in key for cfg in ["B5", "B6", "B7"]):
+                high_errors[method_name].extend(vals["errors"])
 
     scores = {
         "robust_alignment_all": {
@@ -137,16 +137,14 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
                 "median_time_s": {"higher_is_better": False, "coefficient": -0.1},
             },
             "results": {
-                "spmc": {"type": "proposed",
-                    "median_rotation_error_deg": float(np.median(all_spmc)),
-                    "mean_rotation_error_deg": float(np.mean(all_spmc)),
-                    "median_time_s": float(np.median(all_times_spmc)),
-                },
-                "spmc_frs": {"type": "proposed",
-                    "median_rotation_error_deg": float(np.median(all_spmc_frs)),
-                    "mean_rotation_error_deg": float(np.mean(all_spmc_frs)),
-                    "median_time_s": float(np.median(all_times_spmc_frs)),
-                },
+                **{
+                    method_name: {"type": "proposed",
+                        "median_rotation_error_deg": float(np.median(all_errors[method_name])),
+                        "mean_rotation_error_deg": float(np.mean(all_errors[method_name])),
+                        "median_time_s": float(np.median(all_times[method_name])),
+                    }
+                    for method_name in raw_results
+                }
             },
         },
         "robust_alignment_high_outliers": {
@@ -158,14 +156,13 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
                 "p90_rotation_error_deg": {"higher_is_better": False, "coefficient": -0.5},
             },
             "results": {
-                "spmc": {"type": "proposed",
-                    "median_rotation_error_deg": float(np.median(high_spmc)),
-                    "p90_rotation_error_deg": float(np.percentile(high_spmc, 90)),
-                },
-                "spmc_frs": {"type": "proposed",
-                    "median_rotation_error_deg": float(np.median(high_spmc_frs)),
-                    "p90_rotation_error_deg": float(np.percentile(high_spmc_frs, 90)),
-                },
+                **{
+                    method_name: {"type": "proposed",
+                        "median_rotation_error_deg": float(np.median(high_errors[method_name])),
+                        "p90_rotation_error_deg": float(np.percentile(high_errors[method_name], 90)),
+                    }
+                    for method_name in raw_results
+                }
             },
         },
         "computational_complexity": {
@@ -177,14 +174,13 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
                 "time_at_1e7_points_s": {"higher_is_better": False, "coefficient": -0.5},
             },
             "results": {
-                "spmc": {"type": "proposed",
-                    "time_at_1e6_points_s": float(np.median(all_times_spmc) * 1e6 / 22212),
-                    "time_at_1e7_points_s": float(np.median(all_times_spmc) * 1e7 / 22212),
-                },
-                "spmc_frs": {"type": "proposed",
-                    "time_at_1e6_points_s": float(np.median(all_times_spmc_frs) * 1e6 / 22212),
-                    "time_at_1e7_points_s": float(np.median(all_times_spmc_frs) * 1e7 / 22212),
-                },
+                **{
+                    method_name: {"type": "proposed",
+                        "time_at_1e6_points_s": float(np.median(all_times[method_name]) * 1e6 / 22212),
+                        "time_at_1e7_points_s": float(np.median(all_times[method_name]) * 1e7 / 22212),
+                    }
+                    for method_name in raw_results
+                }
             },
         },
     }

@@ -157,14 +157,30 @@ def circular_cross_correlation(gt_hist: np.ndarray, mov_hist: np.ndarray) -> np.
     ).real
 
 
-def find_optimal_shift(gt_hist: np.ndarray, mov_hist: np.ndarray) -> float:
+def find_optimal_shift_fft(gt_hist: np.ndarray, mov_hist: np.ndarray) -> float:
     """
-    Find optimal circular shift (in degrees) that aligns mov_hist to gt_hist.
-    Paper's find_1D_shift_wfft: argmax of cross-correlation.
+    FFT version of the paper's 1D shift search.
     """
     cc = circular_cross_correlation(gt_hist, mov_hist)
     best_shift_bins = np.argmax(np.abs(cc))
-    return float(best_shift_bins)  # bins = degrees at 360-bin resolution
+    bins_per_degree = len(gt_hist) / 360.0
+    return float(best_shift_bins) / bins_per_degree
+
+
+def find_optimal_shift(gt_hist: np.ndarray, mov_hist: np.ndarray) -> float:
+    """
+    Direct circular search used by the paper's default implementation.
+    """
+    assert len(gt_hist) == len(mov_hist)
+    max_correlation = -np.inf
+    best_shift_bins = 0
+    for shift in range(len(gt_hist)):
+        correlation = np.dot(gt_hist, np.roll(mov_hist, shift))
+        if correlation > max_correlation:
+            max_correlation = correlation
+            best_shift_bins = shift
+    bins_per_degree = len(gt_hist) / 360.0
+    return float(best_shift_bins) / bins_per_degree
 
 
 # =============================================================================
@@ -172,7 +188,8 @@ def find_optimal_shift(gt_hist: np.ndarray, mov_hist: np.ndarray) -> float:
 # =============================================================================
 
 def spmc(template: np.ndarray, source: np.ndarray,
-         lat_bin: int = 180, long_bin: int = 360) -> Tuple[np.ndarray, float]:
+         lat_bin: int = 180, long_bin: int = 360,
+         use_fft: bool = False) -> Tuple[np.ndarray, float]:
     """
     Spherical Pattern Matching by Correlation (SPMC).
 
@@ -228,7 +245,11 @@ def spmc(template: np.ndarray, source: np.ndarray,
     # Step 6: 1D circular cross-correlation
     h_template = flatten_2d(template_hist)
     h_source = flatten_2d(source_hist)
-    shift = find_optimal_shift(h_template, h_source)
+    shift = (
+        find_optimal_shift_fft(h_template, h_source)
+        if use_fft else
+        find_optimal_shift(h_template, h_source)
+    )
 
     # z-rotation by shift degrees
     shift_rad = np.deg2rad(shift)
@@ -312,7 +333,7 @@ def estimate_rotation_svd(destination: np.ndarray, source: np.ndarray) -> np.nda
     if np.linalg.det(R) < 0:
         Vt[-1, :] *= -1
         R = U @ Vt
-    return R.T  # return in source→destination convention
+    return R.T  # return in source->destination convention
 
 
 # =============================================================================
@@ -323,18 +344,14 @@ def frs(template: np.ndarray, source: np.ndarray,
         k: int = 360,
         max_iterations: int = 50,
         convergence_angle: float = 0,
-        initial_R: np.ndarray = None) -> Tuple[np.ndarray, float, int]:
+        use_fft: bool = False) -> Tuple[np.ndarray, float, int]:
     """
-    Fast Rotation Search (FRS) — iterative axis-by-axis rotation search.
+    Fast Rotation Search (FRS) from the paper's reference implementation.
 
-    Steps from the paper:
-    1. Convert template to axis-direction angles (fixed)
-    2. Iteratively: convert source to angles → 1D histogram for each axis
-    3. Cross-correlate with template histograms to find shift for each axis
-    4. Compose rotation R_x(shift_x) @ R_y(shift_y) @ R_z(shift_z)
-    5. Apply rotation to source
-    6. After convergence: SVD to estimate final rotation (same-size only)
-       When sizes differ (e.g., outliers), use accumulated rotation product.
+    The key detail is the final closed-form estimate:
+    after iterative histogram-based updates, the paper estimates the net
+    rotation from the original source cloud to the final rotated source cloud
+    via SVD. This does not depend on the template/source having the same size.
 
     Args:
         template: (N, 3) unit vectors
@@ -342,8 +359,6 @@ def frs(template: np.ndarray, source: np.ndarray,
         k: histogram bins (default 360 for 1-degree resolution)
         max_iterations: max iterations
         convergence_angle: stop when all shifts ≤ this value (degrees)
-        initial_R: optional initial rotation matrix to start with
-
     Returns:
         R_est: estimated rotation matrix
         t: computation time
@@ -355,7 +370,7 @@ def frs(template: np.ndarray, source: np.ndarray,
     template = template / np.linalg.norm(template, axis=1, keepdims=True)
     source = source / np.linalg.norm(source, axis=1, keepdims=True)
 
-    # Step 1: Template axis-direction angles (fixed throughout)
+    # Template histograms stay fixed through all iterations.
     template_angles = pcl_array_to_rotation_angle_array(template)
     template_hists = [
         hist1D(template_angles[:, 0], k, 0, 360),
@@ -363,14 +378,10 @@ def frs(template: np.ndarray, source: np.ndarray,
         hist1D(template_angles[:, 2], k, 0, 360),
     ]
 
-    # Working copy of source
     current_source = source.copy()
-
-    # Accumulated rotation (starting from initial_R if provided)
-    R_accumulated = initial_R if initial_R is not None else np.eye(3)
+    source_history = [current_source.copy()]
 
     for iteration in range(max_iterations):
-        # Current source angles
         source_angles = pcl_array_to_rotation_angle_array(current_source)
         source_hists = [
             hist1D(source_angles[:, 0], k, 0, 360),
@@ -378,37 +389,26 @@ def frs(template: np.ndarray, source: np.ndarray,
             hist1D(source_angles[:, 2], k, 0, 360),
         ]
 
-        # Find optimal shift for each axis (template → source)
         shifts = []
         for th, sh in zip(template_hists, source_hists):
-            corr = circular_cross_correlation(th, sh)
-            shift_bins = np.argmax(np.abs(corr))
-            shifts.append(float(shift_bins))
+            shifts.append(
+                find_optimal_shift_fft(th, sh)
+                if use_fft else
+                find_optimal_shift(th, sh)
+            )
 
-        # Check convergence
         if (abs(shifts[0]) <= convergence_angle and
             abs(shifts[1]) <= convergence_angle and
             abs(shifts[2]) <= convergence_angle):
             break
 
-        # Compose and apply rotation
         R_step = rotation_angles_to_matrix(shifts[0], shifts[1], shifts[2])
         current_source = current_source @ R_step.T
-        # R_accumulated: R_accumulated @ R_step means "first apply R_step, then R_accumulated"
-        # After this: current_source = src @ R_accumulated^T @ R_step^T = src @ (R_accumulated @ R_step)^T
-        R_accumulated = R_accumulated @ R_step
+        source_history.append(current_source.copy())
 
-    # Final: SVD when sizes match, otherwise use accumulated rotation
-    if len(template) == len(current_source):
-        R_est = estimate_rotation_svd(template, current_source)
-    else:
-        # R_accumulated is the total rotation s.t. current_source = src @ R_accumulated^T
-        # SVD finds R_svm: template = current_source @ R_svm^T
-        # = src @ R_accumulated^T @ R_svm^T = src @ (R_svm @ R_accumulated)^T
-        # So the total rotation is R_svm @ R_accumulated
-        # But estimate_rotation_svd returns R^T, so:
-        # R_est = R_accumulated (after composing with SVD's R^T)
-        R_est = R_accumulated
+    # Match the paper code: estimate the total rotation from the original source
+    # to the final iteratively rotated source, not from template to source.
+    R_est = estimate_rotation_svd(source_history[0], source_history[-1])
 
     t = time.perf_counter() - start
     return R_est, t, iteration + 1
@@ -420,14 +420,10 @@ def frs(template: np.ndarray, source: np.ndarray,
 
 def spmc_frs(template: np.ndarray, source: np.ndarray,
              lat_bin: int = 180, long_bin: int = 360,
-             k: int = 360, max_iterations: int = 50) -> Tuple[np.ndarray, float, int]:
+             k: int = 360, max_iterations: int = 50,
+             use_fft: bool = False) -> Tuple[np.ndarray, float, int]:
     """
-    Hybrid: SPMC for initialization, then FRS for refinement.
-
-    FRS (Fast Rotation Search) iteratively refines by matching axis-angle histograms.
-    The FRS component requires careful implementation to avoid spurious histogram peaks;
-    in this version, FRS is observed to diverge on some inputs. This function
-    currently delegates to SPMC alone while FRS implementation is validated.
+    Hybrid: run SPMC, then refine its output with FRS exactly as in the paper.
 
     Args:
         template: (N, 3) unit vectors
@@ -442,9 +438,26 @@ def spmc_frs(template: np.ndarray, source: np.ndarray,
         t: total computation time
         frs_iterations: number of FRS iterations
     """
-    # FRS is not yet reliably working; delegate to SPMC
-    R_net, t = spmc(template, source, lat_bin=lat_bin, long_bin=long_bin)
-    return R_net, t, 0
+    start = time.perf_counter()
+    R_spmc, _ = spmc(
+        template,
+        source,
+        lat_bin=lat_bin,
+        long_bin=long_bin,
+        use_fft=use_fft,
+    )
+    spmc_aligned_source = source @ R_spmc.T
+    R_frs, _, frs_iterations = frs(
+        template,
+        spmc_aligned_source,
+        k=k,
+        max_iterations=max_iterations,
+        convergence_angle=0,
+        use_fft=use_fft,
+    )
+    R_net = R_spmc @ R_frs
+    t = time.perf_counter() - start
+    return R_net, t, frs_iterations
 
 
 # =============================================================================
