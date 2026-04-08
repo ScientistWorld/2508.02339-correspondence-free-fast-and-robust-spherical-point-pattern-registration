@@ -4,10 +4,11 @@
 #
 # CPU-only computation — no GPU needed for these O(n) algorithms.
 #
-# Uses Red Hat's public UBI image (no auth required) from registry.access.redhat.com.
+# Use an official Docker Hub Python image so the build does not depend on the
+# Red Hat registry, and keep `%post` on Debian/apt-compatible tooling.
 
 Bootstrap: docker
-From: registry.access.redhat.com/ubi9/python-311:latest
+From: python:3.11-slim-bookworm
 
 %post
     apt-get update && apt-get install -y --no-install-recommends \
