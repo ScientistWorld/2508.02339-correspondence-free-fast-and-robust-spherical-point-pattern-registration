@@ -57,14 +57,6 @@ def compute_scores(raw_results: dict) -> dict:
             scores[method]["median_rotation_error_deg_high"] = float(np.median(high_errs))
             scores[method]["p90_rotation_error_deg_high"] = float(np.percentile(high_errs, 90))
 
-    # computational_complexity: estimate from median times
-    # Uses ~22K point dataset as baseline
-    for method, errs in all_errors.items():
-        median_t = scores[method].get("median_time_s", 0.5)
-        ref_points = 22212
-        scores[method]["time_at_1e6_points_s"] = float(median_t * 1e6 / ref_points)
-        scores[method]["time_at_1e7_points_s"] = float(median_t * 1e7 / ref_points)
-
     return scores
 
 
@@ -93,15 +85,6 @@ def build_scores_json(scores: dict, output_path: str):
                             "p90_rotation_error_deg_high",
                             999.0,
                         ),
-                    }
-                    for method_name, method_scores in scores.items()
-                }
-            },
-            "computational_complexity": {
-                "results": {
-                    method_name: {
-                        "time_at_1e6_points_s": method_scores["time_at_1e6_points_s"],
-                        "time_at_1e7_points_s": method_scores["time_at_1e7_points_s"],
                     }
                     for method_name, method_scores in scores.items()
                 }

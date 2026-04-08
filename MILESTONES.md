@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-08 22:02] - method_runs
+- Removed the unmeasured computational-complexity extrapolation from the canonical evaluator so future scores only report experiments actually run
+- Confirmed the previous CPU submission was cancelled before producing evidence, so milestone remains `method_runs`
+- Prepared a fresh submission state for the full 100-rotation offline evaluation
+
 ### [2026-04-08 21:58] - method_runs
 - Re-audited the local method code and confirmed the workspace still contains the paper's actual SPMC, FRS, and SPMC+FRS algorithms
 - Tightened the offline evaluation scripts without changing the algorithm path, then committed and pushed the submission state

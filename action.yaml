@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: false
 milestone: method_runs
-notes: "Run the full 100-rotation CPU evaluation on the paper dataset through scripts/run.sh to validate corrected FRS and SPMC+FRS end-to-end on compute."
+notes: "Fresh full 100-rotation CPU evaluation on the paper dataset through scripts/run.sh after the earlier job was cancelled; validates corrected FRS/SPMC+FRS and emits only directly measured scores."

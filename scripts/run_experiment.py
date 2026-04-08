@@ -5,8 +5,8 @@ Evaluation of SPMC, FRS, and SPMC+FRS on the paper's Robust Vector Alignment Dat
 Paper: "Correspondence-Free Fast and Robust Spherical Point Pattern Registration"
 (arXiv: 2508.02339)
 
-Runs the paper methods on the paper's actual dataset and writes raw_results.json
-plus a convenience scores.json snapshot.
+Runs the paper methods on the paper's actual dataset and writes raw_results.json.
+The canonical scores.json is produced by eval/evaluate.py.
 Rotation convention: src = template @ R^T; evaluates rotation_error(R_est, R_gt).
 """
 import sys
@@ -116,7 +116,8 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
         for k, v in sorted(agg["spmc"].items()):
             print(f"  {k}: {v['median']:.3f}deg p90={v['p90']:.3f}deg t={v['median_time']:.4f}s")
 
-    # Build scores.json
+    # Build a local summary for console reporting. The canonical scores.json is
+    # written by eval/evaluate.py so we only summarize experiments we measured.
     all_errors = {m: [] for m in raw_results}
     all_times = {m: [r["median_time"] for r in agg[m].values()] for m in raw_results}
     high_errors = {m: [] for m in raw_results}
@@ -165,24 +166,6 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
                 }
             },
         },
-        "computational_complexity": {
-            "description": "Runtime scaling — time grows linearly with number of points (O(n))",
-            "weight": 0.2,
-            "primary_metric": "time_at_1e6_points_s",
-            "metrics": {
-                "time_at_1e6_points_s": {"higher_is_better": False, "coefficient": -0.5},
-                "time_at_1e7_points_s": {"higher_is_better": False, "coefficient": -0.5},
-            },
-            "results": {
-                **{
-                    method_name: {"type": "proposed",
-                        "time_at_1e6_points_s": float(np.median(all_times[method_name]) * 1e6 / 22212),
-                        "time_at_1e7_points_s": float(np.median(all_times[method_name]) * 1e7 / 22212),
-                    }
-                    for method_name in raw_results
-                }
-            },
-        },
     }
 
     output_path = Path(__file__).parent.parent / "scoring" / "scores.json"
@@ -199,32 +182,25 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
     if verbose:
         print(f"Raw results saved to {raw_path}")
 
-    # Strip "type" from results so validator doesn't treat it as a metric
+    # Strip "type" from results so validator doesn't treat it as a metric.
     scores_clean = {}
     for exp_name, exp in scores.items():
-        if isinstance(exp, dict) and "results" in exp:
-            clean_results = {}
-            for method, vals in exp["results"].items():
-                if isinstance(vals, dict):
-                    clean = {k: v for k, v in vals.items() if k != "type"}
-                    clean_results[method] = clean
-                else:
-                    clean_results[method] = vals
-            scores_clean[exp_name] = {**exp, "results": clean_results}
-        else:
-            scores_clean[exp_name] = exp
+        clean_results = {}
+        for method, vals in exp["results"].items():
+            clean_results[method] = {k: v for k, v in vals.items() if k != "type"}
+        scores_clean[exp_name] = {**exp, "results": clean_results}
 
     with open(output_path, "w") as f:
-        json.dump(scores_clean, f, indent=2)
+        json.dump({"experiments": scores_clean}, f, indent=2)
 
     if verbose:
-        print(f"\nScores written to {output_path}")
+        print(f"\nSummary snapshot written to {output_path}")
         print(f"\nOverall SPMC: median={scores_clean['robust_alignment_all']['results']['spmc']['median_rotation_error_deg']:.3f}deg "
               f"mean={scores_clean['robust_alignment_all']['results']['spmc']['mean_rotation_error_deg']:.3f}deg")
         print(f"High-outlier SPMC: median={scores_clean['robust_alignment_high_outliers']['results']['spmc']['median_rotation_error_deg']:.3f}deg "
               f"p90={scores_clean['robust_alignment_high_outliers']['results']['spmc']['p90_rotation_error_deg']:.3f}deg")
 
-    return scores
+    return {"experiments": scores_clean}
 
 
 if __name__ == "__main__":

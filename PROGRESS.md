@@ -12,6 +12,7 @@
 - **Audit conclusion**: the workspace contains a real implementation of the paper's SPMC, FRS, and hybrid pipeline, not a surrogate model
 - **End-to-end local smoke test**: `scripts/method.sh -> scripts/evaluate.sh -> validate.py --compare` completed successfully on the real dataset with `N_ROTATIONS=1`
 - **Submission state**: offline scripts were cleaned up and pushed; the pending job uses the audited algorithm path without further method changes
+- **Scoring integrity fix**: canonical evaluation no longer fabricates a computational-complexity experiment by extrapolating runtime from the main benchmark
 
 ## Results Achieved
 - **SPMC on paper's test case (A1/B3/r5)**: 0.13° error — **exact match** with paper's reported 0.13°
@@ -43,6 +44,7 @@
 - Computational complexity scaling test with varying point counts
 
 ## Issues Encountered
+- **Cancelled CPU submission**: the prior queued CPU job did not produce results, so a fresh submission is still required
 - **Previous FRS mismatch**: The earlier reproduction estimated the final FRS rotation against the template and bypassed the paper's source-to-source SVD finalization. That has now been corrected.
 - **Previous hybrid mismatch**: `spmc_frs` had been delegating to SPMC alone. The actual hybrid composition from the paper is now implemented.
 - **Rotation convention bug in hybrid**: `spmc_frs` was feeding FRS with `source @ R_spmc.T` instead of the paper-equivalent aligned source `source @ R_spmc`. This was the last correctness bug found during the audit.
@@ -52,6 +54,7 @@
 ## Deviations from Paper
 - **Baseline**: FPFH+QUASAR baseline not implemented (requires Point Cloud Library C++ deps).
   Identity rotation used as reference — not scored in scoring/scores.json.
+- **Scoring scope**: the canonical `scores.json` now reports only experiments actually measured on a run. The paper's separate computational-complexity study remains in `reference.json` but is not claimed in reproduced scores until it is explicitly run.
 - **Evaluation status**: The corrected `frs` and `spmc_frs` implementations are in place, and the end-to-end scoring path has been smoke-tested locally; the pending full 100-rotation CPU run is the evidence-generating job for milestone promotion.
 - **Dataset**: Using paper's actual dataset (not synthetic) — improvement over the paper's
   evaluation methodology.

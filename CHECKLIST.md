@@ -12,6 +12,7 @@ Check off items as you complete them. Order doesn't matter — work however make
 - [x] `scoring/reference.json` — paper's reported / paper-derived comparison targets
 - [x] Workspace validated via `python validate.py` — all checks pass
 - [x] `scoring/scores.json` — local smoke-test numbers exist
+- [x] Canonical scorer reports only directly measured experiments (no extrapolated complexity claims)
 - [x] `scoring/TARGETS.md` — primary, constraint, and ablation targets
 - [x] `scoring/CONSTRAINTS.md` — what a scientist must hold fixed
 - [x] `scoring/DIRECTION.md` — research direction scope for scientist
