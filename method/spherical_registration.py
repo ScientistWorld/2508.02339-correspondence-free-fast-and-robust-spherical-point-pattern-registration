@@ -446,7 +446,10 @@ def spmc_frs(template: np.ndarray, source: np.ndarray,
         long_bin=long_bin,
         use_fft=use_fft,
     )
-    spmc_aligned_source = source @ R_spmc.T
+    # `spmc` returns the same rotation convention used by evaluation:
+    # if source = template @ R_true^T, then the aligned source is source @ R_est.
+    # This must match the paper code's `Final_source_spmc`.
+    spmc_aligned_source = source @ R_spmc
     R_frs, _, frs_iterations = frs(
         template,
         spmc_aligned_source,
