@@ -287,6 +287,11 @@ Based on the paper's results:
 
 ## Progress Log
 
+### [2026-04-08 18:29] - method_runs
+- Corrected the environment packaging to follow protocol: Python dependencies now live in `environment/setup.sh`, and `environment/container.def` is OS-level only
+- Revalidated the workspace locally with `python validate.py --compare`
+- Prepared the workspace for a full 100-rotation CPU submission; milestone remains `method_runs` until fresh compute results land
+
 ### [2026-04-08 04:18] - method_runs
 - Ran the real `scripts/method.sh -> scripts/evaluate.sh -> validate.py --compare` path locally with `N_ROTATIONS=1`
 - Confirmed the cleaned offline pipeline produces `scoring/raw_results.json` and a valid `scoring/scores.json`
