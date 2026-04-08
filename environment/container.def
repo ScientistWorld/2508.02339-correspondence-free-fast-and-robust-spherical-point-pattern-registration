@@ -3,18 +3,15 @@
 # Build:  apptainer build container.sif container.def
 #
 # CPU-only computation — no GPU needed for these O(n) algorithms.
-# Keep the image public and minimal to avoid registry/manifest failures.
+# Avoid OCI registry fetches entirely because the scheduler repeatedly receives
+# malformed registry metadata responses.
 
-Bootstrap: docker
-From: ubuntu:22.04
+Bootstrap: debootstrap
+OSVersion: jammy
+MirrorURL: http://archive.ubuntu.com/ubuntu/
+Include: ca-certificates,python3,python3-pip
 
 %post
-    apt-get update && apt-get install -y \
-        ca-certificates \
-        python3 \
-        python3-pip && \
-    rm -rf /var/lib/apt/lists/*
-
     mkdir -p /home/user/data /home/user/checkpoints
     chmod 755 /home/user
 
