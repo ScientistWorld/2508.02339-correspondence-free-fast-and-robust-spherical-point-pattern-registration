@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: true
 milestone: method_runs
-notes: "CPU validation run on 20 rotations to verify corrected FRS and SPMC+FRS against the paper dataset before a full evaluation."
+notes: "Retry CPU validation after moving the container base to ghcr.io/rocky-linux/rockylinux:9, since the prior failures were all registry-fetch errors before %post."
