@@ -11,23 +11,21 @@ Bootstrap: scratch
 
 %setup
     ROOTFS="${APPTAINER_ROOTFS:-$SINGULARITY_ROOTFS}"
-    TARBALL=""
-    for CANDIDATE in \
-        "./environment/ubuntu-base-22.04-base-amd64.tar.gz" \
-        "$PWD/environment/ubuntu-base-22.04-base-amd64.tar.gz" \
-        "/home/user/environment/ubuntu-base-22.04-base-amd64.tar.gz"
-    do
-        if [ -f "$CANDIDATE" ]; then
-            TARBALL="$CANDIDATE"
-            break
+    TARBALL="/tmp/ubuntu-base-22.04-base-amd64.tar.gz"
+    if [ ! -f "$TARBALL" ]; then
+        if command -v wget >/dev/null 2>&1; then
+            wget -O "$TARBALL" "https://cdimage.ubuntu.com/ubuntu-base/releases/22.04/release/ubuntu-base-22.04-base-amd64.tar.gz"
+        elif command -v curl >/dev/null 2>&1; then
+            curl -L "https://cdimage.ubuntu.com/ubuntu-base/releases/22.04/release/ubuntu-base-22.04-base-amd64.tar.gz" -o "$TARBALL"
+        else
+            python3 - <<'PY'
+import urllib.request
+urllib.request.urlretrieve(
+    "https://cdimage.ubuntu.com/ubuntu-base/releases/22.04/release/ubuntu-base-22.04-base-amd64.tar.gz",
+    "/tmp/ubuntu-base-22.04-base-amd64.tar.gz",
+)
+PY
         fi
-    done
-    if [ -z "$TARBALL" ]; then
-        TARBALL="$(find "$PWD" -maxdepth 4 -name 'ubuntu-base-22.04-base-amd64.tar.gz' -print -quit 2>/dev/null)"
-    fi
-    if [ -z "$TARBALL" ]; then
-        echo "Could not locate ubuntu-base-22.04-base-amd64.tar.gz from build working directory: $PWD" >&2
-        exit 1
     fi
     tar -xzf "$TARBALL" -C "$ROOTFS"
 
