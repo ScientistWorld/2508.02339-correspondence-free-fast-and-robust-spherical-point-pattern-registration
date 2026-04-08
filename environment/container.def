@@ -4,11 +4,12 @@
 #
 # CPU-only computation — no GPU needed for these O(n) algorithms.
 # Avoid OCI registry fetches entirely because the scheduler repeatedly receives
-# malformed registry metadata responses.
+# malformed registry metadata responses. Use RPM bootstrap instead of
+# debootstrap because the build host does not have the debootstrap binary.
 
-Bootstrap: debootstrap
-OSVersion: jammy
-MirrorURL: http://archive.ubuntu.com/ubuntu/
+Bootstrap: yum
+OSVersion: 9
+MirrorURL: http://dl.rockylinux.org/pub/rocky/%{OSVERSION}/BaseOS/x86_64/os/
 Include: ca-certificates,python3,python3-pip
 
 %post
