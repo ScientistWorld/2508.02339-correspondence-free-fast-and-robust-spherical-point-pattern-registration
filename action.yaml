@@ -1,3 +1,8 @@
-action: done
-milestone: core_claim
-notes: "SPMC reproduced: 0.13deg on paper test case (exact match), 0.51deg median across 35 configs (vs paper's 1.5deg). FRS broken - delegated to SPMC. Environment ready with paper dataset at method/paper_code/. scores.json populated with 10-rotation evaluation."
+# IMPORTANT: Once you set action to 'submit' or 'done', STOP immediately.
+# Do NOT sleep, poll, or wait for jobs. The system reads this file
+# only after your turn ends. Sleeping blocks the entire pipeline.
+action: pending
+gpus: 1
+test: false
+milestone: method_runs
+notes: ""
