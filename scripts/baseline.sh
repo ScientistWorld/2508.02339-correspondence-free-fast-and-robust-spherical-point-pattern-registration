@@ -11,8 +11,9 @@ cd /home/user
 RAW_RESULTS="${RAW_RESULTS:-scoring/raw_results_identity.json}"
 SCORES_OUT="${SCORES_OUT:-scoring/scores_identity.json}"
 
-python3 - <<'PY'
+RAW_RESULTS_PATH="${RAW_RESULTS}" python3 - <<'PY'
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -42,7 +43,8 @@ for pattern in PATTERNS:
             raw["identity"][key]["errors"].append(rotation_error_deg(np.eye(3), rotation))
             raw["identity"][key]["times"].append(0.0)
 
-raw_path = Path("/home/user/scoring/raw_results_identity.json")
+raw_path = Path(os.environ["RAW_RESULTS_PATH"])
+raw_path.parent.mkdir(parents=True, exist_ok=True)
 with raw_path.open("w") as handle:
     json.dump(raw, handle)
 print(f"Wrote {raw_path}")

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-SPMC evaluation on paper's Robust Vector Alignment Dataset.
+Evaluation of SPMC, FRS, and SPMC+FRS on the paper's Robust Vector Alignment Dataset.
 
 Paper: "Correspondence-Free Fast and Robust Spherical Point Pattern Registration"
 (arXiv: 2508.02339)
 
-Runs SPMC on the paper's actual dataset and writes scores.json.
+Runs the paper methods on the paper's actual dataset and writes raw_results.json
+plus a convenience scores.json snapshot.
 Rotation convention: src = template @ R^T; evaluates rotation_error(R_est, R_gt).
 """
 import sys
@@ -21,7 +22,7 @@ from method.spherical_registration import spmc, frs, spmc_frs, rotation_error
 
 
 def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
-    """Run SPMC on the full paper dataset."""
+    """Run SPMC, FRS, and SPMC+FRS on the full paper dataset."""
     dataset_dir = require_dataset()
     patterns = list(PATTERNS)
     configs = list(CONFIGS)
