@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-08 21:58] - method_runs
+- Re-audited the local method code and confirmed the workspace still contains the paper's actual SPMC, FRS, and SPMC+FRS algorithms
+- Tightened the offline evaluation scripts without changing the algorithm path, then committed and pushed the submission state
+- Kept the milestone at `method_runs` pending the fresh compute-side 100-rotation evaluation
+
 ### [2026-04-08 18:29] - method_runs
 - Corrected the environment packaging to follow protocol: Python dependencies now live in `environment/setup.sh`, and `environment/container.def` is OS-level only
 - Revalidated the workspace locally with `python validate.py --compare`

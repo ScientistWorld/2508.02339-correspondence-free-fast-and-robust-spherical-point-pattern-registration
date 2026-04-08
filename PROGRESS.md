@@ -11,6 +11,7 @@
 - **Implementation fidelity audit**: local method code was compared against the paper's released reference implementation and corrected where it diverged
 - **Audit conclusion**: the workspace contains a real implementation of the paper's SPMC, FRS, and hybrid pipeline, not a surrogate model
 - **End-to-end local smoke test**: `scripts/method.sh -> scripts/evaluate.sh -> validate.py --compare` completed successfully on the real dataset with `N_ROTATIONS=1`
+- **Submission state**: offline scripts were cleaned up and pushed; the pending job uses the audited algorithm path without further method changes
 
 ## Results Achieved
 - **SPMC on paper's test case (A1/B3/r5)**: 0.13° error — **exact match** with paper's reported 0.13°
