@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: false
 milestone: method_runs
-notes: "Run the full 100-rotation CPU evaluation for SPMC, FRS, and SPMC+FRS with the corrected offline pipeline to regenerate scoring/scores.json and validate the main robust-alignment claim."
+notes: "Retry the full 100-rotation CPU evaluation after switching container.def to a scratch build that unpacks the vendored Ubuntu 22.04 base tarball, avoiding broken OCI registry fetches."

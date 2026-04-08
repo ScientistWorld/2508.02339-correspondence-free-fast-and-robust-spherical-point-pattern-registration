@@ -3,19 +3,25 @@
 # Build:  apptainer build container.sif container.def
 #
 # CPU-only computation — no GPU needed for these O(n) algorithms.
-# Use a public Quay base image to avoid the previous GHCR auth failure, the
-# malformed Docker Hub metadata responses, and the fakeroot limitations of yum
-# bootstrap on this cluster.
+# This definition avoids OCI registry fetches entirely because repeated remote
+# metadata responses were malformed on the cluster. Instead, it unpacks a local
+# Ubuntu base rootfs tarball during %setup, then installs only minimal OS deps.
 
-Bootstrap: docker
-From: quay.io/centos/centos:stream9
+Bootstrap: scratch
+
+%setup
+    ROOTFS="${APPTAINER_ROOTFS:-$SINGULARITY_ROOTFS}"
+    tar -xzf /home/user/environment/ubuntu-base-22.04-base-amd64.tar.gz -C "$ROOTFS"
 
 %post
-    dnf install -y \
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y \
         ca-certificates \
         python3 \
-        python3-pip && \
-    dnf clean all
+        python3-pip
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
 
     mkdir -p /home/user/data /home/user/checkpoints
     chmod 755 /home/user
