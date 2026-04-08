@@ -4,11 +4,11 @@
 #
 # CPU-only computation — no GPU needed for these O(n) algorithms.
 #
-# Use a Quay-hosted Rocky Linux base to avoid Docker Hub pull-rate limits.
-# Install Python and basic shell tools via dnf in `%post`.
+# Use a GitHub Container Registry Rocky Linux base to avoid the flaky registry
+# endpoints hit by the prior attempts. Keep `%post` minimal.
 
 Bootstrap: docker
-From: quay.io/rockylinux/rockylinux:9
+From: ghcr.io/rocky-linux/rockylinux:9
 
 %post
     dnf install -y \
