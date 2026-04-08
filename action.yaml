@@ -3,6 +3,6 @@
 # only after your turn ends. Sleeping blocks the entire pipeline.
 action: submit
 gpus: 0
-test: true
+test: false
 milestone: method_runs
-notes: "Retry CPU validation after moving the container base to ghcr.io/rocky-linux/rockylinux:9, since the prior failures were all registry-fetch errors before %post."
+notes: "Run the full 100-rotation CPU evaluation for SPMC, FRS, and SPMC+FRS with the corrected offline pipeline to regenerate scoring/scores.json and validate the main robust-alignment claim."

@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-08 04:05] - method_runs
+- Cleaned the execution path so `run.sh` performs one consistent offline evaluation flow
+- Restricted `scripts/evaluate.sh` to the method-agnostic aggregator in `eval/`
+- Updated checklist/progress bookkeeping to remove stale `core_claim` assertions before the next validation run
+
 ### [2026-04-08 00:53] - method_runs
 - Audited the previous agent's workspace before trusting the claimed `core_claim`
 - Confirmed the codebase implements the paper's actual SPMC, FRS, and SPMC+FRS algorithms rather than a surrogate

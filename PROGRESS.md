@@ -30,7 +30,7 @@
 ## What Remains
 - Fresh compute validation run for corrected `frs` and `spmc_frs` on the paper dataset
 - Regeneration of `scoring/scores.json`, because the current file predates the final fidelity fixes and cannot support `core_claim`
-- Full 100-rotation evaluation once the corrected hybrid is verified
+- Full 100-rotation evaluation through the cleaned `run.sh -> method.sh -> evaluate.sh` path
 - FPFH+QUASAR baseline (requires C++ Point Cloud Library — unavailable)
 - Computational complexity scaling test with varying point counts
 
@@ -48,3 +48,4 @@
 - **Evaluation status**: The corrected `frs` and `spmc_frs` implementations are in place and locally spot-checked, but compute-side evaluation still needs to regenerate `scores.json` before the milestone can be restored to `core_claim`.
 - **Dataset**: Using paper's actual dataset (not synthetic) — improvement over the paper's
   evaluation methodology.
+- **Current run protocol**: `scripts/run.sh` now executes the full 100-rotation evaluation by default so a successful CPU job can directly support the main experiment.

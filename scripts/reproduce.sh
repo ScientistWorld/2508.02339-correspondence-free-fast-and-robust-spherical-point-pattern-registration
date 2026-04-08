@@ -11,7 +11,7 @@
 #   - Working directory is /home/user
 #   - Paper dataset at method/paper_code/vector_alignment_dataset/
 
-set -e
+set -euo pipefail
 cd /home/user
 
 echo "=========================================="
@@ -27,9 +27,9 @@ else
     echo "  Dataset already present."
 fi
 
-# Step 2: Run evaluation on paper's actual dataset
+# Step 2: Run the paper methods and aggregate scores
 echo "[2/3] Running SPMC, FRS, and SPMC+FRS evaluation on paper's dataset..."
-python3 scripts/run_experiment.py --n-rotations 100 --output scoring/scores.json
+N_ROTATIONS="${N_ROTATIONS:-100}" bash scripts/method.sh
 
 # Step 3: Report results
 echo "[3/3] Results written to scoring/scores.json"

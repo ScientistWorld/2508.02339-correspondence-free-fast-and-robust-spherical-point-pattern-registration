@@ -6,7 +6,7 @@
 #   - numpy available via setup.sh
 #   - Paper dataset at /home/user/method/paper_code/vector_alignment_dataset/
 
-set -e
+set -euo pipefail
 cd /home/user
 
 echo "=========================================="
@@ -19,10 +19,14 @@ if [ ! -f "method/paper_code/vector_alignment_dataset/A1_A.pkl" ]; then
     exit 1
 fi
 
-# Run configurable evaluation; default to a 20-rotation validation pass.
-N_ROTATIONS="${N_ROTATIONS:-20}"
+# Run a configurable offline evaluation. Default to the full 100-rotation paper
+# protocol so a successful job can support the core claim immediately.
+N_ROTATIONS="${N_ROTATIONS:-100}"
 echo "Running evaluation (SPMC, FRS, SPMC+FRS) on 5 patterns x 7 configs x ${N_ROTATIONS} rotations..."
-python3 scripts/run_experiment.py --n-rotations "${N_ROTATIONS}" --output scoring/scores.json
+bash scripts/method.sh
+
+echo "Validating scoring artifacts..."
+python3 validate.py --compare
 
 echo ""
 echo "=========================================="
