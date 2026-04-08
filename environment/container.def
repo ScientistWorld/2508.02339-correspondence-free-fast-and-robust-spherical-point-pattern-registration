@@ -27,7 +27,7 @@ urllib.request.urlretrieve(
 PY
         fi
     fi
-    tar -xzf "$TARBALL" -C "$ROOTFS"
+    tar --no-same-owner --no-same-permissions -xzf "$TARBALL" -C "$ROOTFS"
 
 %post
     export DEBIAN_FRONTEND=noninteractive
