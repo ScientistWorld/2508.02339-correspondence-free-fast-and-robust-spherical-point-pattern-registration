@@ -9,7 +9,6 @@ Runs SPMC on the paper's actual dataset and writes scores.json.
 Rotation convention: src = template @ R^T; evaluates rotation_error(R_est, R_gt).
 """
 import sys
-import pickle
 import json
 import time
 from pathlib import Path
@@ -17,31 +16,31 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+from data.dataset import CONFIGS, PATTERNS, get_rotations, get_source, get_template, require_dataset
 from method.spherical_registration import spmc, frs, spmc_frs, rotation_error
-
-DATASET_DIR = Path(__file__).parent.parent / "method" / "paper_code" / "vector_alignment_dataset"
 
 
 def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
     """Run SPMC on the full paper dataset."""
-    patterns = ["A1", "A2", "A3", "A4", "A5"]
-    configs = ["B1", "B2", "B3", "B4", "B5", "B6", "B7"]
+    dataset_dir = require_dataset()
+    patterns = list(PATTERNS)
+    configs = list(CONFIGS)
 
-    rots = pickle.load(open(DATASET_DIR / "RandomRotation100.pkl", "rb"))
+    rots = get_rotations()
     n_rot = min(n_rotations, len(rots))
 
     if verbose:
-        print(f"Loading dataset from {DATASET_DIR}...")
+        print(f"Loading dataset from {dataset_dir}...")
         print(f"Patterns: {patterns}, Configs: {configs}, Rotations: {n_rot}")
 
     # Pre-load all data
     templates_raw = {}
     sources_raw = {}
     for pat in patterns:
-        t = pickle.load(open(DATASET_DIR / f"{pat}_A.pkl", "rb"))
+        t = np.asarray(get_template(pat), dtype=float)
         templates_raw[pat] = t / np.linalg.norm(t, axis=1, keepdims=True)
         for cfg in configs:
-            s = pickle.load(open(DATASET_DIR / f"{pat}_A_{cfg}.pkl", "rb"))
+            s = np.asarray(get_source(pat, cfg), dtype=float)
             sources_raw[(pat, cfg)] = s / np.linalg.norm(s, axis=1, keepdims=True)
 
     if verbose:

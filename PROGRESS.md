@@ -5,6 +5,7 @@
 - **Paper's dataset**: Robust Vector Alignment Dataset fully loaded and verified (35 pickle files + 100 rotations)
 - **Evaluation pipeline**: rotation error computation, timing, aggregation, scores.json output
 - **scripts/evaluate.sh**: method-agnostic aggregation path that reads raw results and writes scores.json
+- **data access**: baseline and method runs now share the same method-agnostic loader in `data/dataset.py`
 - **scripts/download.sh**: idempotent, clones paper repo from GitHub
 - **Container**: Red Hat UBI image with numpy installed via setup.sh
 - **Implementation fidelity audit**: local method code was compared against the paper's released reference implementation and corrected where it diverged
@@ -54,6 +55,7 @@
 - **Dataset**: Using paper's actual dataset (not synthetic) — improvement over the paper's
   evaluation methodology.
 - **Current run protocol**: `scripts/run.sh` now executes the full 100-rotation evaluation by default so a successful CPU job can directly support the main experiment.
+- **Baseline packaging**: the shipped baseline is an identity-rotation sanity check on the released dataset, not the paper's FPFH+QUASAR baseline.
 
 ## Next Turn Goal
 - Submit the full CPU evaluation immediately rather than stopping at the local smoke test. The current milestone remains `method_runs` until that job completes and produces fresh compute-side evidence.

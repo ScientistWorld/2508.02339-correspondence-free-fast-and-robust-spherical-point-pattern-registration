@@ -19,13 +19,13 @@ Check off items as you complete them. Order doesn't matter — work however make
 ## Code
 - [x] Evaluation code in `eval/` — method-agnostic rotation error computation
 - [x] Method implementation in `method/spherical_registration.py`
-- [ ] Baseline implementation in `baseline/` (FPFH+QUASAR baseline skipped — C++ deps unavailable)
+- [ ] Baseline implementation in `baseline/` (paper baseline still unavailable; `scripts/baseline.sh` provides only an identity sanity check)
 
 ## Scripts
 - [x] `scripts/evaluate.sh` — self-contained evaluation pipeline
 - [x] `scripts/reproduce.sh` — calls evaluate.sh
 - [x] `scripts/download.sh` — idempotent, clones paper repo
-- [x] `scripts/baseline.sh` — exists (FPFH+QUASAR baseline skipped due to C++ deps)
+- [x] `scripts/baseline.sh` — identity sanity baseline on the released dataset
 - [x] `scripts/run_experiment.py` — runs SPMC, FRS, and SPMC+FRS on the paper dataset
 - [x] `scripts/run.sh` — Ray job script for full 100-rotation CPU validation
 

@@ -7,12 +7,12 @@ Reduce the median rotational angular error on the Robust Vector Alignment Datase
 - **Experiment**: robust_alignment_all
 - **How to measure**: Run the method on all 5 patterns × 7 configs × 100 rotations, compute median angular error.
 
-## Constraint: computation_time
-Methods must remain fast. The paper claims O(n) complexity, which is a core contribution.
+## Constraint: runtime_efficiency
+Methods must remain fast on the released benchmark, not just accurate.
 
 - **Metric**: median_time_s (lower is better)
-- **Experiment**: computational_complexity
-- **How to measure**: Time the method on the synthetic dataset.
+- **Experiment**: robust_alignment_all
+- **How to measure**: Run the same 5 patterns × 7 configs × 100 rotations protocol and record per-instance runtime.
 
 ## Ablation: vs_single_method
 Compare the hybrid SPMC+FRS against individual SPMC and FRS to verify the hybrid's benefit.
