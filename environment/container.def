@@ -11,7 +11,25 @@ Bootstrap: scratch
 
 %setup
     ROOTFS="${APPTAINER_ROOTFS:-$SINGULARITY_ROOTFS}"
-    tar -xzf /home/user/environment/ubuntu-base-22.04-base-amd64.tar.gz -C "$ROOTFS"
+    TARBALL=""
+    for CANDIDATE in \
+        "./environment/ubuntu-base-22.04-base-amd64.tar.gz" \
+        "$PWD/environment/ubuntu-base-22.04-base-amd64.tar.gz" \
+        "/home/user/environment/ubuntu-base-22.04-base-amd64.tar.gz"
+    do
+        if [ -f "$CANDIDATE" ]; then
+            TARBALL="$CANDIDATE"
+            break
+        fi
+    done
+    if [ -z "$TARBALL" ]; then
+        TARBALL="$(find "$PWD" -maxdepth 4 -name 'ubuntu-base-22.04-base-amd64.tar.gz' -print -quit 2>/dev/null)"
+    fi
+    if [ -z "$TARBALL" ]; then
+        echo "Could not locate ubuntu-base-22.04-base-amd64.tar.gz from build working directory: $PWD" >&2
+        exit 1
+    fi
+    tar -xzf "$TARBALL" -C "$ROOTFS"
 
 %post
     export DEBIAN_FRONTEND=noninteractive

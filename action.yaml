@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: false
 milestone: method_runs
-notes: "Retry the full 100-rotation CPU evaluation after switching container.def to a scratch build that unpacks the vendored Ubuntu 22.04 base tarball, avoiding broken OCI registry fetches."
+notes: "Retry the full 100-rotation CPU evaluation after making the scratch container locate the vendored Ubuntu 22.04 rootfs tarball relative to the actual build working directory."
