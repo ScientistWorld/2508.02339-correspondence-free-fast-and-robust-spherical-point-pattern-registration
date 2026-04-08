@@ -1,8 +1,8 @@
 # IMPORTANT: Once you set action to 'submit' or 'done', STOP immediately.
 # Do NOT sleep, poll, or wait for jobs. The system reads this file
 # only after your turn ends. Sleeping blocks the entire pipeline.
-action: submit
+action: done
 gpus: 0
 test: false
 milestone: method_runs
-notes: "Retry the full 100-rotation CPU evaluation after making the scratch container download the Ubuntu 22.04 base rootfs directly during %setup, avoiding both OCI registry metadata failures and invalid workspace paths."
+notes: "Stopped by the scheduler after 10 consecutive environment build failures. Local smoke tests pass and the workspace remains at method_runs, but no cluster job could be launched."
