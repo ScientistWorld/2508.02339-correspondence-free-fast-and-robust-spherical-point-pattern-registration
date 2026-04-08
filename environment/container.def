@@ -3,19 +3,16 @@
 # Build:  apptainer build container.sif container.def
 #
 # CPU-only computation — no GPU needed for these O(n) algorithms.
-# Keep the image public and minimal to avoid registry auth failures.
+# Keep the image public and minimal to avoid registry/manifest failures.
 
 Bootstrap: docker
-From: python:3.12-slim-bookworm
+From: ubuntu:22.04
 
 %post
     apt-get update && apt-get install -y \
         ca-certificates \
-        curl \
-        git \
-        less \
-        vim-tiny \
-        wget && \
+        python3 \
+        python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
     mkdir -p /home/user/data /home/user/checkpoints
