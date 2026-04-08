@@ -6,4 +6,11 @@
 
 set -euo pipefail
 
-uv pip install --system numpy
+export HOME=/home/user
+export PYTHONUSERBASE="${HOME}/.local"
+
+mkdir -p "${PYTHONUSERBASE}"
+
+# The build runs under fakeroot and cannot reliably write into /usr/local.
+# Install into the user site instead of using a system prefix.
+python3 -m pip install --user numpy

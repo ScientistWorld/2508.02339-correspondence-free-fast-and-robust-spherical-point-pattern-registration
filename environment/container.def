@@ -44,4 +44,6 @@ PY
 
 %environment
     export HOME=/home/user
+    export PATH=/home/user/.local/bin:$PATH
+    export PYTHONUSERBASE=/home/user/.local
     export PYTHONUNBUFFERED=1
