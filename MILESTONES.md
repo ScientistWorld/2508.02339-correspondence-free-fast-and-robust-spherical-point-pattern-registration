@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-08 04:18] - method_runs
+- Ran the real `scripts/method.sh -> scripts/evaluate.sh -> validate.py --compare` path locally with `N_ROTATIONS=1`
+- Confirmed the cleaned offline pipeline produces `scoring/raw_results.json` and a valid `scoring/scores.json`
+- Kept the milestone at `method_runs` until the submitted full 100-rotation CPU run finishes
+
 ### [2026-04-08 04:05] - method_runs
 - Cleaned the execution path so `run.sh` performs one consistent offline evaluation flow
 - Restricted `scripts/evaluate.sh` to the method-agnostic aggregator in `eval/`

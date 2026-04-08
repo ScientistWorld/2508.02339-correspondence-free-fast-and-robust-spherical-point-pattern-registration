@@ -1,82 +1,54 @@
 {
-  "robust_alignment_all": {
-    "description": "Robust alignment on paper dataset \u2014 5 patterns x 7 configs x 10 rotations each. Primary metric: median rotation error.",
-    "weight": 0.5,
-    "primary_metric": "median_rotation_error_deg",
-    "metrics": {
-      "median_rotation_error_deg": {
-        "higher_is_better": false,
-        "coefficient": -1.0
-      },
-      "mean_rotation_error_deg": {
-        "higher_is_better": false,
-        "coefficient": -0.3
-      },
-      "median_time_s": {
-        "higher_is_better": false,
-        "coefficient": -0.1
+  "experiments": {
+    "robust_alignment_all": {
+      "results": {
+        "spmc": {
+          "median_rotation_error_deg": 0.5006770129056958,
+          "mean_rotation_error_deg": 1.5267387886547592,
+          "median_time_s": 0.9947320302017033
+        },
+        "frs": {
+          "median_rotation_error_deg": 1.0904011562456104,
+          "mean_rotation_error_deg": 32.83798425882357,
+          "median_time_s": 1.0864848205819726
+        },
+        "spmc_frs": {
+          "median_rotation_error_deg": 0.5232817590572842,
+          "mean_rotation_error_deg": 0.6708750836792167,
+          "median_time_s": 1.2047249949537218
+        }
       }
     },
-    "results": {
-      "spmc": {
-        "median_rotation_error_deg": 0.5072001994959803,
-        "mean_rotation_error_deg": 1.557394404914571,
-        "median_time_s": 0.7707475570496172
-      },
-      "spmc_frs": {
-        "median_rotation_error_deg": 0.5072001994959803,
-        "mean_rotation_error_deg": 1.557394404914571,
-        "median_time_s": 0.7978826194885187
-      }
-    }
-  },
-  "robust_alignment_high_outliers": {
-    "description": "Robust alignment at high outlier ratios (B5: 50%, B6: 75%, B7: 90% outliers)",
-    "weight": 0.3,
-    "primary_metric": "median_rotation_error_deg",
-    "metrics": {
-      "median_rotation_error_deg": {
-        "higher_is_better": false,
-        "coefficient": -1.0
-      },
-      "p90_rotation_error_deg": {
-        "higher_is_better": false,
-        "coefficient": -0.5
+    "robust_alignment_high_outliers": {
+      "results": {
+        "spmc": {
+          "median_rotation_error_deg": 1.0155532140000325,
+          "p90_rotation_error_deg": 6.093467371377442
+        },
+        "frs": {
+          "median_rotation_error_deg": 0.9600664478785533,
+          "p90_rotation_error_deg": 150.8545673377039
+        },
+        "spmc_frs": {
+          "median_rotation_error_deg": 0.7350483755569486,
+          "p90_rotation_error_deg": 1.24521499882395
+        }
       }
     },
-    "results": {
-      "spmc": {
-        "median_rotation_error_deg": 0.9252822460646954,
-        "p90_rotation_error_deg": 6.415304991195686
-      },
-      "spmc_frs": {
-        "median_rotation_error_deg": 0.9252822460646954,
-        "p90_rotation_error_deg": 6.415304991195686
-      }
-    }
-  },
-  "computational_complexity": {
-    "description": "Runtime scaling \u2014 time grows linearly with number of points (O(n))",
-    "weight": 0.2,
-    "primary_metric": "time_at_1e6_points_s",
-    "metrics": {
-      "time_at_1e6_points_s": {
-        "higher_is_better": false,
-        "coefficient": -0.5
-      },
-      "time_at_1e7_points_s": {
-        "higher_is_better": false,
-        "coefficient": -0.5
-      }
-    },
-    "results": {
-      "spmc": {
-        "time_at_1e6_points_s": 34.69960188409946,
-        "time_at_1e7_points_s": 346.99601884099457
-      },
-      "spmc_frs": {
-        "time_at_1e6_points_s": 35.92124164814149,
-        "time_at_1e7_points_s": 359.21241648141483
+    "computational_complexity": {
+      "results": {
+        "spmc": {
+          "time_at_1e6_points_s": 44.78354178829927,
+          "time_at_1e7_points_s": 447.83541788299266
+        },
+        "frs": {
+          "time_at_1e6_points_s": 48.9143175122444,
+          "time_at_1e7_points_s": 489.143175122444
+        },
+        "spmc_frs": {
+          "time_at_1e6_points_s": 54.23757405698369,
+          "time_at_1e7_points_s": 542.3757405698369
+        }
       }
     }
   }

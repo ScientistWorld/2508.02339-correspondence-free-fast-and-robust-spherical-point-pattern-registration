@@ -2,8 +2,9 @@
 """
 Method-agnostic evaluation script.
 
-This script computes aggregate metrics from pre-generated rotation estimation results.
-It does NOT import from method/ — it only reads results files and computes statistics.
+This script computes aggregate metrics from pre-generated rotation estimation
+results. It does NOT import from method/; it only reads result files and
+writes scoring/scores.json in the canonical experiment-oriented format.
 
 Usage:
     python eval/evaluate.py --input scoring/raw_results.json --output scoring/scores.json
@@ -70,30 +71,42 @@ def compute_scores(raw_results: dict) -> dict:
 def build_scores_json(scores: dict, output_path: str):
     """Build the full scores.json structure and write it."""
     output = {
-        "robust_alignment_all": {
-            "results": {
-                k: {**v}
-                for k, v in scores.items()
-            }
-        },
-        "robust_alignment_high_outliers": {
-            "results": {
-                k: {
-                    "median_rotation_error_deg": scores[k].get("median_rotation_error_deg_high", scores[k]["median_rotation_error_deg"]),
-                    "p90_rotation_error_deg": scores[k].get("p90_rotation_error_deg_high", 999.0),
+        "experiments": {
+            "robust_alignment_all": {
+                "results": {
+                    method_name: {
+                        "median_rotation_error_deg": method_scores["median_rotation_error_deg"],
+                        "mean_rotation_error_deg": method_scores["mean_rotation_error_deg"],
+                        "median_time_s": method_scores["median_time_s"],
+                    }
+                    for method_name, method_scores in scores.items()
                 }
-                for k in scores
-            }
-        },
-        "computational_complexity": {
-            "results": {
-                k: {
-                    "time_at_1e6_points_s": scores[k]["time_at_1e6_points_s"],
-                    "time_at_1e7_points_s": scores[k]["time_at_1e7_points_s"],
+            },
+            "robust_alignment_high_outliers": {
+                "results": {
+                    method_name: {
+                        "median_rotation_error_deg": method_scores.get(
+                            "median_rotation_error_deg_high",
+                            method_scores["median_rotation_error_deg"],
+                        ),
+                        "p90_rotation_error_deg": method_scores.get(
+                            "p90_rotation_error_deg_high",
+                            999.0,
+                        ),
+                    }
+                    for method_name, method_scores in scores.items()
                 }
-                for k in scores
-            }
-        },
+            },
+            "computational_complexity": {
+                "results": {
+                    method_name: {
+                        "time_at_1e6_points_s": method_scores["time_at_1e6_points_s"],
+                        "time_at_1e7_points_s": method_scores["time_at_1e7_points_s"],
+                    }
+                    for method_name, method_scores in scores.items()
+                }
+            },
+        }
     }
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
