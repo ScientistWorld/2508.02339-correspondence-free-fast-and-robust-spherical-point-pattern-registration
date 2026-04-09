@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-09 14:10] - majority
+- Finalized the benchmark-facing wrap-up documents so the scored targets, experiments, constraints, and direction are consistent with the checked-in `scores.json`
+- Confirmed `python validate.py` still passes after the final documentation cleanup
+- Closed the workspace at `majority`; the only remaining unreproduced reference item is the separate computational-complexity study
+
 ### [2026-04-09 14:01] - majority
 - Ran final gym verification on folder structure, method/eval separation, briefing files, scoring files, and reusable scripts
 - Fixed the remaining scoring-rubric issue by aligning `scoring/TARGETS.md` to the experiments actually present in `scoring/scores.json`
@@ -95,4 +100,4 @@
 
 ## Stop Justification
 
-Stopped at `majority` because the workspace is already usable as a research gym: the paper's released method is reproduced on the main scored benchmark, the problem/evaluation split is clean, and the remaining gap is the separate complexity-scaling study rather than a failure of the core environment.
+Stopped at `majority` because the workspace is already usable as a research gym: the paper's released method is reproduced on the full main scored benchmark and its high-outlier subset, the problem/evaluation split is clean, and the remaining gap is the separate complexity-scaling study rather than a failure of the core environment.

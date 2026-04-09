@@ -107,3 +107,4 @@
 ## Final Status
 - Workspace verified as gym-ready at milestone `majority`
 - Main limitation: the separate computational-complexity scaling study remains documented in `reference.json` but is not yet reproduced in `scores.json`
+- Final wrap-up completed: benchmark-facing scoring documents now explicitly cover primary, constraint, and ablation targets without adding any unscored experiments
