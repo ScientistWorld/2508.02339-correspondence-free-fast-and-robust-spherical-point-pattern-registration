@@ -6,12 +6,7 @@
 
 set -euo pipefail
 
-export HOME=/home/user
-export PYTHON_TARGET="${HOME}/python-packages/lib/python3.10/site-packages"
-
-mkdir -p "${PYTHON_TARGET}"
-
-# The build runs under fakeroot and cannot reliably write into /usr/local, and
-# user-site installs are disabled by the scheduler wrapper. Install into an
-# explicit writable target under /home/user instead.
-python3 -m pip install --target "${PYTHON_TARGET}" numpy
+# The workspace is bind-mounted over /home/user at runtime, so installing
+# packages under /home/user would be hidden from the job container. Install
+# into the overlay's system site-packages instead.
+uv pip install --system numpy

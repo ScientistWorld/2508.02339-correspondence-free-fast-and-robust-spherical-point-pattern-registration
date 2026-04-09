@@ -19,6 +19,12 @@ if [ ! -f "method/paper_code/vector_alignment_dataset/A1_A.pkl" ]; then
     exit 1
 fi
 
+echo "Checking runtime Python dependencies..."
+python3 - <<'PY'
+import numpy
+print(f"numpy OK: {numpy.__version__}")
+PY
+
 # Run a configurable offline evaluation. Default to the full 100-rotation paper
 # protocol so a successful job can support the core claim immediately.
 N_ROTATIONS="${N_ROTATIONS:-100}"

@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-09 10:59] - method_runs
+- Reviewed failed CPU job `62d88eed-373`: the run exited immediately with `ModuleNotFoundError: No module named 'numpy'`
+- Identified the packaging bug: `environment/setup.sh` had installed NumPy under `/home/user`, but the job bind-mount hides that path at runtime
+- Fixed the environment to install NumPy with `uv pip install --system` and added a startup dependency smoke test to `scripts/run.sh` before the full evaluation
+
 ### [2026-04-09 10:55] - method_runs
 - Removed the last non-canonical score-writing path: `scripts/run_experiment.py` now writes only raw per-instance results, leaving `scoring/scores.json` exclusively to `eval/evaluate.py`
 - Pruned the checked-in `scoring/scores.json` to only directly measured experiments, removing the stale computational-complexity block
