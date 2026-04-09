@@ -10,6 +10,7 @@
 
 set -euo pipefail
 cd /home/user
+export PYTHONPATH="/opt/python-packages${PYTHONPATH:+:${PYTHONPATH}}"
 
 RAW_RESULTS="${RAW_RESULTS:-scoring/raw_results.json}"
 SCORES_OUTPUT="${SCORES_OUTPUT:-scoring/scores.json}"

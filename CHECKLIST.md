@@ -39,10 +39,10 @@ Check off items as you complete them. Order doesn't matter — work however make
 
 ## Milestones
 - [x] `method_runs` — SPMC, FRS, SPMC+FRS execute end-to-end without errors
-- [x] `core_claim` — compute-side results support the released method on all 5 patterns × 7 configs (20 rotations per config so far)
-- [ ] `core_claim_plus`
+- [x] `core_claim` — compute-side results support the released method on all 5 patterns × 7 configs
+- [x] `core_claim_plus` — full 100-rotation benchmark completed on compute with validated scores
 - [ ] `secondary_claims`
-- [ ] `majority`
+- [x] `majority` — 2 of 3 scored reference experiments reproduced (main benchmark + high-outlier subset)
 - [ ] `near_complete`
 - [ ] `full`
 
@@ -50,6 +50,6 @@ Check off items as you complete them. Order doesn't matter — work however make
 - **SPMC fully working**: exact agreement with the released code on audited spot checks
 - **FRS fixed in code**: final source-to-source SVD step now matches the released implementation
 - **spmc_frs fixed in code**: the hybrid now uses the actual SPMC initialization plus FRS refinement path
-- **Next action**: extend the successful 20-rotation benchmark to the full 100-rotation protocol by resuming from the saved checkpoint
+- **Next action**: environment is usable as-is; only the optional computational-complexity study remains unmeasured
 - **Paper's baseline (FPFH+QUASAR)**: Not implemented — requires C++ dependencies (Point Cloud Library) that are unavailable
 - **Identity rotation baseline**: Used as reference (999° error)

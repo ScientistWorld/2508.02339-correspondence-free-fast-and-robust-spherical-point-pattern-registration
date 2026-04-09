@@ -14,3 +14,8 @@ The paper addresses rotation estimation between two sets of points on a unit sph
 - Computation time: < 1 second for all cases (vs. ~23 seconds for FPFH+QUASAR)
 - O(n) scaling confirmed experimentally from 10³ to 10⁷ points
 - Robust point cloud registration on ModelNet40 with overlap as low as 65%
+
+## Reproduction Status
+- Reproduced the released Experiment 1 benchmark end to end on the paper's dataset for all 5 patterns, 7 outlier configurations, and 100 rotations per configuration
+- Reproduced `spmc_frs` at **0.597°** median error overall and **0.621°** on the high-outlier subset, both better than the paper's reported values for the same experiment
+- The separate computational-complexity scaling study remains unmeasured in this workspace

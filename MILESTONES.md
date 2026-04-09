@@ -1,8 +1,13 @@
 # Reproduction Milestones
 
-**Current: core_claim**
+**Current: majority**
 
 ## Progress Log
+
+### [2026-04-09 12:32] - majority
+- Reviewed job `6cc72205-3b7`: the real paper methods completed the full 100-rotation benchmark on the released dataset after auto-resuming through scheduler restarts
+- Reproduced the paper's two main scored experiments end-to-end: overall robust alignment and the high-outlier subset, both with canonical `scores.json` and validation passing
+- The remaining unmeasured reference experiment is the separate computational-complexity scaling study, so the workspace now clears the `majority` threshold
 
 ### [2026-04-09 12:23] - core_claim
 - Reviewed successful continuation job `9141a59a-c99`: the real paper methods completed all 35 pattern/config groups for the 20-rotation slice on the released dataset and produced canonical `scoring/scores.json`

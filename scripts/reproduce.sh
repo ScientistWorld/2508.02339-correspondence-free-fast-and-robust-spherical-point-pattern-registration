@@ -13,6 +13,7 @@
 
 set -euo pipefail
 cd /home/user
+export PYTHONPATH="/opt/python-packages${PYTHONPATH:+:${PYTHONPATH}}"
 
 echo "=========================================="
 echo "End-to-End Reproduction"
@@ -31,8 +32,10 @@ fi
 echo "[2/3] Running SPMC, FRS, and SPMC+FRS evaluation on paper's dataset..."
 N_ROTATIONS="${N_ROTATIONS:-100}" bash scripts/method.sh
 
-# Step 3: Report results
-echo "[3/3] Results written to scoring/scores.json"
+# Step 3: Validate and report results
+echo "[3/3] Validating scoring artifacts..."
+python3 validate.py --compare
+echo "  Results written to scoring/scores.json"
 echo ""
 echo "=========================================="
 echo "Reproduction complete!"
