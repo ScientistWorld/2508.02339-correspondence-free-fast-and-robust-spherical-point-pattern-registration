@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: false
 milestone: method_runs
-notes: "Resubmit the full 100-rotation CPU evaluation after fixing compute-side NumPy installation in environment/setup.sh and adding a dependency smoke test to scripts/run.sh."
+notes: "Resubmit the full 100-rotation CPU evaluation after fixing the setup overlay build: install NumPy to /opt/python-packages instead of /usr/local or /home/user, and export that path in scripts/run.sh."
