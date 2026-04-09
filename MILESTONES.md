@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-09 11:03] - method_runs
+- The setup overlay build failed before submission because `/usr/local` is not writable in this fakeroot environment, so `uv pip install --system numpy` could not complete
+- Reworked Python dependency installation to use `/opt/python-packages` inside the overlay and exported that path from `scripts/run.sh`
+- Kept the next job as the same full offline CPU evaluation; the only change is the environment install target
+
 ### [2026-04-09 10:59] - method_runs
 - Reviewed failed CPU job `62d88eed-373`: the run exited immediately with `ModuleNotFoundError: No module named 'numpy'`
 - Identified the packaging bug: `environment/setup.sh` had installed NumPy under `/home/user`, but the job bind-mount hides that path at runtime

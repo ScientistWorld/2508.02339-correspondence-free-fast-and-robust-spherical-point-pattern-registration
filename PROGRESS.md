@@ -15,6 +15,7 @@
 - **Scoring integrity fix**: canonical evaluation no longer fabricates a computational-complexity experiment by extrapolating runtime from the main benchmark
 - **Single-writer scoring path**: `scripts/run_experiment.py` now writes only `scoring/raw_results.json`; canonical `scoring/scores.json` is left exclusively to `eval/evaluate.py`
 - **Environment fix prepared**: NumPy installation was moved from a bind-mounted workspace path to system site-packages inside the setup overlay
+- **Environment fix revised**: the scheduler's fakeroot overlay cannot write to `/usr/local`, so NumPy is now targeted to `/opt/python-packages` and exposed via `PYTHONPATH` in `scripts/run.sh`
 
 ## Results Achieved
 - **SPMC on paper's test case (A1/B3/r5)**: 0.13° error — **exact match** with paper's reported 0.13°
@@ -49,6 +50,8 @@
 - **Failed CPU job `62d88eed-373`**: compute-side import failed before evaluation started: `ModuleNotFoundError: No module named 'numpy'`
 - **Root cause**: `environment/setup.sh` had installed NumPy under `/home/user/python-packages`, but `/home/user` is bind-mounted at runtime, hiding that installation from the container
 - **Mitigation**: switched to `uv pip install --system numpy` and added an explicit import smoke test in `scripts/run.sh`
+- **Setup overlay failure before resubmission**: the environment build reported `/usr/local/lib/python3.10/dist-packages/...: Invalid argument`, so the system-site install target is not usable under fakeroot here
+- **Mitigation revised**: install NumPy into `/opt/python-packages` with `python3 -m pip --target` and export that path in `scripts/run.sh`
 - **Cancelled CPU submission**: the prior queued CPU job did not produce results, so a fresh submission is still required
 - **Previous FRS mismatch**: The earlier reproduction estimated the final FRS rotation against the template and bypassed the paper's source-to-source SVD finalization. That has now been corrected.
 - **Previous hybrid mismatch**: `spmc_frs` had been delegating to SPMC alone. The actual hybrid composition from the paper is now implemented.

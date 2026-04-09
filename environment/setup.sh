@@ -7,6 +7,9 @@
 set -euo pipefail
 
 # The workspace is bind-mounted over /home/user at runtime, so installing
-# packages under /home/user would be hidden from the job container. Install
-# into the overlay's system site-packages instead.
-uv pip install --system numpy
+# packages under /home/user would be hidden from the job container. Installing
+# into /usr/local also fails under this fakeroot overlay, so place Python
+# dependencies in /opt and add that path at runtime from scripts/run.sh.
+PYTHON_TARGET="/opt/python-packages"
+mkdir -p "${PYTHON_TARGET}"
+python3 -m pip install --target "${PYTHON_TARGET}" numpy

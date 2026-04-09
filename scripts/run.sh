@@ -8,6 +8,7 @@
 
 set -euo pipefail
 cd /home/user
+export PYTHONPATH="/opt/python-packages${PYTHONPATH:+:${PYTHONPATH}}"
 
 echo "=========================================="
 echo "Spherical Point Pattern Registration"
