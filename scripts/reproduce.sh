@@ -10,7 +10,7 @@
 # Assumes:
 #   - Container is built with numpy available
 #   - Working directory is /home/user
-#   - Paper dataset at method/paper_code/vector_alignment_dataset/
+#   - Paper dataset at data/vector_alignment_dataset/
 
 set -euo pipefail
 cd /home/user
@@ -22,7 +22,7 @@ echo "=========================================="
 
 # Step 1: Verify dataset is already present. Compute nodes have no internet.
 echo "[1/3] Verifying paper dataset..."
-if [ ! -f "method/paper_code/vector_alignment_dataset/A1_A.pkl" ]; then
+if [ ! -f "data/vector_alignment_dataset/A1_A.pkl" ]; then
     echo "  ERROR: dataset missing. Run scripts/download.sh before reproduce.sh."
     exit 1
 else

@@ -12,13 +12,7 @@ method solves the correspondence-free rotation estimation problem.
 
 ## robust_alignment_high_outliers
 Tests whether the rotation registration method remains robust under extreme clutter
-conditions (50%, 75%, and 90% outlier ratios). This subset isolates the high-outlier
-regime where most registration methods fail — outliers create misleading histogram peaks
-and corrupt the correlation signal. The paper specifically claims robustness up to 90%
-outliers, making this a key validation of the method's robustness claim.
-
-## computational_complexity
-Tests whether the method scales efficiently with the number of input points. The paper
-claims O(n) linear-time complexity, which is a core algorithmic contribution distinguishing
-it from O(n²) or worse correspondence-based methods. This experiment validates the
-method's scalability claim by measuring runtime as a function of point count.
+conditions (50%, 75%, and 90% outlier ratios). This subset isolates the hardest clutter
+regime in the released benchmark, where many methods degrade sharply as unrelated source
+points dominate the observation. The paper specifically claims robustness up to 90%
+outliers, making this a key validation of the robustness claim.

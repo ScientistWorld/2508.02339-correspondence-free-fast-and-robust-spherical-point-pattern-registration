@@ -17,10 +17,10 @@ The method must maintain accuracy across varying outlier ratios (0% to 90%) and 
 
 ## Baselines and Targets
 
-Based on the paper's results:
-- **FPFH+QUASAR baseline**: Median angular error varies widely (0.04° to >100°) depending on dataset difficulty; median computation ~23 seconds
-- **Target (SPMC+FRS)**: Median angular error < 1° across all datasets; computation < 1 second
-- **Random baseline**: For random rotation guesses, median error would be ~57° (half of 180° range)
+Based on the paper's reported results:
+- **Feature-matching baseline**: Median angular error varies widely (0.04° to >100°) depending on dataset difficulty; median computation is on the order of tens of seconds
+- **Paper-reported top method**: Median angular error below 1° across the full robust-alignment benchmark; runtime under 1 second
+- **Random baseline**: For random rotation guesses, median error would be roughly tens of degrees and far worse than the reported methods
 
 ## Evaluation Protocol
 
@@ -47,3 +47,7 @@ Based on the paper's results:
 - Template: 2D world map projected onto sphere
 - Source: same image with added clutter (0% to ~19%) and random rotations
 - Report median angular error
+
+## Current Reusable Gym Scope
+
+The packaged scoring and reusable evaluation scripts in this workspace currently cover the robust spherical-pattern registration benchmark from Experiment 1. The other experiments above document the paper's broader evaluation context, but they are not yet part of the scored gym interface.

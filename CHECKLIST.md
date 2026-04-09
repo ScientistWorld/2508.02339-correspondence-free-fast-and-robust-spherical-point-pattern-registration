@@ -35,7 +35,7 @@ Check off items as you complete them. Order doesn't matter — work however make
 - [x] `environment/container.def` + `environment/setup.sh`
 
 ## Data
-- [x] Dataset acquired: paper's Robust Vector Alignment Dataset at method/paper_code/vector_alignment_dataset/ (cloned from GitHub)
+- [x] Dataset acquired: paper's Robust Vector Alignment Dataset at data/vector_alignment_dataset/ (copied from the paper's released repo)
 - [x] Pretrained models downloaded if needed (N/A — no ML models used)
 
 ## Milestones
@@ -51,6 +51,6 @@ Check off items as you complete them. Order doesn't matter — work however make
 - **SPMC fully working**: exact agreement with the released code on audited spot checks
 - **FRS fixed in code**: final source-to-source SVD step now matches the released implementation
 - **spmc_frs fixed in code**: the hybrid now uses the actual SPMC initialization plus FRS refinement path
-- **Next action**: run the new CPU complexity benchmark and promote the milestone if Fig. 6 is reproduced cleanly
+- **Current limitation**: the separate complexity-scaling study remains in `reference.json` but is not part of the verified scored gym because it has not been reproduced yet
 - **Paper's baseline (FPFH+QUASAR)**: Not implemented — requires C++ dependencies (Point Cloud Library) that are unavailable
 - **Identity rotation baseline**: Used as reference (999° error)

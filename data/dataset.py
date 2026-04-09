@@ -11,7 +11,7 @@ from pathlib import Path
 import pickle
 
 
-DATASET_DIR = Path("/home/user/method/paper_code/vector_alignment_dataset")
+DATASET_DIR = Path("/home/user/data/vector_alignment_dataset")
 PATTERNS = ("A1", "A2", "A3", "A4", "A5")
 CONFIGS = ("B1", "B2", "B3", "B4", "B5", "B6", "B7")
 
@@ -44,4 +44,3 @@ def get_template(pattern: str):
 
 def get_source(pattern: str, config: str):
     return load_pickle(require_dataset() / f"{pattern}_A_{config}.pkl")
-

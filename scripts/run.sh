@@ -4,7 +4,7 @@
 # This runs inside the compute container with:
 #   - Workspace mounted at /home/user
 #   - numpy available via setup.sh
-#   - Paper dataset at /home/user/method/paper_code/vector_alignment_dataset/
+#   - Paper dataset at /home/user/data/vector_alignment_dataset/
 
 set -euo pipefail
 cd /home/user
@@ -15,8 +15,8 @@ echo "Spherical Point Pattern Registration: Complexity Benchmark"
 echo "=========================================="
 
 # Compute nodes have no internet. All assets must exist before submission.
-if [ ! -f "method/paper_code/vector_alignment_dataset/A1_A.pkl" ]; then
-    echo "ERROR: paper dataset missing at method/paper_code/vector_alignment_dataset/"
+if [ ! -f "data/vector_alignment_dataset/A1_A.pkl" ]; then
+    echo "ERROR: paper dataset missing at data/vector_alignment_dataset/"
     exit 1
 fi
 
