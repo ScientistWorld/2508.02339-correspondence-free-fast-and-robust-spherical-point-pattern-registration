@@ -16,6 +16,7 @@
 - **Single-writer scoring path**: `scripts/run_experiment.py` now writes only `scoring/raw_results.json`; canonical `scoring/scores.json` is left exclusively to `eval/evaluate.py`
 - **Environment fix prepared**: NumPy installation was moved from a bind-mounted workspace path to system site-packages inside the setup overlay
 - **Environment fix revised**: the scheduler's fakeroot overlay cannot write to `/usr/local`, so NumPy is now targeted to `/opt/python-packages` and exposed via `PYTHONPATH` in `scripts/run.sh`
+- **Chunked evaluation path**: `scripts/run_experiment.py` now supports rotation slices and incremental checkpoints, so partial CPU runs still leave usable raw results and scores
 
 ## Results Achieved
 - **SPMC on paper's test case (A1/B3/r5)**: 0.13° error — **exact match** with paper's reported 0.13°
@@ -52,6 +53,8 @@
 - **Mitigation**: switched to `uv pip install --system numpy` and added an explicit import smoke test in `scripts/run.sh`
 - **Setup overlay failure before resubmission**: the environment build reported `/usr/local/lib/python3.10/dist-packages/...: Invalid argument`, so the system-site install target is not usable under fakeroot here
 - **Mitigation revised**: install NumPy into `/opt/python-packages` with `python3 -m pip --target` and export that path in `scripts/run.sh`
+- **Interrupted CPU job `24712a1a-0f8`**: the actual method ran, but the Ray worker died after ~1000/3500 evaluations and the restarted attempt was orphaned before any final artifact was written
+- **Mitigation**: shortened the default job to a 20-rotation slice and added per-config raw-result checkpoints so future runs survive partial interruption
 - **Cancelled CPU submission**: the prior queued CPU job did not produce results, so a fresh submission is still required
 - **Previous FRS mismatch**: The earlier reproduction estimated the final FRS rotation against the template and bypassed the paper's source-to-source SVD finalization. That has now been corrected.
 - **Previous hybrid mismatch**: `spmc_frs` had been delegating to SPMC alone. The actual hybrid composition from the paper is now implemented.

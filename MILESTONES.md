@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-09 11:11] - method_runs
+- Reviewed job `24712a1a-0f8`: the method launched successfully, passed the NumPy smoke test, and reached 1000/3500 evaluations before the Ray worker died and the job was orphaned
+- Confirmed the blocker is queue/runtime fragility rather than algorithm correctness
+- Reworked the evaluation path to support rotation slices and incremental raw-result checkpoints so shorter CPU jobs can still produce canonical scores
+
 ### [2026-04-09 11:03] - method_runs
 - The setup overlay build failed before submission because `/usr/local` is not writable in this fakeroot environment, so `uv pip install --system numpy` could not complete
 - Reworked Python dependency installation to use `/opt/python-packages` inside the overlay and exported that path from `scripts/run.sh`

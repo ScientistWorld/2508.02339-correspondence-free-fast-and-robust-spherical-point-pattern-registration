@@ -21,18 +21,45 @@ from data.dataset import CONFIGS, PATTERNS, get_rotations, get_source, get_templ
 from method.spherical_registration import spmc, frs, spmc_frs, rotation_error
 
 
-def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
-    """Run SPMC, FRS, and SPMC+FRS on the full paper dataset."""
+def _save_raw_results(raw_results: dict, output_path: Path) -> None:
+    """Persist raw results incrementally so partial progress survives interruptions."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    raw_save = {}
+    for method_name, method_results in raw_results.items():
+        raw_save[method_name] = {}
+        for key, values in method_results.items():
+            raw_save[method_name][key] = {
+                "errors": [float(err) for err in values["errors"]],
+                "times": [float(t) for t in values["times"]],
+            }
+    with output_path.open("w") as handle:
+        json.dump(raw_save, handle)
+
+
+def run_evaluation(
+    n_rotations: int = 100,
+    rotation_start: int = 0,
+    raw_output: str = "scoring/raw_results.json",
+    verbose: bool = True,
+) -> dict:
+    """Run SPMC, FRS, and SPMC+FRS on the paper dataset for a selected rotation slice."""
     dataset_dir = require_dataset()
     patterns = list(PATTERNS)
     configs = list(CONFIGS)
 
     rots = get_rotations()
-    n_rot = min(n_rotations, len(rots))
+    start_idx = max(0, rotation_start)
+    end_idx = min(start_idx + n_rotations, len(rots))
+    rot_subset = rots[start_idx:end_idx]
+    n_rot = len(rot_subset)
+    raw_path = Path(raw_output)
 
     if verbose:
         print(f"Loading dataset from {dataset_dir}...")
-        print(f"Patterns: {patterns}, Configs: {configs}, Rotations: {n_rot}")
+        print(
+            f"Patterns: {patterns}, Configs: {configs}, "
+            f"Rotations: {n_rot} (slice {start_idx}:{end_idx})"
+        )
 
     # Pre-load all data
     templates_raw = {}
@@ -58,7 +85,7 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
             for m in raw_results:
                 raw_results[m][key] = {"errors": [], "times": []}
 
-            for ridx in range(n_rot):
+            for local_ridx, rotation in enumerate(rot_subset):
                 count += 1
                 if verbose and count % 1000 == 0:
                     elapsed = time.time() - t_start
@@ -67,7 +94,7 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
 
                 template = templates_raw[pat]
                 src_pkl = sources_raw[(pat, cfg)]
-                R_test = rots[ridx]
+                R_test = rotation
                 source = src_pkl @ R_test.T
                 true_rot = R_test
 
@@ -93,6 +120,11 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
                     raw_results["frs"][key]["times"].append(0.0)
                     raw_results["spmc_frs"][key]["errors"].append(999.0)
                     raw_results["spmc_frs"][key]["times"].append(0.0)
+
+            _save_raw_results(raw_results, raw_path)
+            if verbose:
+                completed = start_idx + local_ridx + 1 if n_rot else start_idx
+                print(f"  Checkpointed {key}; processed rotations up to index {completed}")
 
     elapsed = time.time() - t_start
     if verbose:
@@ -169,15 +201,7 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
     }
 
     # Save raw per-eval results for eval/evaluate.py (method-agnostic aggregator)
-    raw_path = Path(__file__).parent.parent / "scoring" / "raw_results.json"
-    # Normalize raw_results: {method: {config: {errors: [...], times: [...]}}}
-    raw_save = {}
-    for m in raw_results:
-        raw_save[m] = {}
-        for k, v in raw_results[m].items():
-            raw_save[m][k] = {"errors": [float(e) for e in v["errors"]], "times": [float(t) for t in v["times"]]}
-    with open(raw_path, "w") as f:
-        json.dump(raw_save, f)
+    _save_raw_results(raw_results, raw_path)
     if verbose:
         print(f"Raw results saved to {raw_path}")
 
@@ -203,7 +227,13 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--n-rotations", type=int, default=100)
-    parser.add_argument("--output", type=str, default=None)
+    parser.add_argument("--rotation-start", type=int, default=0)
+    parser.add_argument("--raw-output", type=str, default="scoring/raw_results.json")
     args = parser.parse_args()
 
-    run_evaluation(n_rotations=args.n_rotations, verbose=True)
+    run_evaluation(
+        n_rotations=args.n_rotations,
+        rotation_start=args.rotation_start,
+        raw_output=args.raw_output,
+        verbose=True,
+    )

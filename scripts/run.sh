@@ -26,11 +26,15 @@ import numpy
 print(f"numpy OK: {numpy.__version__}")
 PY
 
-# Run a configurable offline evaluation. Default to the full 100-rotation paper
-# protocol so a successful job can support the core claim immediately.
-N_ROTATIONS="${N_ROTATIONS:-100}"
-echo "Running evaluation (SPMC, FRS, SPMC+FRS) on 5 patterns x 7 configs x ${N_ROTATIONS} rotations..."
-bash scripts/method.sh
+# Run a configurable offline evaluation. The CPU queue available here behaves
+# like a 1-hour test queue, so default to a 20-rotation slice that still covers
+# all 5 patterns x 7 configs while finishing reliably. Full 100-rotation sweeps
+# remain available by overriding N_ROTATIONS/ROTATION_START.
+N_ROTATIONS="${N_ROTATIONS:-20}"
+ROTATION_START="${ROTATION_START:-0}"
+RAW_RESULTS="${RAW_RESULTS:-scoring/raw_results.json}"
+echo "Running evaluation (SPMC, FRS, SPMC+FRS) on 5 patterns x 7 configs x ${N_ROTATIONS} rotations starting at ${ROTATION_START}..."
+N_ROTATIONS="${N_ROTATIONS}" ROTATION_START="${ROTATION_START}" RAW_RESULTS="${RAW_RESULTS}" bash scripts/method.sh
 
 echo "Validating scoring artifacts..."
 python3 validate.py --compare
