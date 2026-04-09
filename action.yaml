@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: false
 milestone: method_runs
-notes: "Full 100-rotation CPU evaluation on the paper dataset through scripts/run.sh after removing the last non-canonical scores.json write path; validates corrected FRS/SPMC+FRS and emits only directly measured scores."
+notes: "Resubmit the full 100-rotation CPU evaluation after fixing compute-side NumPy installation in environment/setup.sh and adding a dependency smoke test to scripts/run.sh."
