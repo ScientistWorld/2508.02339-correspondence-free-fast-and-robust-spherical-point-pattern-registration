@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-09 13:32] - majority
+- Added a dedicated, reusable Fig. 6 computational-complexity benchmark path for the paper's `A3/B3` scaling study
+- Extended the method-agnostic evaluator so `scores.json` can include the complexity experiment alongside the already reproduced main benchmark
+- Preparing a CPU submission for the remaining paper reference experiment; milestone stays `majority` until the new job finishes
+
 ### [2026-04-09 12:32] - majority
 - Reviewed job `6cc72205-3b7`: the real paper methods completed the full 100-rotation benchmark on the released dataset after auto-resuming through scheduler restarts
 - Reproduced the paper's two main scored experiments end-to-end: overall robust alignment and the high-outlier subset, both with canonical `scores.json` and validation passing

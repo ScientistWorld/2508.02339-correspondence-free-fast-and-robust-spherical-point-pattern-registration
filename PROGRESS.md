@@ -20,6 +20,8 @@
 - **Resume-safe continuation path**: the evaluator now reloads `scoring/raw_results.json`, skips already completed pattern/config groups, and rewrites canonical `scoring/scores.json` after each checkpoint so interrupted jobs can continue rather than restart
 - **Fresh compute-side core-claim evidence**: job `9141a59a-c99` completed all 35 pattern/config groups for the 20-rotation slice, validated the canonical scoring artifacts, and confirmed the released algorithm path on the real paper dataset
 - **Full benchmark reproduction**: job `6cc72205-3b7` extended every config from 20 to 100 rotations, auto-resumed across worker restarts, and completed the paper's full main benchmark with validated canonical scores
+- **Complexity benchmark path**: added `scripts/run_complexity_experiment.py` and `scripts/complexity.sh` for the paper's separate Fig. 6 runtime-scaling study on `A3/B3`
+- **Evaluator extension**: `eval/evaluate.py` and `scripts/evaluate.sh` now aggregate both the main benchmark raw results and optional complexity raw results into one canonical `scoring/scores.json`
 
 ## Results Achieved
 - **SPMC on paper's test case (A1/B3/r5)**: 0.13° error — **exact match** with paper's reported 0.13°
@@ -63,7 +65,7 @@
   - `spmc_frs`: no longer falls back to pure SPMC; improves difficult cases such as `A5/B7/r1` to 0.83°
 
 ## What Remains
-- Computational complexity scaling test with varying point counts
+- Compute-side execution of the computational complexity scaling test with varying point counts
 - Optional FPFH+QUASAR baseline reimplementation (requires Point Cloud Library C++ stack that is currently unavailable here)
 
 ## Issues Encountered
@@ -83,6 +85,7 @@
 - **Previous hybrid mismatch**: `spmc_frs` had been delegating to SPMC alone. The actual hybrid composition from the paper is now implemented.
 - **Rotation convention bug in hybrid**: `spmc_frs` was feeding FRS with `source @ R_spmc.T` instead of the paper-equivalent aligned source `source @ R_spmc`. This was the last correctness bug found during the audit.
 - **Login-node limitation**: the login node still lacks NumPy, so Python-side spot checks must rely on compute jobs until the refreshed setup overlay is built
+- **Current complexity-path limitation**: the new Fig. 6 scripts parse cleanly via `py_compile`, but they cannot be executed on the login node because NumPy is only available inside the compute overlay
 - **Stale score artifact**: `scripts/run_experiment.py` had still been writing a summary `scoring/scores.json`, which allowed non-canonical score blocks to persist even after the evaluator was cleaned. That path has now been removed.
 
 ## Deviations from Paper

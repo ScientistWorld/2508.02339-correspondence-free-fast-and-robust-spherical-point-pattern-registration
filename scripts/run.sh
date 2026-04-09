@@ -1,5 +1,5 @@
 #!/bin/bash
-# Job script for spherical point pattern registration.
+# Job script for the paper's computational-complexity benchmark.
 #
 # This runs inside the compute container with:
 #   - Workspace mounted at /home/user
@@ -11,7 +11,7 @@ cd /home/user
 export PYTHONPATH="/opt/python-packages${PYTHONPATH:+:${PYTHONPATH}}"
 
 echo "=========================================="
-echo "Spherical Point Pattern Registration"
+echo "Spherical Point Pattern Registration: Complexity Benchmark"
 echo "=========================================="
 
 # Compute nodes have no internet. All assets must exist before submission.
@@ -26,18 +26,19 @@ import numpy
 print(f"numpy OK: {numpy.__version__}")
 PY
 
-# Run a configurable offline evaluation. Resume support lets us extend an
-# existing partial checkpoint, so default back to the full 100-rotation paper
-# protocol while still surviving queue interruptions.
-N_ROTATIONS="${N_ROTATIONS:-100}"
-ROTATION_START="${ROTATION_START:-0}"
-RAW_RESULTS="${RAW_RESULTS:-scoring/raw_results.json}"
+# Run the paper's Fig. 6 complexity protocol on CPU. The implementation is
+# resume-safe per scale and rotation, so interrupted jobs can continue.
+COMPLEXITY_SCALES="${COMPLEXITY_SCALES:-1000,10000,100000,1000000,10000000}"
+COMPLEXITY_ROTATIONS="${COMPLEXITY_ROTATIONS:-20}"
+RAW_COMPLEXITY_RESULTS="${RAW_COMPLEXITY_RESULTS:-scoring/raw_complexity_results.json}"
 SCORES_OUTPUT="${SCORES_OUTPUT:-scoring/scores.json}"
-if [ -f "${RAW_RESULTS}" ]; then
-    echo "Found existing raw checkpoint at ${RAW_RESULTS}; completed configs will be skipped automatically."
+if [ -f "${RAW_COMPLEXITY_RESULTS}" ]; then
+    echo "Found existing complexity checkpoint at ${RAW_COMPLEXITY_RESULTS}; completed rotations will be skipped automatically."
 fi
-echo "Running evaluation (SPMC, FRS, SPMC+FRS) on 5 patterns x 7 configs x ${N_ROTATIONS} rotations starting at ${ROTATION_START}..."
-N_ROTATIONS="${N_ROTATIONS}" ROTATION_START="${ROTATION_START}" RAW_RESULTS="${RAW_RESULTS}" SCORES_OUTPUT="${SCORES_OUTPUT}" bash scripts/method.sh
+echo "Running complexity benchmark on A3/B3 for scales ${COMPLEXITY_SCALES} with ${COMPLEXITY_ROTATIONS} rotations..."
+COMPLEXITY_SCALES="${COMPLEXITY_SCALES}" COMPLEXITY_ROTATIONS="${COMPLEXITY_ROTATIONS}" \
+RAW_COMPLEXITY_RESULTS="${RAW_COMPLEXITY_RESULTS}" SCORES_OUTPUT="${SCORES_OUTPUT}" \
+    bash scripts/complexity.sh
 
 echo "Validating scoring artifacts..."
 python3 validate.py --compare

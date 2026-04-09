@@ -4,7 +4,8 @@
 # This script runs inside the compute container and:
 #   1. Verifies the paper's dataset is available
 #   2. Runs SPMC, FRS, and SPMC+FRS evaluation on the paper's dataset
-#   3. Runs evaluation and writes scoring/scores.json
+#   3. Optionally runs the paper's computational-complexity benchmark
+#   4. Runs evaluation and writes scoring/scores.json
 #
 # Assumes:
 #   - Container is built with numpy available
@@ -29,11 +30,19 @@ else
 fi
 
 # Step 2: Run the paper methods and aggregate scores
-echo "[2/3] Running SPMC, FRS, and SPMC+FRS evaluation on paper's dataset..."
+echo "[2/4] Running SPMC, FRS, and SPMC+FRS evaluation on paper's dataset..."
 N_ROTATIONS="${N_ROTATIONS:-100}" bash scripts/method.sh
 
-# Step 3: Validate and report results
-echo "[3/3] Validating scoring artifacts..."
+# Step 3: Optional complexity benchmark
+if [ "${RUN_COMPLEXITY:-0}" = "1" ]; then
+    echo "[3/4] Running computational-complexity benchmark..."
+    bash scripts/complexity.sh
+else
+    echo "[3/4] Skipping computational-complexity benchmark (set RUN_COMPLEXITY=1 to enable)"
+fi
+
+# Step 4: Validate and report results
+echo "[4/4] Validating scoring artifacts..."
 python3 validate.py --compare
 echo "  Results written to scoring/scores.json"
 echo ""

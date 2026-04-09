@@ -28,6 +28,7 @@ Check off items as you complete them. Order doesn't matter — work however make
 - [x] `scripts/download.sh` — idempotent, clones paper repo
 - [x] `scripts/baseline.sh` — identity sanity baseline on the released dataset
 - [x] `scripts/run_experiment.py` — runs SPMC, FRS, and SPMC+FRS on the paper dataset
+- [x] `scripts/run_complexity_experiment.py` — runs the paper's A3/B3 runtime-scaling benchmark
 - [x] `scripts/run.sh` — Ray job script with resume-safe full 100-rotation CPU validation
 
 ## Environment
@@ -43,13 +44,13 @@ Check off items as you complete them. Order doesn't matter — work however make
 - [x] `core_claim_plus` — full 100-rotation benchmark completed on compute with validated scores
 - [ ] `secondary_claims`
 - [x] `majority` — 2 of 3 scored reference experiments reproduced (main benchmark + high-outlier subset)
-- [ ] `near_complete`
+- [ ] `near_complete` — pending the compute-side complexity benchmark
 - [ ] `full`
 
 ## Notes
 - **SPMC fully working**: exact agreement with the released code on audited spot checks
 - **FRS fixed in code**: final source-to-source SVD step now matches the released implementation
 - **spmc_frs fixed in code**: the hybrid now uses the actual SPMC initialization plus FRS refinement path
-- **Next action**: environment is usable as-is; only the optional computational-complexity study remains unmeasured
+- **Next action**: run the new CPU complexity benchmark and promote the milestone if Fig. 6 is reproduced cleanly
 - **Paper's baseline (FPFH+QUASAR)**: Not implemented — requires C++ dependencies (Point Cloud Library) that are unavailable
 - **Identity rotation baseline**: Used as reference (999° error)
