@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-09 10:55] - method_runs
+- Removed the last non-canonical score-writing path: `scripts/run_experiment.py` now writes only raw per-instance results, leaving `scoring/scores.json` exclusively to `eval/evaluate.py`
+- Pruned the checked-in `scoring/scores.json` to only directly measured experiments, removing the stale computational-complexity block
+- Kept the milestone at `method_runs` pending fresh compute-side evidence from the full 100-rotation CPU run
+
 ### [2026-04-08 22:02] - method_runs
 - Removed the unmeasured computational-complexity extrapolation from the canonical evaluator so future scores only report experiments actually run
 - Confirmed the previous CPU submission was cancelled before producing evidence, so milestone remains `method_runs`

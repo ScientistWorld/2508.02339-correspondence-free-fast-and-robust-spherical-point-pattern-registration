@@ -168,7 +168,6 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
         },
     }
 
-    output_path = Path(__file__).parent.parent / "scoring" / "scores.json"
     # Save raw per-eval results for eval/evaluate.py (method-agnostic aggregator)
     raw_path = Path(__file__).parent.parent / "scoring" / "raw_results.json"
     # Normalize raw_results: {method: {config: {errors: [...], times: [...]}}}
@@ -182,7 +181,8 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
     if verbose:
         print(f"Raw results saved to {raw_path}")
 
-    # Strip "type" from results so validator doesn't treat it as a metric.
+    # Strip "type" from the console summary so validator-style consumers would
+    # only see metrics if this object is reused programmatically.
     scores_clean = {}
     for exp_name, exp in scores.items():
         clean_results = {}
@@ -190,11 +190,7 @@ def run_evaluation(n_rotations: int = 100, verbose: bool = True) -> dict:
             clean_results[method] = {k: v for k, v in vals.items() if k != "type"}
         scores_clean[exp_name] = {**exp, "results": clean_results}
 
-    with open(output_path, "w") as f:
-        json.dump({"experiments": scores_clean}, f, indent=2)
-
     if verbose:
-        print(f"\nSummary snapshot written to {output_path}")
         print(f"\nOverall SPMC: median={scores_clean['robust_alignment_all']['results']['spmc']['median_rotation_error_deg']:.3f}deg "
               f"mean={scores_clean['robust_alignment_all']['results']['spmc']['mean_rotation_error_deg']:.3f}deg")
         print(f"High-outlier SPMC: median={scores_clean['robust_alignment_high_outliers']['results']['spmc']['median_rotation_error_deg']:.3f}deg "

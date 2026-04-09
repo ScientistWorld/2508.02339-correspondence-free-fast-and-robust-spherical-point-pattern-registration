@@ -13,6 +13,7 @@
 - **End-to-end local smoke test**: `scripts/method.sh -> scripts/evaluate.sh -> validate.py --compare` completed successfully on the real dataset with `N_ROTATIONS=1`
 - **Submission state**: offline scripts were cleaned up and pushed; the pending job uses the audited algorithm path without further method changes
 - **Scoring integrity fix**: canonical evaluation no longer fabricates a computational-complexity experiment by extrapolating runtime from the main benchmark
+- **Single-writer scoring path**: `scripts/run_experiment.py` now writes only `scoring/raw_results.json`; canonical `scoring/scores.json` is left exclusively to `eval/evaluate.py`
 
 ## Results Achieved
 - **SPMC on paper's test case (A1/B3/r5)**: 0.13° error — **exact match** with paper's reported 0.13°
@@ -50,6 +51,7 @@
 - **Rotation convention bug in hybrid**: `spmc_frs` was feeding FRS with `source @ R_spmc.T` instead of the paper-equivalent aligned source `source @ R_spmc`. This was the last correctness bug found during the audit.
 - **Container numpy**: Login node has no numpy; compute node has it via setup.sh.
   Local testing requires pip install numpy.
+- **Stale score artifact**: `scripts/run_experiment.py` had still been writing a summary `scoring/scores.json`, which allowed non-canonical score blocks to persist even after the evaluator was cleaned. That path has now been removed.
 
 ## Deviations from Paper
 - **Baseline**: FPFH+QUASAR baseline not implemented (requires Point Cloud Library C++ deps).

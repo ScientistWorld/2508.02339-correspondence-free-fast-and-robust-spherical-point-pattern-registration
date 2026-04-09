@@ -34,22 +34,6 @@
           "p90_rotation_error_deg": 1.24521499882395
         }
       }
-    },
-    "computational_complexity": {
-      "results": {
-        "spmc": {
-          "time_at_1e6_points_s": 44.78354178829927,
-          "time_at_1e7_points_s": 447.83541788299266
-        },
-        "frs": {
-          "time_at_1e6_points_s": 48.9143175122444,
-          "time_at_1e7_points_s": 489.143175122444
-        },
-        "spmc_frs": {
-          "time_at_1e6_points_s": 54.23757405698369,
-          "time_at_1e7_points_s": 542.3757405698369
-        }
-      }
     }
   }
 }
