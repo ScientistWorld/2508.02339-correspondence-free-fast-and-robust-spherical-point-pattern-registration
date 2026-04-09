@@ -18,6 +18,7 @@
 - **Environment fix revised**: the scheduler's fakeroot overlay cannot write to `/usr/local`, so NumPy is now targeted to `/opt/python-packages` and exposed via `PYTHONPATH` in `scripts/run.sh`
 - **Chunked evaluation path**: `scripts/run_experiment.py` now supports rotation slices and incremental checkpoints, so partial CPU runs still leave usable raw results and scores
 - **Resume-safe continuation path**: the evaluator now reloads `scoring/raw_results.json`, skips already completed pattern/config groups, and rewrites canonical `scoring/scores.json` after each checkpoint so interrupted jobs can continue rather than restart
+- **Fresh compute-side core-claim evidence**: job `9141a59a-c99` completed all 35 pattern/config groups for the 20-rotation slice, validated the canonical scoring artifacts, and confirmed the released algorithm path on the real paper dataset
 
 ## Results Achieved
 - **SPMC on paper's test case (A1/B3/r5)**: 0.13° error — **exact match** with paper's reported 0.13°
@@ -40,6 +41,13 @@
   - Completed all 21 configs for patterns `A1`-`A3` before infrastructure loss
   - Preserved **420** evaluated rotations in `scoring/raw_results.json`
   - This is fresh compute-node evidence from the released benchmark, not a local smoke test
+- **Compute-side full 20-rotation benchmark** (`9141a59a-c99`, actual paper dataset and algorithm):
+  - Completed all **5 patterns × 7 configs × 20 rotations = 700 evaluations**
+  - Canonical `validate.py --compare` passed on the produced `scoring/scores.json`
+  - `spmc_frs`: **0.586°** median overall, **0.645°** mean overall, **0.294s** median runtime
+  - `spmc_frs` high-outlier subset (B5-B7): **0.626°** median, **1.277°** p90
+  - `spmc`: **0.536°** median overall, **0.918°** median on high outliers
+  - `frs`: **0.840°** median overall, but unstable tail behavior at high outliers (`p90 = 150.129°`)
 - Our SPMC outperforms the paper's reported results (both SPMC and hybrid)
 - **Local post-audit spot checks** against the paper code now agree on representative cases for:
   - `spmc`: exact numerical agreement on tested cases
@@ -47,9 +55,7 @@
   - `spmc_frs`: no longer falls back to pure SPMC; improves difficult cases such as `A5/B7/r1` to 0.83°
 
 ## What Remains
-- Fresh compute validation run for corrected `frs` and `spmc_frs` on the paper dataset
-- Finish the remaining `A4`-`A5` configs for the current 20-rotation slice, then extend coverage if budget permits
-- Full 100-rotation evaluation through the cleaned `run.sh -> method.sh -> evaluate.sh` path
+- Extend the current reproduction from the successful 20-rotation slice to the paper's full 100-rotation protocol
 - FPFH+QUASAR baseline (requires C++ Point Cloud Library — unavailable)
 - Computational complexity scaling test with varying point counts
 
@@ -63,6 +69,7 @@
 - **Mitigation**: shortened the default job to a 20-rotation slice and added per-config raw-result checkpoints so future runs survive partial interruption
 - **Interrupted CPU job `768b2584-16c`**: the 20-rotation slice progressed farther and checkpointed through `A3_B7`, but the worker was orphaned again before the final evaluator step
 - **Mitigation**: `scripts/run_experiment.py` now reloads existing raw checkpoints, skips finished configs, and writes `scores.json` at every per-config checkpoint so future interruptions still leave canonical scoring artifacts
+- **Successful continuation job `9141a59a-c99`**: resume-from-checkpoint worked as intended, finished the remaining `A4`-`A5` configs, and left a validated canonical score artifact
 - **Cancelled CPU submission**: the prior queued CPU job did not produce results, so a fresh submission is still required
 - **Previous FRS mismatch**: The earlier reproduction estimated the final FRS rotation against the template and bypassed the paper's source-to-source SVD finalization. That has now been corrected.
 - **Previous hybrid mismatch**: `spmc_frs` had been delegating to SPMC alone. The actual hybrid composition from the paper is now implemented.
@@ -74,11 +81,11 @@
 - **Baseline**: FPFH+QUASAR baseline not implemented (requires Point Cloud Library C++ deps).
   Identity rotation used as reference — not scored in scoring/scores.json.
 - **Scoring scope**: the canonical `scores.json` now reports only experiments actually measured on a run. The paper's separate computational-complexity study remains in `reference.json` but is not claimed in reproduced scores until it is explicitly run.
-- **Evaluation status**: The corrected `frs` and `spmc_frs` implementations are in place, and the end-to-end scoring path has been smoke-tested locally; the pending full 100-rotation CPU run is the evidence-generating job for milestone promotion.
+- **Evaluation status**: the workspace now has compute-side `core_claim` evidence on the full pattern/config benchmark at 20 rotations per config; the next run extends that to the full 100-rotation paper protocol.
 - **Dataset**: Using paper's actual dataset (not synthetic) — improvement over the paper's
   evaluation methodology.
-- **Current run protocol**: `scripts/run.sh` now resumes from existing raw checkpoints by default. The active submission target is the 20-rotation slice, because the available CPU queue repeatedly orphans longer jobs.
+- **Current run protocol**: `scripts/run.sh` resumes from existing raw checkpoints by default and now targets the paper's full 100-rotation protocol, using the saved 20-rotation checkpoint as the starting point.
 - **Baseline packaging**: the shipped baseline is an identity-rotation sanity check on the released dataset, not the paper's FPFH+QUASAR baseline.
 
 ## Next Turn Goal
-- Resume the interrupted 20-rotation compute run from the saved checkpoint so the remaining `A4`-`A5` configs complete and canonical `scores.json` is preserved even if the queue interrupts again.
+- Extend the successful 20-rotation reproduction to the full 100-rotation benchmark by resuming each config from rotation 20 through 99.

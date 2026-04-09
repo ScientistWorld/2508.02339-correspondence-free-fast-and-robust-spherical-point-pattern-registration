@@ -1,8 +1,13 @@
 # Reproduction Milestones
 
-**Current: method_runs**
+**Current: core_claim**
 
 ## Progress Log
+
+### [2026-04-09 12:23] - core_claim
+- Reviewed successful continuation job `9141a59a-c99`: the real paper methods completed all 35 pattern/config groups for the 20-rotation slice on the released dataset and produced canonical `scoring/scores.json`
+- The reproduced results support the central claim: `spmc_frs` reached 0.586° median error overall and 0.626° on the high-outlier subset while remaining under 0.30s median runtime
+- Promoted the workspace to `core_claim` and reset `scripts/run.sh` to resume the full 100-rotation paper protocol from the saved checkpoint
 
 ### [2026-04-09 12:06] - method_runs
 - Reviewed job `768b2584-16c`: the real paper methods completed and checkpointed all 21 `A1`-`A3` pattern/config groups for the 20-rotation slice before the Ray worker was orphaned

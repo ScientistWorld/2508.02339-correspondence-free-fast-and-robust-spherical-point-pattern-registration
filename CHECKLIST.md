@@ -28,7 +28,7 @@ Check off items as you complete them. Order doesn't matter — work however make
 - [x] `scripts/download.sh` — idempotent, clones paper repo
 - [x] `scripts/baseline.sh` — identity sanity baseline on the released dataset
 - [x] `scripts/run_experiment.py` — runs SPMC, FRS, and SPMC+FRS on the paper dataset
-- [x] `scripts/run.sh` — Ray job script for full 100-rotation CPU validation
+- [x] `scripts/run.sh` — Ray job script with resume-safe full 100-rotation CPU validation
 
 ## Environment
 - [x] `environment/container.def` + `environment/setup.sh`
@@ -39,7 +39,7 @@ Check off items as you complete them. Order doesn't matter — work however make
 
 ## Milestones
 - [x] `method_runs` — SPMC, FRS, SPMC+FRS execute end-to-end without errors
-- [ ] `core_claim` — pending fresh compute-side evaluation with corrected FRS/hybrid
+- [x] `core_claim` — compute-side results support the released method on all 5 patterns × 7 configs (20 rotations per config so far)
 - [ ] `core_claim_plus`
 - [ ] `secondary_claims`
 - [ ] `majority`
@@ -50,6 +50,6 @@ Check off items as you complete them. Order doesn't matter — work however make
 - **SPMC fully working**: exact agreement with the released code on audited spot checks
 - **FRS fixed in code**: final source-to-source SVD step now matches the released implementation
 - **spmc_frs fixed in code**: the hybrid now uses the actual SPMC initialization plus FRS refinement path
-- **Next action**: submit one CPU job for the full 100-rotation evaluation through `scripts/run.sh`
+- **Next action**: extend the successful 20-rotation benchmark to the full 100-rotation protocol by resuming from the saved checkpoint
 - **Paper's baseline (FPFH+QUASAR)**: Not implemented — requires C++ dependencies (Point Cloud Library) that are unavailable
 - **Identity rotation baseline**: Used as reference (999° error)

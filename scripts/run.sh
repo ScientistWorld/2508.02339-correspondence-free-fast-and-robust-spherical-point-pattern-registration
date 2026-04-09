@@ -26,11 +26,10 @@ import numpy
 print(f"numpy OK: {numpy.__version__}")
 PY
 
-# Run a configurable offline evaluation. The CPU queue available here behaves
-# like a 1-hour test queue, so default to a 20-rotation slice that still covers
-# all 5 patterns x 7 configs while finishing reliably. Full 100-rotation sweeps
-# remain available by overriding N_ROTATIONS/ROTATION_START.
-N_ROTATIONS="${N_ROTATIONS:-20}"
+# Run a configurable offline evaluation. Resume support lets us extend an
+# existing partial checkpoint, so default back to the full 100-rotation paper
+# protocol while still surviving queue interruptions.
+N_ROTATIONS="${N_ROTATIONS:-100}"
 ROTATION_START="${ROTATION_START:-0}"
 RAW_RESULTS="${RAW_RESULTS:-scoring/raw_results.json}"
 SCORES_OUTPUT="${SCORES_OUTPUT:-scoring/scores.json}"

@@ -1,5 +1,5 @@
 action: submit
 gpus: 0
 test: false
-milestone: method_runs
-notes: "Resume the 20-rotation CPU evaluation from the saved raw checkpoint, skipping completed A1-A3 configs and checkpointing canonical scores.json after every config so partial progress survives further worker loss."
+milestone: core_claim
+notes: "Extend the successful 20-rotation reproduction to the paper's full 100-rotation benchmark by resuming each config from the saved checkpoint and preserving canonical scores.json throughout the run."
