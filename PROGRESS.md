@@ -17,6 +17,7 @@
 - **Environment fix prepared**: NumPy installation was moved from a bind-mounted workspace path to system site-packages inside the setup overlay
 - **Environment fix revised**: the scheduler's fakeroot overlay cannot write to `/usr/local`, so NumPy is now targeted to `/opt/python-packages` and exposed via `PYTHONPATH` in `scripts/run.sh`
 - **Chunked evaluation path**: `scripts/run_experiment.py` now supports rotation slices and incremental checkpoints, so partial CPU runs still leave usable raw results and scores
+- **Resume-safe continuation path**: the evaluator now reloads `scoring/raw_results.json`, skips already completed pattern/config groups, and rewrites canonical `scoring/scores.json` after each checkpoint so interrupted jobs can continue rather than restart
 
 ## Results Achieved
 - **SPMC on paper's test case (A1/B3/r5)**: 0.13° error — **exact match** with paper's reported 0.13°
@@ -35,6 +36,10 @@
   - B1-B2 (0-5% outliers): 0.13-0.25° — excellent
   - B3-B4 (10-20% outliers): 0.17-3.05° — good
   - B5-B7 (50-90% outliers): 0.35-11.44° — reasonable
+- **Compute-side partial 20-rotation run** (`768b2584-16c`, actual paper dataset and algorithm):
+  - Completed all 21 configs for patterns `A1`-`A3` before infrastructure loss
+  - Preserved **420** evaluated rotations in `scoring/raw_results.json`
+  - This is fresh compute-node evidence from the released benchmark, not a local smoke test
 - Our SPMC outperforms the paper's reported results (both SPMC and hybrid)
 - **Local post-audit spot checks** against the paper code now agree on representative cases for:
   - `spmc`: exact numerical agreement on tested cases
@@ -43,6 +48,7 @@
 
 ## What Remains
 - Fresh compute validation run for corrected `frs` and `spmc_frs` on the paper dataset
+- Finish the remaining `A4`-`A5` configs for the current 20-rotation slice, then extend coverage if budget permits
 - Full 100-rotation evaluation through the cleaned `run.sh -> method.sh -> evaluate.sh` path
 - FPFH+QUASAR baseline (requires C++ Point Cloud Library — unavailable)
 - Computational complexity scaling test with varying point counts
@@ -55,6 +61,8 @@
 - **Mitigation revised**: install NumPy into `/opt/python-packages` with `python3 -m pip --target` and export that path in `scripts/run.sh`
 - **Interrupted CPU job `24712a1a-0f8`**: the actual method ran, but the Ray worker died after ~1000/3500 evaluations and the restarted attempt was orphaned before any final artifact was written
 - **Mitigation**: shortened the default job to a 20-rotation slice and added per-config raw-result checkpoints so future runs survive partial interruption
+- **Interrupted CPU job `768b2584-16c`**: the 20-rotation slice progressed farther and checkpointed through `A3_B7`, but the worker was orphaned again before the final evaluator step
+- **Mitigation**: `scripts/run_experiment.py` now reloads existing raw checkpoints, skips finished configs, and writes `scores.json` at every per-config checkpoint so future interruptions still leave canonical scoring artifacts
 - **Cancelled CPU submission**: the prior queued CPU job did not produce results, so a fresh submission is still required
 - **Previous FRS mismatch**: The earlier reproduction estimated the final FRS rotation against the template and bypassed the paper's source-to-source SVD finalization. That has now been corrected.
 - **Previous hybrid mismatch**: `spmc_frs` had been delegating to SPMC alone. The actual hybrid composition from the paper is now implemented.
@@ -69,8 +77,8 @@
 - **Evaluation status**: The corrected `frs` and `spmc_frs` implementations are in place, and the end-to-end scoring path has been smoke-tested locally; the pending full 100-rotation CPU run is the evidence-generating job for milestone promotion.
 - **Dataset**: Using paper's actual dataset (not synthetic) — improvement over the paper's
   evaluation methodology.
-- **Current run protocol**: `scripts/run.sh` now executes the full 100-rotation evaluation by default so a successful CPU job can directly support the main experiment.
+- **Current run protocol**: `scripts/run.sh` now resumes from existing raw checkpoints by default. The active submission target is the 20-rotation slice, because the available CPU queue repeatedly orphans longer jobs.
 - **Baseline packaging**: the shipped baseline is an identity-rotation sanity check on the released dataset, not the paper's FPFH+QUASAR baseline.
 
 ## Next Turn Goal
-- Submit the full CPU evaluation immediately rather than stopping at the local smoke test. The current milestone remains `method_runs` until that job completes and produces fresh compute-side evidence.
+- Resume the interrupted 20-rotation compute run from the saved checkpoint so the remaining `A4`-`A5` configs complete and canonical `scores.json` is preserved even if the queue interrupts again.

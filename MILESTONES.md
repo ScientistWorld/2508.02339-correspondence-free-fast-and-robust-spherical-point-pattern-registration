@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-09 12:06] - method_runs
+- Reviewed job `768b2584-16c`: the real paper methods completed and checkpointed all 21 `A1`-`A3` pattern/config groups for the 20-rotation slice before the Ray worker was orphaned
+- Confirmed `scoring/raw_results.json` now contains 420 compute-side evaluations from the released paper dataset, but the job died before the final standalone aggregation step
+- Patched the run path to resume from the saved raw checkpoint, skip completed configs, and rewrite canonical `scoring/scores.json` after every per-config checkpoint so partial progress remains usable
+
 ### [2026-04-09 11:11] - method_runs
 - Reviewed job `24712a1a-0f8`: the method launched successfully, passed the NumPy smoke test, and reached 1000/3500 evaluations before the Ray worker died and the job was orphaned
 - Confirmed the blocker is queue/runtime fragility rather than algorithm correctness

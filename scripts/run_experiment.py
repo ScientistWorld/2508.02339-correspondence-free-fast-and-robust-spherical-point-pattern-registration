@@ -18,6 +18,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from data.dataset import CONFIGS, PATTERNS, get_rotations, get_source, get_template, require_dataset
+from eval.evaluate import build_scores_json, compute_scores
 from method.spherical_registration import spmc, frs, spmc_frs, rotation_error
 
 
@@ -36,10 +37,34 @@ def _save_raw_results(raw_results: dict, output_path: Path) -> None:
         json.dump(raw_save, handle)
 
 
+def _load_raw_results(output_path: Path) -> dict:
+    """Load prior checkpoints so interrupted jobs can resume."""
+    if not output_path.exists():
+        return {"spmc": {}, "frs": {}, "spmc_frs": {}}
+
+    loaded = json.loads(output_path.read_text())
+    raw_results = {"spmc": {}, "frs": {}, "spmc_frs": {}}
+    for method_name in raw_results:
+        for key, values in loaded.get(method_name, {}).items():
+            raw_results[method_name][key] = {
+                "errors": [float(err) for err in values.get("errors", [])],
+                "times": [float(t) for t in values.get("times", [])],
+            }
+    return raw_results
+
+
+def _save_outputs(raw_results: dict, raw_output: Path, scores_output: Path) -> None:
+    """Persist raw checkpoints and canonical scores together."""
+    _save_raw_results(raw_results, raw_output)
+    scores = compute_scores(raw_results)
+    build_scores_json(scores, str(scores_output))
+
+
 def run_evaluation(
     n_rotations: int = 100,
     rotation_start: int = 0,
     raw_output: str = "scoring/raw_results.json",
+    scores_output: str = "scoring/scores.json",
     verbose: bool = True,
 ) -> dict:
     """Run SPMC, FRS, and SPMC+FRS on the paper dataset for a selected rotation slice."""
@@ -53,6 +78,7 @@ def run_evaluation(
     rot_subset = rots[start_idx:end_idx]
     n_rot = len(rot_subset)
     raw_path = Path(raw_output)
+    scores_path = Path(scores_output)
 
     if verbose:
         print(f"Loading dataset from {dataset_dir}...")
@@ -74,7 +100,7 @@ def run_evaluation(
     if verbose:
         print("Data pre-loaded. Running evaluation...")
 
-    raw_results = {"spmc": {}, "frs": {}, "spmc_frs": {}}
+    raw_results = _load_raw_results(raw_path)
     count = 0
     total = len(patterns) * len(configs) * n_rot
     t_start = time.time()
@@ -83,9 +109,19 @@ def run_evaluation(
         for cfg in configs:
             key = f"{pat}_{cfg}"
             for m in raw_results:
-                raw_results[m][key] = {"errors": [], "times": []}
+                raw_results[m].setdefault(key, {"errors": [], "times": []})
 
-            for local_ridx, rotation in enumerate(rot_subset):
+            completed = min(len(raw_results[m][key]["errors"]) for m in raw_results)
+            if completed >= n_rot:
+                count += n_rot
+                if verbose:
+                    print(f"  Skipping {key}; already checkpointed {completed} rotations")
+                continue
+
+            if verbose and completed > 0:
+                print(f"  Resuming {key} from rotation index {completed}")
+
+            for local_ridx, rotation in enumerate(rot_subset[completed:], start=completed):
                 count += 1
                 if verbose and count % 1000 == 0:
                     elapsed = time.time() - t_start
@@ -121,10 +157,10 @@ def run_evaluation(
                     raw_results["spmc_frs"][key]["errors"].append(999.0)
                     raw_results["spmc_frs"][key]["times"].append(0.0)
 
-            _save_raw_results(raw_results, raw_path)
+            _save_outputs(raw_results, raw_path, scores_path)
             if verbose:
-                completed = start_idx + local_ridx + 1 if n_rot else start_idx
-                print(f"  Checkpointed {key}; processed rotations up to index {completed}")
+                completed_abs = start_idx + local_ridx + 1 if n_rot else start_idx
+                print(f"  Checkpointed {key}; processed rotations up to index {completed_abs}")
 
     elapsed = time.time() - t_start
     if verbose:
@@ -201,9 +237,10 @@ def run_evaluation(
     }
 
     # Save raw per-eval results for eval/evaluate.py (method-agnostic aggregator)
-    _save_raw_results(raw_results, raw_path)
+    _save_outputs(raw_results, raw_path, scores_path)
     if verbose:
         print(f"Raw results saved to {raw_path}")
+        print(f"Scores saved to {scores_path}")
 
     # Strip "type" from the console summary so validator-style consumers would
     # only see metrics if this object is reused programmatically.
@@ -229,11 +266,13 @@ if __name__ == "__main__":
     parser.add_argument("--n-rotations", type=int, default=100)
     parser.add_argument("--rotation-start", type=int, default=0)
     parser.add_argument("--raw-output", type=str, default="scoring/raw_results.json")
+    parser.add_argument("--scores-output", type=str, default="scoring/scores.json")
     args = parser.parse_args()
 
     run_evaluation(
         n_rotations=args.n_rotations,
         rotation_start=args.rotation_start,
         raw_output=args.raw_output,
+        scores_output=args.scores_output,
         verbose=True,
     )

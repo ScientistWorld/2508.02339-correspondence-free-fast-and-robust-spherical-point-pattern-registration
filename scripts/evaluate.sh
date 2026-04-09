@@ -6,13 +6,13 @@
 #
 # Usage:
 #   bash scripts/evaluate.sh
-#   RAW_RESULTS=/tmp/raw.json SCORES_OUT=/tmp/scores.json bash scripts/evaluate.sh
+#   RAW_RESULTS=/tmp/raw.json SCORES_OUTPUT=/tmp/scores.json bash scripts/evaluate.sh
 
 set -euo pipefail
 cd /home/user
 
 RAW_RESULTS="${RAW_RESULTS:-scoring/raw_results.json}"
-SCORES_OUT="${SCORES_OUT:-scoring/scores.json}"
+SCORES_OUTPUT="${SCORES_OUTPUT:-scoring/scores.json}"
 
 if [ ! -f "${RAW_RESULTS}" ]; then
     echo "ERROR: raw results not found at ${RAW_RESULTS}"
@@ -20,11 +20,11 @@ if [ ! -f "${RAW_RESULTS}" ]; then
     exit 1
 fi
 
-mkdir -p "$(dirname "${SCORES_OUT}")"
+mkdir -p "$(dirname "${SCORES_OUTPUT}")"
 
-echo "Aggregating ${RAW_RESULTS} -> ${SCORES_OUT}..."
+echo "Aggregating ${RAW_RESULTS} -> ${SCORES_OUTPUT}..."
 python3 eval/evaluate.py \
     --input "${RAW_RESULTS}" \
-    --output "${SCORES_OUT}"
+    --output "${SCORES_OUTPUT}"
 
-echo "Evaluation complete. Results in ${SCORES_OUT}"
+echo "Evaluation complete. Results in ${SCORES_OUTPUT}"

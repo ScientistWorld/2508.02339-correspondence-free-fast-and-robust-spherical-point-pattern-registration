@@ -33,8 +33,12 @@ PY
 N_ROTATIONS="${N_ROTATIONS:-20}"
 ROTATION_START="${ROTATION_START:-0}"
 RAW_RESULTS="${RAW_RESULTS:-scoring/raw_results.json}"
+SCORES_OUTPUT="${SCORES_OUTPUT:-scoring/scores.json}"
+if [ -f "${RAW_RESULTS}" ]; then
+    echo "Found existing raw checkpoint at ${RAW_RESULTS}; completed configs will be skipped automatically."
+fi
 echo "Running evaluation (SPMC, FRS, SPMC+FRS) on 5 patterns x 7 configs x ${N_ROTATIONS} rotations starting at ${ROTATION_START}..."
-N_ROTATIONS="${N_ROTATIONS}" ROTATION_START="${ROTATION_START}" RAW_RESULTS="${RAW_RESULTS}" bash scripts/method.sh
+N_ROTATIONS="${N_ROTATIONS}" ROTATION_START="${ROTATION_START}" RAW_RESULTS="${RAW_RESULTS}" SCORES_OUTPUT="${SCORES_OUTPUT}" bash scripts/method.sh
 
 echo "Validating scoring artifacts..."
 python3 validate.py --compare

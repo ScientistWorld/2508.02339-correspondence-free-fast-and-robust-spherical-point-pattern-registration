@@ -1,8 +1,5 @@
-# IMPORTANT: Once you set action to 'submit' or 'done', STOP immediately.
-# Do NOT sleep, poll, or wait for jobs. The system reads this file
-# only after your turn ends. Sleeping blocks the entire pipeline.
 action: submit
 gpus: 0
 test: false
 milestone: method_runs
-notes: "Run a chunked 20-rotation CPU evaluation across all 5 patterns x 7 configs using the real paper method, with incremental raw-result checkpoints to survive worker loss on the CPU queue."
+notes: "Resume the 20-rotation CPU evaluation from the saved raw checkpoint, skipping completed A1-A3 configs and checkpointing canonical scores.json after every config so partial progress survives further worker loss."
