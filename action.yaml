@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: false
 milestone: method_runs
-notes: "Fresh full 100-rotation CPU evaluation on the paper dataset through scripts/run.sh after the earlier job was cancelled; validates corrected FRS/SPMC+FRS and emits only directly measured scores."
+notes: "Full 100-rotation CPU evaluation on the paper dataset through scripts/run.sh after removing the last non-canonical scores.json write path; validates corrected FRS/SPMC+FRS and emits only directly measured scores."
