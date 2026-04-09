@@ -25,6 +25,7 @@
 - **Final gym verification**: method-agnostic briefing and scoring docs were reviewed and rewritten where needed so future from-scratch agents can understand the task without seeing the paper's implementation choices
 - **Dataset separation fix**: the canonical released dataset now lives under `data/vector_alignment_dataset`, and the shared loader in `data/dataset.py` no longer depends on assets inside `method/`
 - **Complexity submission prep**: the SPMC geographic conversion is now vectorized without changing the paper's computation, making the remaining Fig. 6 benchmark materially more feasible at large scales
+- **FRS memory hardening**: the iterative search now keeps only the initial and final source clouds needed for the closed-form SVD estimate, avoiding unnecessary history retention during the largest scale runs
 
 ## Results Achieved
 - **SPMC on paper's test case (A1/B3/r5)**: 0.13° error — **exact match** with paper's reported 0.13°

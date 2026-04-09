@@ -29,7 +29,7 @@ Check off items as you complete them. Order doesn't matter — work however make
 - [x] `scripts/baseline.sh` — identity sanity baseline on the released dataset
 - [x] `scripts/run_experiment.py` — runs SPMC, FRS, and SPMC+FRS on the paper dataset
 - [x] `scripts/run_complexity_experiment.py` — runs the paper's A3/B3 runtime-scaling benchmark
-- [x] `scripts/run.sh` — Ray job script with resume-safe full 100-rotation CPU validation
+- [x] `scripts/run.sh` — Ray job script for the remaining resume-safe CPU complexity benchmark
 
 ## Environment
 - [x] `environment/container.def` + `environment/setup.sh`
@@ -52,5 +52,6 @@ Check off items as you complete them. Order doesn't matter — work however make
 - **FRS fixed in code**: final source-to-source SVD step now matches the released implementation
 - **spmc_frs fixed in code**: the hybrid now uses the actual SPMC initialization plus FRS refinement path
 - **Current limitation**: the separate complexity-scaling study remains in `reference.json` but is not part of the verified scored gym because it has not been reproduced yet
+- **Current submission target**: `scripts/run.sh` now focuses on the paper's Fig. 6 complexity benchmark rather than rerunning the already-finished main accuracy benchmark
 - **Paper's baseline (FPFH+QUASAR)**: Not implemented — requires C++ dependencies (Point Cloud Library) that are unavailable
 - **Identity rotation baseline**: Used as reference (999° error)
