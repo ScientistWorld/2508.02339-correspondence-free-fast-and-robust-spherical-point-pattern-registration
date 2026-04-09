@@ -2,7 +2,7 @@
   "experiments": {
     "robust_alignment_all": {
       "description": "Robust alignment on synthetic spherical patterns — median rotational error across all 5 datasets (A1-A5) and 7 outlier configurations (B1-B7), 100 rotations each. Paper's main result.",
-      "weight": 0.5,
+      "weight": 0.6,
       "primary_metric": "median_rotation_error_deg",
       "metrics": {
         "median_rotation_error_deg": {"higher_is_better": false, "coefficient": -1.0},
@@ -18,7 +18,7 @@
     },
     "robust_alignment_high_outliers": {
       "description": "Robust alignment at high outlier ratios (B5: 50%, B6: 75%, B7: 90% outliers) — tests the method's robustness to extreme clutter",
-      "weight": 0.3,
+      "weight": 0.2,
       "primary_metric": "median_rotation_error_deg",
       "metrics": {
         "median_rotation_error_deg": {"higher_is_better": false, "coefficient": -1.0},

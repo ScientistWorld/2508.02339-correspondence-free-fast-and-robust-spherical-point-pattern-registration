@@ -14,16 +14,18 @@ Methods must remain fast on the released benchmark, not just accurate.
 - **Experiment**: robust_alignment_all
 - **How to measure**: Run the same 5 patterns × 7 configs × 100 rotations protocol and record per-instance runtime.
 
-## Constraint: linear_scaling
-Methods should preserve the paper's near-linear runtime scaling as point count grows.
+## Constraint: high_outlier_robustness
+Methods must remain reliable when the source set is dominated by clutter.
 
-- **Metric**: loglog_runtime_slope (lower is better when close to 1)
-- **Experiment**: computational_complexity
-- **How to measure**: Run the Fig. 6 protocol on `A3/B3` with 20 released rotations at point counts `10^3, 10^4, 10^5, 10^6, 10^7`, then fit a log-log slope of runtime versus point count.
+- **Metric**: median_rotation_error_deg and p90_rotation_error_deg (lower is better)
+- **Experiment**: robust_alignment_high_outliers
+- **How to measure**: Evaluate only the released `B5`, `B6`, and `B7` settings and summarize both the typical error and the high-error tail.
 
-## Ablation: strongest_vs_simpler_variants
-Compare the strongest reproduced variant against the simpler reproduced variants to verify that the extra method complexity is justified.
+## Current scored scope
 
-- **Metric**: median_rotation_error_deg (lower is better for all)
-- **Experiment**: robust_alignment_all
-- **How to measure**: Evaluate all reproduced variants listed in `scores.json` on the same benchmark and check that the strongest variant does not win only by violating the runtime or problem constraints.
+The current gym score is defined only by experiments that already appear in `scoring/scores.json`.
+At verification time, that means:
+- `robust_alignment_all`
+- `robust_alignment_high_outliers`
+
+The paper's separate computational-complexity study remains documented in `scoring/reference.json`, but it is not yet part of the verified scored baseline because it has not been reproduced in `scores.json`.

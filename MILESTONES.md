@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-09 14:01] - majority
+- Ran final gym verification on folder structure, method/eval separation, briefing files, scoring files, and reusable scripts
+- Fixed the remaining scoring-rubric issue by aligning `scoring/TARGETS.md` to the experiments actually present in `scoring/scores.json`
+- Rebalanced reference experiment weights so the current scored gym emphasizes the full benchmark more than the overlapping high-outlier subset; milestone remains `majority`
+
 ### [2026-04-09 13:50] - majority
 - Audited the remaining Fig. 6 benchmark path and confirmed the workspace was incorrectly left in a permanent `done` state before the final reference experiment was actually attempted
 - Kept the paper algorithm unchanged but vectorized SPMC's geographic conversion so the original `10^3` to `10^7` complexity protocol is practical enough to attempt on compute

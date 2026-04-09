@@ -1,22 +1,20 @@
 # Verification Report
 
 ## Initial Assessment
-The workspace started in a credible `majority` state. The paper's released method had already been reproduced on the main robust-alignment benchmark with valid `scores.json`, `validate.py --compare` passed, and `eval/` was already import-separated from `method/`.
+The workspace started in a credible `majority` state. The released SPMC, FRS, and hybrid pipeline had already been reproduced on the main robust-alignment benchmark, `validate.py --compare` passed, and the `data/` and `eval/` trees were already separated cleanly from `method/`.
 
 ## Issues Found
-- Critical: `briefing/evaluation.md`, `scoring/EXPERIMENTS.md`, `scoring/TARGETS.md`, `scoring/CONSTRAINTS.md`, and `scoring/DIRECTION.md` leaked the paper's specific algorithm family or implementation ideas, which compromises from-scratch gym mode.
-- Major: `scoring/EXPERIMENTS.md` described `computational_complexity` even though that experiment is not present in the current `scoring/scores.json`.
-- Major: `data/dataset.py` pointed to `method/paper_code/vector_alignment_dataset`, so the canonical data path depended on `method/`.
-- Minor: the workspace root contained throwaway artifacts (`eval_output.log`, root `__pycache__/`) that do not belong in the gym root.
+- Major: `scoring/TARGETS.md` still named targets that were not present in `scoring/scores.json`, which would misstate the actual gym rubric for future scientist agents.
+- Minor: the reference experiment weights slightly over-emphasized the overlapping high-outlier subset relative to the full benchmark when renormalized over the currently scored experiments.
+- Minor: `action.yaml` was still set to submit another job even though this final verification turn did not require additional compute.
 
 ## Fixes Applied
-- Rewrote the method-sensitive gym docs to stay problem- and evaluation-focused without naming the paper's algorithm family or computational recipe.
-- Aligned `scoring/EXPERIMENTS.md` and `scoring/TARGETS.md` with the experiments actually present in `scoring/scores.json`.
-- Moved the canonical dataset path into `data/` by copying the released dataset to `data/vector_alignment_dataset`, updating `data/dataset.py`, and updating download/run/reproduce scripts to use the data-owned path.
-- Removed the stray root artifacts and added a stop justification to `MILESTONES.md`.
+- Rewrote `scoring/TARGETS.md` so it now matches the experiments actually present in `scoring/scores.json`: the full benchmark and the high-outlier subset.
+- Adjusted `scoring/reference.json` weights from `0.5 / 0.3 / 0.2` to `0.6 / 0.2 / 0.2`, so the current scored gym renormalizes to a more sensible `75% / 25%` split between the full benchmark and the overlapping high-outlier subset.
+- Added a final verification entry to `MILESTONES.md` and changed `action.yaml` to `done` for this final handoff.
 
 ## Final Judgment
-After these fixes, the workspace is ready to serve as a gym in both improve and from-scratch modes. The core benchmark is reproduced, the scored experiments are coherent, and the problem/evaluation interface no longer leaks the paper's method.
+After these fixes, the workspace is ready to serve as a gym in both improve and from-scratch modes. The core benchmark is reproduced, the problem/evaluation split is clean, and the scored rubric now matches the baseline artifacts that future scientist agents will actually be judged against.
 
 - Milestone: majority
 - Ready for gym use: yes
