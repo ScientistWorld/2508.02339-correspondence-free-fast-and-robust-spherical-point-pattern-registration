@@ -22,6 +22,8 @@
 - **Full benchmark reproduction**: job `6cc72205-3b7` extended every config from 20 to 100 rotations, auto-resumed across worker restarts, and completed the paper's full main benchmark with validated canonical scores
 - **Complexity benchmark path**: added `scripts/run_complexity_experiment.py` and `scripts/complexity.sh` for the paper's separate Fig. 6 runtime-scaling study on `A3/B3`
 - **Evaluator extension**: `eval/evaluate.py` and `scripts/evaluate.sh` now aggregate both the main benchmark raw results and optional complexity raw results into one canonical `scoring/scores.json`
+- **Final gym verification**: method-agnostic briefing and scoring docs were reviewed and rewritten where needed so future from-scratch agents can understand the task without seeing the paper's implementation choices
+- **Dataset separation fix**: the canonical released dataset now lives under `data/vector_alignment_dataset`, and the shared loader in `data/dataset.py` no longer depends on assets inside `method/`
 
 ## Results Achieved
 - **SPMC on paper's test case (A1/B3/r5)**: 0.13° error — **exact match** with paper's reported 0.13°
@@ -87,6 +89,7 @@
 - **Login-node limitation**: the login node still lacks NumPy, so Python-side spot checks must rely on compute jobs until the refreshed setup overlay is built
 - **Current complexity-path limitation**: the new Fig. 6 scripts parse cleanly via `py_compile`, but they cannot be executed on the login node because NumPy is only available inside the compute overlay
 - **Stale score artifact**: `scripts/run_experiment.py` had still been writing a summary `scoring/scores.json`, which allowed non-canonical score blocks to persist even after the evaluator was cleaned. That path has now been removed.
+- **Gym-verification issue**: several benchmark-facing markdown files still leaked paper-specific method details and the canonical dataset path still pointed into `method/`. Those issues are now fixed, and the workspace passed a fresh `python validate.py --compare` check afterward.
 
 ## Deviations from Paper
 - **Baseline**: FPFH+QUASAR baseline not implemented (requires Point Cloud Library C++ deps).
@@ -98,5 +101,6 @@
 - **Current run protocol**: `scripts/run.sh`, `scripts/method.sh`, `scripts/evaluate.sh`, and `scripts/reproduce.sh` all export the overlay Python path directly, so they now work standalone inside the container rather than only through `run.sh`.
 - **Baseline packaging**: the shipped baseline is an identity-rotation sanity check on the released dataset, not the paper's FPFH+QUASAR baseline.
 
-## Next Turn Goal
-- Package the finished environment and stop unless extra budget is intentionally spent on the optional complexity-scaling study.
+## Final Status
+- Workspace verified as gym-ready at milestone `majority`
+- Main limitation: the separate computational-complexity scaling study remains documented in `reference.json` but is not yet reproduced in `scores.json`

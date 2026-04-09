@@ -1,3 +1,3 @@
 action: done
 milestone: majority
-notes: "Finished the packaged reproduction environment. The real paper methods completed the full 100-rotation benchmark with validated scores for the main and high-outlier experiments; only the optional computational-complexity study remains unmeasured."
+notes: "Verified the workspace as gym-ready after fixing method leakage in the benchmark docs, aligning scored experiment docs, and moving the canonical dataset path under data/."
