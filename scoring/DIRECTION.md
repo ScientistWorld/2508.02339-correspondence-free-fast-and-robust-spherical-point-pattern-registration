@@ -7,6 +7,7 @@ This gym is about correspondence-free rotation estimation for spherical point pa
 - Lower median rotation error on the full benchmark
 - Better robustness on the hardest outlier settings
 - Faster runtime without sacrificing the accuracy gains above
+- Runtime scaling that remains close to linear on the dedicated complexity study
 
 ## Valid Research Space
 Scientists may explore geometric, statistical, optimization-based, or learned approaches, as long as they still solve the same benchmarked task: estimate the rotation directly from the two unordered spherical point sets without using benchmark-specific correspondences.

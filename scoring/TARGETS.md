@@ -14,6 +14,13 @@ Methods must remain fast on the released benchmark, not just accurate.
 - **Experiment**: robust_alignment_all
 - **How to measure**: Run the same 5 patterns × 7 configs × 100 rotations protocol and record per-instance runtime.
 
+## Constraint: linear_scaling
+Methods should preserve the paper's near-linear runtime scaling as point count grows.
+
+- **Metric**: loglog_runtime_slope (lower is better when close to 1)
+- **Experiment**: computational_complexity
+- **How to measure**: Run the Fig. 6 protocol on `A3/B3` with 20 released rotations at point counts `10^3, 10^4, 10^5, 10^6, 10^7`, then fit a log-log slope of runtime versus point count.
+
 ## Ablation: strongest_vs_simpler_variants
 Compare the strongest reproduced variant against the simpler reproduced variants to verify that the extra method complexity is justified.
 

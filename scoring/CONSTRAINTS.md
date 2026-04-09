@@ -17,6 +17,7 @@ Each method must output a 3x3 rotation matrix in `SO(3)` for each source/templat
 ## Evaluation Rules
 - Use the geodesic rotation error in degrees: `arccos((trace(R_true^T R_est) - 1) / 2)`.
 - Measure runtime on the same inputs used for accuracy evaluation.
+- For the complexity experiment, hold fixed the paper's `A3/B3` setup, the released `RandomRotation100.pkl` rotations, and the scale list `10^3, 10^4, 10^5, 10^6, 10^7`.
 - Report results under the same experiment names and metric names used in `scoring/reference.json` and `scoring/scores.json`.
 
 ## Prohibited Shortcuts

@@ -1,3 +1,5 @@
-action: done
+action: submit
+gpus: 0
+test: false
 milestone: majority
-notes: "Verified the workspace as gym-ready after fixing method leakage in the benchmark docs, aligning scored experiment docs, and moving the canonical dataset path under data/."
+notes: "Run the remaining Fig. 6 computational-complexity benchmark on A3/B3 at scales 1e3..1e7 with resume-safe checkpoints, then regenerate canonical scores.json."

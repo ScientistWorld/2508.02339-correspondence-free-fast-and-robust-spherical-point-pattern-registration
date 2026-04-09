@@ -3,6 +3,7 @@ paper/images/
 
 # Large files — do not commit
 checkpoints/
+method/paper_code/
 *.pt
 *.pth
 *.ckpt

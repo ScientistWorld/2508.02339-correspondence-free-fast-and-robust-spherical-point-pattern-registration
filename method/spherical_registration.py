@@ -93,7 +93,13 @@ def cart2geo(xyz: np.ndarray) -> Tuple[float, float]:
 
 def cart2geo_array(points: np.ndarray) -> np.ndarray:
     """Convert (N, 3) Cartesian array to (N, 2) [lat, lon] in degrees."""
-    return np.array([cart2geo(p) for p in points])
+    points = np.asarray(points, dtype=float)
+    radii = np.linalg.norm(points, axis=1)
+    safe_radii = np.clip(radii, 1e-12, None)
+    latitudes = np.degrees(np.arccos(np.clip(points[:, 2] / safe_radii, -1.0, 1.0)))
+    longitudes = np.degrees(np.arctan2(points[:, 1], points[:, 0]))
+    longitudes[longitudes < 0] += 360.0
+    return np.stack([latitudes, longitudes], axis=1)
 
 
 def hist2D_from_geo_array(geo_array: np.ndarray,
@@ -379,9 +385,11 @@ def frs(template: np.ndarray, source: np.ndarray,
     ]
 
     current_source = source.copy()
-    source_history = [current_source.copy()]
+    initial_source = current_source.copy()
+    iterations = 0
 
     for iteration in range(max_iterations):
+        iterations = iteration + 1
         source_angles = pcl_array_to_rotation_angle_array(current_source)
         source_hists = [
             hist1D(source_angles[:, 0], k, 0, 360),
@@ -404,14 +412,13 @@ def frs(template: np.ndarray, source: np.ndarray,
 
         R_step = rotation_angles_to_matrix(shifts[0], shifts[1], shifts[2])
         current_source = current_source @ R_step.T
-        source_history.append(current_source.copy())
 
     # Match the paper code: estimate the total rotation from the original source
     # to the final iteratively rotated source, not from template to source.
-    R_est = estimate_rotation_svd(source_history[0], source_history[-1])
+    R_est = estimate_rotation_svd(initial_source, current_source)
 
     t = time.perf_counter() - start
-    return R_est, t, iteration + 1
+    return R_est, t, iterations
 
 
 # =============================================================================

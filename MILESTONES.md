@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-09 13:50] - majority
+- Audited the remaining Fig. 6 benchmark path and confirmed the workspace was incorrectly left in a permanent `done` state before the final reference experiment was actually attempted
+- Kept the paper algorithm unchanged but vectorized SPMC's geographic conversion so the original `10^3` to `10^7` complexity protocol is practical enough to attempt on compute
+- Preparing a final CPU submission for the paper's computational-complexity experiment; milestone remains `majority` until that run finishes
+
 ### [2026-04-09 13:32] - majority
 - Added a dedicated, reusable Fig. 6 computational-complexity benchmark path for the paper's `A3/B3` scaling study
 - Extended the method-agnostic evaluator so `scores.json` can include the complexity experiment alongside the already reproduced main benchmark

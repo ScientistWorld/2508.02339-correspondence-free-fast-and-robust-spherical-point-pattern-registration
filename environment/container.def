@@ -44,5 +44,5 @@ PY
 
 %environment
     export HOME=/home/user
-    export PYTHONPATH=/home/user/python-packages/lib/python3.10/site-packages${PYTHONPATH:+:$PYTHONPATH}
+    export PYTHONPATH=/opt/python-packages${PYTHONPATH:+:$PYTHONPATH}
     export PYTHONUNBUFFERED=1

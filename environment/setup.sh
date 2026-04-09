@@ -12,4 +12,4 @@ set -euo pipefail
 # dependencies in /opt and add that path at runtime from scripts/run.sh.
 PYTHON_TARGET="/opt/python-packages"
 mkdir -p "${PYTHON_TARGET}"
-python3 -m pip install --target "${PYTHON_TARGET}" numpy
+uv pip install --target "${PYTHON_TARGET}" numpy
