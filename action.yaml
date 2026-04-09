@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: false
 milestone: method_runs
-notes: "Resubmit the full 100-rotation CPU evaluation after fixing the setup overlay build: install NumPy to /opt/python-packages instead of /usr/local or /home/user, and export that path in scripts/run.sh."
+notes: "Run a chunked 20-rotation CPU evaluation across all 5 patterns x 7 configs using the real paper method, with incremental raw-result checkpoints to survive worker loss on the CPU queue."
