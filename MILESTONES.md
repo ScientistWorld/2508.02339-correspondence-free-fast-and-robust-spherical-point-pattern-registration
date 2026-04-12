@@ -109,5 +109,4 @@
 - Updated the evaluation harness and run scripts to score `spmc`, `frs`, and `spmc_frs` offline on compute nodes
 
 ## Stop Justification
-
-Stopped at `majority` because the workspace is already usable as a research gym: the paper's released method is reproduced on the full main scored benchmark and its high-outlier subset, the problem/evaluation split is clean, and the remaining gap is the separate complexity-scaling study rather than a failure of the core environment.
+- Completed at milestone `majority`.
