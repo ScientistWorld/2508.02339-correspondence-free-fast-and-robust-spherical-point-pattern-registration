@@ -24,7 +24,7 @@ Based on the paper's reported results:
 
 ## Evaluation Protocol
 
-### Experiment 1: Synthetic Spherical Pattern Registration
+### Scored Gym Benchmark: Released Spherical Pattern Registration
 - 5 template spherical patterns (A1–A5) with distinct characteristics
 - 7 source configurations per template (B1–B7):
   - B1: no noise, no outliers (one-to-one correspondence)
@@ -38,16 +38,16 @@ Based on the paper's reported results:
 - Total: 5 × 7 × 100 = 3500 evaluations per method
 - Report median and distribution of angular errors across all configurations
 
-### Experiment 2: Point Cloud Registration (ModelNet40)
+### Additional Paper Experiment: Point Cloud Registration (ModelNet40)
 - Complete-to-complete (Comp2Comp): both source and target have 2500 points from same object
 - Partial-to-complete (Part2Comp): source is partial view, target is complete object
 - Report rotation error (degrees) and translation error (meters)
 
-### Experiment 3: Spherical Image Rotation Estimation
+### Additional Paper Experiment: Spherical Image Rotation Estimation
 - Template: 2D world map projected onto sphere
 - Source: same image with added clutter (0% to ~19%) and random rotations
 - Report median angular error
 
 ## Current Reusable Gym Scope
 
-The packaged scoring and reusable evaluation scripts in this workspace currently cover the robust spherical-pattern registration benchmark from Experiment 1. The other experiments above document the paper's broader evaluation context, but they are not yet part of the scored gym interface.
+The packaged scoring and reusable evaluation scripts in this workspace currently cover only the released spherical-pattern registration benchmark above. The point-cloud and spherical-image experiments remain documented for paper context, but they are not part of the scored gym interface and future scientists are not evaluated on them here.

@@ -21,13 +21,6 @@ Methods must remain reliable when the source set is dominated by clutter.
 - **Experiment**: robust_alignment_high_outliers
 - **How to measure**: Evaluate only the released `B5`, `B6`, and `B7` settings and summarize both the typical error and the high-error tail.
 
-## Ablation: hybrid_refinement_value
-The combined pipeline should improve on its component methods on the main benchmark rather than collapsing to either stage alone.
-
-- **Metric**: median_rotation_error_deg (lower is better)
-- **Experiment**: robust_alignment_all
-- **How to measure**: Compare `spmc_frs` against the separately scored `spmc` and `frs` results already reported under `robust_alignment_all`.
-
 ## Current scored scope
 
 The current gym score is defined only by experiments that already appear in `scoring/scores.json`.

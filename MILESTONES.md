@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-12 23:52] - majority
+- Completed final gym verification and confirmed the existing `majority` milestone is justified by the reproduced released benchmark results
+- Removed benchmark-facing method leakage from scientist documents, cleaned the container/setup split, and tightened the end-to-end reproduction script preflight
+- No new experiment was required for verification; the remaining limitation is still the unreproduced computational-complexity study
+
 ### [2026-04-12 23:48] - majority
 - Reopened the workspace from an incorrect permanent `done` state because the paper's Fig. 6 computational-complexity experiment is still unmeasured
 - Fixed a stale evaluator-call regression in `scripts/run_experiment.py` so `scripts/method.sh` and `scripts/reproduce.sh` are executable again

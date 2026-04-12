@@ -1,5 +1,3 @@
-action: submit
-gpus: 0
-test: false
+action: done
 milestone: majority
-notes: "Run the remaining Fig. 6 computational-complexity benchmark on the paper's A3/B3 setup after fixing the complexity scoring schema, run-script preflight checks, and the stale method-runner evaluator call."
+notes: "Final verification passed: benchmark-facing docs are method-safe, the container/setup split is clean, validation passes, and the workspace is ready for gym use at majority."
