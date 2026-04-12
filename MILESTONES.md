@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-12 23:48] - majority
+- Reopened the workspace from an incorrect permanent `done` state because the paper's Fig. 6 computational-complexity experiment is still unmeasured
+- Fixed a stale evaluator-call regression in `scripts/run_experiment.py` so `scripts/method.sh` and `scripts/reproduce.sh` are executable again
+- Fixed the complexity scoring contract to emit only the metric names declared in `scoring/reference.json` and tightened `scripts/run.sh` to preflight the actual `A3/B3` assets before a fresh CPU submission
+
 ### [2026-04-09 14:10] - majority
 - Finalized the benchmark-facing wrap-up documents so the scored targets, experiments, constraints, and direction are consistent with the checked-in `scores.json`
 - Confirmed `python validate.py` still passes after the final documentation cleanup

@@ -63,25 +63,20 @@ def compute_scores(raw_results: dict) -> dict:
 
 
 def compute_complexity_scores(raw_results: dict) -> dict:
-    """Aggregate median runtimes by point-count scale and fit a log-log slope."""
+    """Aggregate only the complexity metrics tracked in reference.json."""
     scores = {}
     for method, by_scale in raw_results.items():
         method_scores = {}
-        xs = []
-        ys = []
         for scale_name, values in sorted(by_scale.items(), key=lambda item: int(item[0])):
             times = np.array(values.get("times", []), dtype=float)
             if times.size == 0:
                 continue
             scale = int(scale_name)
             median_time = float(np.median(times))
-            method_scores[f"time_at_{scale}_points_s"] = median_time
-            xs.append(np.log10(scale))
-            ys.append(np.log10(max(median_time, 1e-12)))
-
-        if len(xs) >= 2:
-            slope, _ = np.polyfit(xs, ys, 1)
-            method_scores["loglog_runtime_slope"] = float(slope)
+            if scale == 10**6:
+                method_scores["time_at_1e6_points_s"] = median_time
+            elif scale == 10**7:
+                method_scores["time_at_1e7_points_s"] = median_time
 
         if method_scores:
             scores[method] = method_scores

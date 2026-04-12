@@ -50,4 +50,4 @@ with raw_path.open("w") as handle:
 print(f"Wrote {raw_path}")
 PY
 
-RAW_RESULTS="${RAW_RESULTS}" SCORES_OUT="${SCORES_OUT}" bash scripts/evaluate.sh
+RAW_RESULTS="${RAW_RESULTS}" SCORES_OUTPUT="${SCORES_OUT}" bash scripts/evaluate.sh

@@ -57,7 +57,7 @@ def _save_outputs(raw_results: dict, raw_output: Path, scores_output: Path) -> N
     """Persist raw checkpoints and canonical scores together."""
     _save_raw_results(raw_results, raw_output)
     scores = compute_scores(raw_results)
-    build_scores_json(scores, str(scores_output))
+    build_scores_json(scores, {}, str(scores_output))
 
 
 def run_evaluation(

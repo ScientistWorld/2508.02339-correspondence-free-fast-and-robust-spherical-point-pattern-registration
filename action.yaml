@@ -1,3 +1,5 @@
-action: done
+action: submit
+gpus: 0
+test: false
 milestone: majority
-notes: "Finalized the majority-level gym wrap-up: milestones and progress are up to date, scoring docs match the scored baseline, and validation passes."
+notes: "Run the remaining Fig. 6 computational-complexity benchmark on the paper's A3/B3 setup after fixing the complexity scoring schema, run-script preflight checks, and the stale method-runner evaluator call."

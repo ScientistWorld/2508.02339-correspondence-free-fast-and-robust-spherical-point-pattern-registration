@@ -1,6 +1,10 @@
 # Progress
 
 ## What Works
+- **Reopened submission path**: the workspace is no longer left in a permanent `done` state while the Fig. 6 complexity experiment remains outstanding
+- **Method-path regression fix**: `scripts/run_experiment.py` now matches the current evaluator signature again, so `scripts/method.sh` and `scripts/reproduce.sh` no longer fail before aggregation
+- **Complexity score-contract fix**: the evaluator now emits only `time_at_1e6_points_s` and `time_at_1e7_points_s`, matching `scoring/reference.json` so a future complexity run can validate cleanly
+- **Complexity preflight fix**: `scripts/run.sh` now checks for `A3_A.pkl`, `A3_A_B3.pkl`, and `RandomRotation100.pkl`, which are the actual required assets for the Fig. 6 benchmark
 - **SPMC algorithm** fully implemented and previously validated on the paper dataset
 - **Paper's dataset**: Robust Vector Alignment Dataset fully loaded and verified (35 pickle files + 100 rotations)
 - **Evaluation pipeline**: rotation error computation, timing, aggregation, scores.json output
@@ -73,6 +77,12 @@
 - Optional FPFH+QUASAR baseline reimplementation (requires Point Cloud Library C++ stack that is currently unavailable here)
 
 ## Issues Encountered
+- **Stale method-runner bug**: `scripts/run_experiment.py` still called `build_scores_json(...)` with the old two-argument signature after the complexity evaluator extension, which would have broken `scripts/method.sh` and `scripts/reproduce.sh`
+- **Mitigation**: updated the call site to pass the explicit empty complexity block and restored compatibility with the current evaluator
+- **Complexity schema bug**: the evaluator emitted runtime keys like `time_at_1000000_points_s` plus an unreferenced slope metric, while `scoring/reference.json` only declares `time_at_1e6_points_s` and `time_at_1e7_points_s`
+- **Mitigation**: restricted canonical complexity scoring output to the two metric names already defined in `reference.json`
+- **Preflight gap**: the complexity job had only been checking for `A1_A.pkl`, which is unrelated to the actual `A3/B3` runtime-scaling path
+- **Mitigation**: `scripts/run.sh` now fails fast if `A3_A.pkl`, `A3_A_B3.pkl`, or `RandomRotation100.pkl` are missing
 - **Failed CPU job `62d88eed-373`**: compute-side import failed before evaluation started: `ModuleNotFoundError: No module named 'numpy'`
 - **Root cause**: `environment/setup.sh` had installed NumPy under `/home/user/python-packages`, but `/home/user` is bind-mounted at runtime, hiding that installation from the container
 - **Mitigation**: switched to `uv pip install --system numpy` and added an explicit import smoke test in `scripts/run.sh`
@@ -105,6 +115,6 @@
 - **Baseline packaging**: the shipped baseline is an identity-rotation sanity check on the released dataset, not the paper's FPFH+QUASAR baseline.
 
 ## Final Status
-- Workspace verified as gym-ready at milestone `majority`
+- Workspace remains at milestone `majority`
 - Main limitation: the separate computational-complexity scaling study remains documented in `reference.json` but is not yet reproduced in `scores.json`
-- Final wrap-up completed: benchmark-facing scoring documents now explicitly cover primary, constraint, and ablation targets without adding any unscored experiments
+- Current turn status: execution-path blockers for the remaining Fig. 6 benchmark are fixed and a fresh CPU submission is being prepared

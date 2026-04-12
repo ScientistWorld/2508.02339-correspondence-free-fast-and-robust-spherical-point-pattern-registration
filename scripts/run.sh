@@ -15,10 +15,16 @@ echo "Spherical Point Pattern Registration: Complexity Benchmark"
 echo "=========================================="
 
 # Compute nodes have no internet. All assets must exist before submission.
-if [ ! -f "data/vector_alignment_dataset/A1_A.pkl" ]; then
-    echo "ERROR: paper dataset missing at data/vector_alignment_dataset/"
-    exit 1
-fi
+for required_path in \
+    "data/vector_alignment_dataset/A3_A.pkl" \
+    "data/vector_alignment_dataset/A3_A_B3.pkl" \
+    "data/vector_alignment_dataset/RandomRotation100.pkl"
+do
+    if [ ! -f "${required_path}" ]; then
+        echo "ERROR: required complexity asset missing: ${required_path}"
+        exit 1
+    fi
+done
 
 echo "Checking runtime Python dependencies..."
 python3 - <<'PY'
