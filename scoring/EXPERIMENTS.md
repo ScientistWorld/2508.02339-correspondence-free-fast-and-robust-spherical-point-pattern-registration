@@ -1,18 +1,26 @@
 # Experiment Overview
 
-This file describes what each experiment in `scores.json` is trying to establish.
+This file describes the experiments that are currently scored in `scores.json`.
 
 ## robust_alignment_all
-Tests whether the rotation registration method achieves low angular error on the paper's
-Robust Vector Alignment Dataset across all outlier configurations. The dataset contains
-5 distinct point cloud patterns with varying complexity (from uniform trajectories to
-non-uniform density distributions), each evaluated under 7 different outlier configurations
-(0% to 90% outlier ratios). This is the primary experiment establishing whether the
-method solves the correspondence-free rotation estimation problem.
+Measures overall performance on the released Robust Vector Alignment Dataset.
+Each method is evaluated on all 5 template patterns (`A1`-`A5`), all 7 source
+configurations (`B1`-`B7`), and all 100 released rotations. This is the main
+benchmark for the gym.
+
+The recorded metrics are:
+- `median_rotation_error_deg`
+- `mean_rotation_error_deg`
+- `median_time_s`
 
 ## robust_alignment_high_outliers
-Tests whether the rotation registration method remains robust under extreme clutter
-conditions (50%, 75%, and 90% outlier ratios). This subset isolates the hardest clutter
-regime in the released benchmark, where many methods degrade sharply as unrelated source
-points dominate the observation. The paper specifically claims robustness up to 90%
-outliers, making this a key validation of the robustness claim.
+Measures robustness on the hardest clutter settings only. This experiment uses
+the same released dataset, but restricts evaluation to configurations `B5`,
+`B6`, and `B7`, where the source set contains 50%, 75%, and 90% outliers.
+
+The recorded metrics are:
+- `median_rotation_error_deg`
+- `p90_rotation_error_deg`
+
+This experiment exists because the paper's central claim is not only low
+overall error, but also strong performance under severe outlier corruption.

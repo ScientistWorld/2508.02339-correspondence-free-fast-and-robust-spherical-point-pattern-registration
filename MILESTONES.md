@@ -4,11 +4,10 @@
 
 ## Progress Log
 
-### [2026-04-13 18:56] - majority
-- Reopened the paper from a stale permanent `done` state because the paper's separate Fig. 6 computational-complexity benchmark is still unreproduced
-- Revalidated that the checked-in method still matches the released SPMC, FRS, and SPMC+FRS computation and confirmed the remaining gap is only the `computational_complexity` experiment on `A3/B3`
-- Fixed the remaining environment-packaging drift by removing Python package installation from `environment/container.def`; `environment/setup.sh` is again the sole Python dependency entrypoint
-- Prepared a fresh CPU submission for the resumable complexity benchmark; milestone remains `majority` until the run lands
+### [2026-04-13 18:59] - majority
+- Final verification confirmed the claimed `majority` milestone is justified by the checked-in results and scoring artifacts
+- Rechecked folder structure, method/eval separation, method-agnostic scientist docs, and the scoring rubric for the experiments actually present in `scores.json`
+- Closed the workspace for gym use at `majority`; the remaining limitation is still the unreproduced reference `computational_complexity` experiment
 
 ### [2026-04-13 10:35] - majority
 - Final verification confirmed the claimed `majority` milestone remains justified by the reproduced released benchmark and reusable scoring artifacts

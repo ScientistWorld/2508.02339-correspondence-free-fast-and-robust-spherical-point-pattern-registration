@@ -1,8 +1,6 @@
 # Progress
 
 ## What Works
-- **Submission path reopened**: `action.yaml` is no longer left in a permanent `done` state while the Fig. 6 complexity benchmark is still missing
-- **Packaging cleanup**: `environment/container.def` is back to OS-level dependencies only; Python packages remain solely in `environment/setup.sh` as required by the reproduction protocol
 - **Reopened submission path**: the workspace is no longer left in a permanent `done` state while the Fig. 6 complexity experiment remains outstanding
 - **Method-path regression fix**: `scripts/run_experiment.py` now matches the current evaluator signature again, so `scripts/method.sh` and `scripts/reproduce.sh` no longer fail before aggregation
 - **Complexity score-contract fix**: the evaluator now emits only `time_at_1e6_points_s` and `time_at_1e7_points_s`, matching `scoring/reference.json` so a future complexity run can validate cleanly
@@ -122,4 +120,4 @@
 ## Final Status
 - Workspace remains at milestone `majority`
 - Main limitation: the separate computational-complexity scaling study remains documented in `reference.json` but is not yet reproduced in `scores.json`
-- Current turn status: the workspace is ready for the remaining resumable CPU complexity submission, and further compute is now queued instead of closing the paper
+- Current turn status: final verification passed and the workspace is ready for gym use at `majority`

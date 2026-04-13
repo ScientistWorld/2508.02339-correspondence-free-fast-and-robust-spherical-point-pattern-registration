@@ -1,24 +1,24 @@
 # Verification Report
 
 ## Initial Assessment
-The workspace started in a credible `majority` state. The paper's main released benchmark had already been reproduced on the real dataset, `scores.json` matched the checked-in results, and `validate.py --compare` passed. The remaining gap was not a broken reproduction; it was a final gym audit plus one unreproduced reference experiment (`computational_complexity`) that is still absent from `scores.json`.
+The workspace started in a supportable `majority` state. The released robust-alignment benchmark had already been reproduced on the real dataset, `scores.json` matched those checked-in results, and `python validate.py --compare` passed. The main verification task was to judge gym readiness, not to rescue a broken reproduction.
 
 ## Issues Found
-- Minor: `environment/container.def` still embedded Python package installation logic even though `environment/setup.sh` already existed, so the packaging split did not actually match protocol.
-- Minor: `scoring/TARGETS.md` still spoke about a "next submission" even though this verification turn is the final closeout and the current scored scope is fixed by `scores.json`.
-- Minor: `scripts/evaluate.sh` was not actually lightweight-standalone on the login node because `eval/evaluate.py` depended on NumPy for simple aggregation.
-- Cosmetic: a stray root `__pycache__/` directory made the workspace root less clean than intended.
+- Minor: the workspace still reflected the previous queued-submission state even though this final turn should close the paper cleanly.
+- Minor: `scoring/EXPERIMENTS.md` was serviceable but could describe the currently scored experiments more explicitly for future scientist agents.
+- Cosmetic: a stale root `__pycache__/` directory was still present.
+- Cosmetic: the repo still had pending deletions for unused root artifacts (`manifest.json`, `trajectory/`, and the old root `README.md`) that had not been finalized in git.
 
 ## Fixes Applied
-- Removed Python dependency installation from [environment/container.def](/home/user/environment/container.def), leaving Python packages solely in [environment/setup.sh](/home/user/environment/setup.sh).
-- Rewrote the stale closeout language in [scoring/TARGETS.md](/home/user/scoring/TARGETS.md) so it reflects the actual final scored scope and keeps the unreproduced complexity experiment as reference-only context.
-- Removed the NumPy dependency from [eval/evaluate.py](/home/user/eval/evaluate.py), so [scripts/evaluate.sh](/home/user/scripts/evaluate.sh) can aggregate results with only the standard library.
-- Removed the root `__pycache__/` directory.
+- Rewrote [VERIFICATION.md](/home/user/VERIFICATION.md) to match the actual final judgment and current tree state.
+- Tightened [scoring/EXPERIMENTS.md](/home/user/scoring/EXPERIMENTS.md) so it maps cleanly to the two experiments that actually appear in `scores.json`, including their metric names and purpose.
+- Updated [MILESTONES.md](/home/user/MILESTONES.md), [PROGRESS.md](/home/user/PROGRESS.md), [CHECKLIST.md](/home/user/CHECKLIST.md), and [action.yaml](/home/user/action.yaml) so the workspace closes consistently at `majority` instead of remaining in a stale queued-submission state.
+- Removed the root `__pycache__/` directory and finalized the deletion of unused root artifacts.
 
 ## Final Judgment
-This workspace is ready to serve as a gym. A future scientist can use it in improve mode with the reproduced method and results, and in from-scratch mode with method-agnostic problem, evaluation, data, and scoring documents. The current scoring rubric is reasonable for the experiments that actually appear in `scores.json`: after renormalization, `robust_alignment_all` carries 75% of the score and `robust_alignment_high_outliers` carries 25%, which is an appropriate balance between overall performance and the paper's explicit robustness claim.
+This workspace is ready to serve as a research gym. Improve-mode scientists have the reproduced method, scores, and scripts. From-scratch scientists can work from method-agnostic problem, evaluation, data, and scoring documents without being told the paper's algorithm. The scoring rubric for the experiments actually in `scores.json` is reasonable: after renormalization, `robust_alignment_all` carries 75% of the score and `robust_alignment_high_outliers` carries 25%, which appropriately emphasizes overall performance while still rewarding robustness under severe outliers.
 
 - Milestone: majority
 - Ready for gym use: yes
 - Confidence: high
-- Key limitation: the paper's separate computational-complexity experiment is still documented in `reference.json` but not yet reproduced in `scores.json`
+- Key limitation: the paper's separate `computational_complexity` reference experiment is still documented in `reference.json` but remains unreproduced in `scores.json`
