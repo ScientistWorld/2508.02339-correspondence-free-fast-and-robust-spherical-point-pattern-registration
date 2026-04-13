@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-13 10:35] - majority
+- Final verification confirmed the claimed `majority` milestone remains justified by the reproduced released benchmark and reusable scoring artifacts
+- Fixed the remaining environment-packaging issue by removing Python package installation from `environment/container.def`, leaving `setup.sh` as the single Python dependency entrypoint
+- Closed the workspace for gym use at `majority`; the only remaining gap is the unreproduced reference computational-complexity experiment
+
 ### [2026-04-13 10:20] - majority
 - Reopened the control file from a stale permanent `done` state so the remaining Fig. 6 complexity benchmark can actually be scheduled
 - Rechecked the released SPMC/FRS implementation, fixed a small FRS timing-path mismatch, and confirmed the local submission still follows the paper's `A3/B3` scaling protocol rather than changing the algorithm
@@ -114,4 +119,4 @@
 - Updated the evaluation harness and run scripts to score `spmc`, `frs`, and `spmc_frs` offline on compute nodes
 
 ## Stop Justification
-- Current turn ends with a CPU submission for the remaining computational-complexity experiment; final wrap-up is deferred until that result lands.
+- Final verification completed at milestone `majority`. The workspace is usable as a gym now; the only remaining limitation is that the reference computational-complexity experiment is documented but still unreproduced.

@@ -13,10 +13,36 @@ Usage:
 """
 import argparse
 import json
+import math
+import statistics
 import sys
 from pathlib import Path
 
-import numpy as np
+
+def _mean(values: list[float]) -> float:
+    return float(statistics.fmean(values))
+
+
+def _median(values: list[float]) -> float:
+    return float(statistics.median(values))
+
+
+def _percentile(values: list[float], percentile: float) -> float:
+    """
+    NumPy-style linear percentile on a 0-100 scale.
+    """
+    if not values:
+        raise ValueError("percentile requires at least one value")
+    ordered = sorted(float(v) for v in values)
+    if len(ordered) == 1:
+        return ordered[0]
+    rank = (percentile / 100.0) * (len(ordered) - 1)
+    lower = math.floor(rank)
+    upper = math.ceil(rank)
+    if lower == upper:
+        return ordered[lower]
+    weight = rank - lower
+    return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
 
 
 def compute_scores(raw_results: dict) -> dict:
@@ -41,13 +67,11 @@ def compute_scores(raw_results: dict) -> dict:
         all_times[method] = all_tms
 
     for method, errs in all_errors.items():
-        errs = np.array(errs)
-        tms = np.array(all_times[method])
         if method not in scores:
             scores[method] = {}
-        scores[method]["median_rotation_error_deg"] = float(np.median(errs))
-        scores[method]["mean_rotation_error_deg"] = float(np.mean(errs))
-        scores[method]["median_time_s"] = float(np.median(tms))
+        scores[method]["median_rotation_error_deg"] = _median(errs)
+        scores[method]["mean_rotation_error_deg"] = _mean(errs)
+        scores[method]["median_time_s"] = _median(all_times[method])
 
     # robust_alignment_high_outliers: B5, B6, B7 only
     for method, configs in raw_results.items():
@@ -56,8 +80,8 @@ def compute_scores(raw_results: dict) -> dict:
             if any(c in cfg for c in ["B5", "B6", "B7"]):
                 high_errs.extend(data["errors"])
         if high_errs:
-            scores[method]["median_rotation_error_deg_high"] = float(np.median(high_errs))
-            scores[method]["p90_rotation_error_deg_high"] = float(np.percentile(high_errs, 90))
+            scores[method]["median_rotation_error_deg_high"] = _median(high_errs)
+            scores[method]["p90_rotation_error_deg_high"] = _percentile(high_errs, 90)
 
     return scores
 
@@ -68,11 +92,11 @@ def compute_complexity_scores(raw_results: dict) -> dict:
     for method, by_scale in raw_results.items():
         method_scores = {}
         for scale_name, values in sorted(by_scale.items(), key=lambda item: int(item[0])):
-            times = np.array(values.get("times", []), dtype=float)
-            if times.size == 0:
+            times = [float(v) for v in values.get("times", [])]
+            if not times:
                 continue
             scale = int(scale_name)
-            median_time = float(np.median(times))
+            median_time = _median(times)
             if scale == 10**6:
                 method_scores["time_at_1e6_points_s"] = median_time
             elif scale == 10**7:

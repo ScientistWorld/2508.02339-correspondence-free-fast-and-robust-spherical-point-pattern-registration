@@ -120,4 +120,4 @@
 ## Final Status
 - Workspace remains at milestone `majority`
 - Main limitation: the separate computational-complexity scaling study remains documented in `reference.json` but is not yet reproduced in `scores.json`
-- Current turn status: execution-path blockers for the remaining Fig. 6 benchmark are fixed and a fresh CPU submission is queued
+- Current turn status: final verification passed, the gym is ready for use, and no further compute is queued

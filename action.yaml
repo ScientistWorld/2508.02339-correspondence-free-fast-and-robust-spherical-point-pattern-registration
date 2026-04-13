@@ -1,5 +1,3 @@
-action: submit
-gpus: 0
-test: false
+action: done
 milestone: majority
-notes: "CPU submission for the remaining Fig. 6 computational-complexity benchmark on the paper's A3/B3 setup across scales 1e3-1e7 and 20 released rotations; local FRS timing now matches the released loop structure, the run is resume-safe, and it should add the missing computational_complexity experiment to scores.json."
+notes: "Final verification passed: the workspace is clean, method-safe, and ready for gym use at majority; only the reference computational-complexity experiment remains unreproduced."
