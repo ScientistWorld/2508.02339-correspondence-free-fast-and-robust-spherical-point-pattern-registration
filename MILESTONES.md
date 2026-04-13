@@ -119,4 +119,4 @@
 - Updated the evaluation harness and run scripts to score `spmc`, `frs`, and `spmc_frs` offline on compute nodes
 
 ## Stop Justification
-- Final verification completed at milestone `majority`. The workspace is usable as a gym now; the only remaining limitation is that the reference computational-complexity experiment is documented but still unreproduced.
+- Completed at milestone `majority`.
