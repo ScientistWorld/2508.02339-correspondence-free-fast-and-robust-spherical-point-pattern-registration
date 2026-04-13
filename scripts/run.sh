@@ -1,10 +1,13 @@
 #!/bin/bash
-# Job script for the paper's computational-complexity benchmark.
+# Job script for the paper's remaining computational-complexity benchmark.
 #
 # This runs inside the compute container with:
 #   - Workspace mounted at /home/user
 #   - numpy available via setup.sh
 #   - Paper dataset at /home/user/data/vector_alignment_dataset/
+#
+# The job is resume-safe: if `scoring/raw_complexity_results.json` already
+# exists, completed scales/rotations are skipped automatically.
 
 set -euo pipefail
 cd /home/user

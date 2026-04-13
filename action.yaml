@@ -1,3 +1,5 @@
-action: done
+action: submit
+gpus: 0
+test: false
 milestone: majority
-notes: "Final verification passed: the workspace is clean, method-safe, and ready for gym use at majority; only the reference computational-complexity experiment remains unreproduced."
+notes: "Run the remaining resume-safe Fig. 6 computational-complexity benchmark on the released A3/B3 setup and aggregate scores if partial results already exist."
