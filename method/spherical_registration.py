@@ -376,20 +376,21 @@ def frs(template: np.ndarray, source: np.ndarray,
     template = template / np.linalg.norm(template, axis=1, keepdims=True)
     source = source / np.linalg.norm(source, axis=1, keepdims=True)
 
-    # Template histograms stay fixed through all iterations.
-    template_angles = pcl_array_to_rotation_angle_array(template)
-    template_hists = [
-        hist1D(template_angles[:, 0], k, 0, 360),
-        hist1D(template_angles[:, 1], k, 0, 360),
-        hist1D(template_angles[:, 2], k, 0, 360),
-    ]
-
     current_source = source.copy()
     initial_source = current_source.copy()
     iterations = 0
 
     for iteration in range(max_iterations):
         iterations = iteration + 1
+        # Match the released implementation's runtime path for Fig. 6:
+        # recompute the fixed target histograms inside the loop rather than
+        # caching them once up front.
+        template_angles = pcl_array_to_rotation_angle_array(template)
+        template_hists = [
+            hist1D(template_angles[:, 0], k, 0, 360),
+            hist1D(template_angles[:, 1], k, 0, 360),
+            hist1D(template_angles[:, 2], k, 0, 360),
+        ]
         source_angles = pcl_array_to_rotation_angle_array(current_source)
         source_hists = [
             hist1D(source_angles[:, 0], k, 0, 360),

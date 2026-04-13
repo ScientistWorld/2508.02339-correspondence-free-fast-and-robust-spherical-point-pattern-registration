@@ -29,3 +29,10 @@ At verification time, that means:
 - `robust_alignment_high_outliers`
 
 The paper's separate computational-complexity study remains documented in `scoring/reference.json`, but it is not yet part of the verified scored baseline because it has not been reproduced in `scores.json`.
+
+## Pending reference target
+
+The next submission is intended to add:
+- `computational_complexity`
+
+This uses the paper's dedicated Fig. 6 protocol on `A3/B3` with the released rotations and scale list `10^3, 10^4, 10^5, 10^6, 10^7`.

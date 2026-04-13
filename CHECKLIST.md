@@ -52,6 +52,6 @@ Check off items as you complete them. Order doesn't matter — work however make
 - **FRS fixed in code**: final source-to-source SVD step now matches the released implementation
 - **spmc_frs fixed in code**: the hybrid now uses the actual SPMC initialization plus FRS refinement path
 - **Current limitation**: the separate complexity-scaling study remains in `reference.json` but is not part of the verified scored gym because it has not been reproduced yet
-- **Final state**: the workspace closes at `majority` with the full main benchmark and the high-outlier subset reproduced; no additional compute is queued
+- **Current submission state**: the workspace remains open at `majority` and the next queued step is a CPU submission for the remaining complexity-scaling study
 - **Paper's baseline (FPFH+QUASAR)**: Not implemented — requires C++ dependencies (Point Cloud Library) that are unavailable
 - **Identity rotation baseline**: Used as reference (999° error)

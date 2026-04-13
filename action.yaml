@@ -1,3 +1,5 @@
-action: done
+action: submit
+gpus: 0
+test: false
 milestone: majority
-notes: "Final verification passed: benchmark-facing docs are method-safe, the container/setup split is clean, validation passes, and the workspace is ready for gym use at majority."
+notes: "CPU submission for the remaining Fig. 6 computational-complexity benchmark on the paper's A3/B3 setup across scales 1e3-1e7 and 20 released rotations; local FRS timing now matches the released loop structure, the run is resume-safe, and it should add the missing computational_complexity experiment to scores.json."

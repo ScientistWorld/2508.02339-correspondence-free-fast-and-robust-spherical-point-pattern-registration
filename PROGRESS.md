@@ -30,6 +30,7 @@
 - **Dataset separation fix**: the canonical released dataset now lives under `data/vector_alignment_dataset`, and the shared loader in `data/dataset.py` no longer depends on assets inside `method/`
 - **Complexity submission prep**: the SPMC geographic conversion is now vectorized without changing the paper's computation, making the remaining Fig. 6 benchmark materially more feasible at large scales
 - **FRS memory hardening**: the iterative search now keeps only the initial and final source clouds needed for the closed-form SVD estimate, avoiding unnecessary history retention during the largest scale runs
+- **FRS timing fidelity fix**: the FRS loop now rebuilds the fixed target histograms each iteration, matching the released runtime path used for the paper's timing study instead of a slightly faster cached variant
 
 ## Results Achieved
 - **SPMC on paper's test case (A1/B3/r5)**: 0.13° error — **exact match** with paper's reported 0.13°
@@ -101,6 +102,8 @@
 - **Login-node limitation**: the login node still lacks NumPy, so Python-side spot checks must rely on compute jobs until the refreshed setup overlay is built
 - **Current complexity-path limitation**: the new Fig. 6 scripts parse cleanly via `py_compile`, but they cannot be executed on the login node because NumPy is only available inside the compute overlay
 - **Complexity feasibility risk**: the released SPMC code used Python-level spherical-coordinate conversion, which is too slow for the largest `10^7` scale. The local reproduction now uses an equivalent vectorized NumPy implementation for that step so the compute-side attempt still matches the paper's algorithm while remaining practical.
+- **Timing-path mismatch discovered during final audit**: the local FRS implementation had been caching the fixed target histograms across iterations, while the released code rebuilds them inside the loop. This affected wall-clock timing for the dedicated complexity study.
+- **Mitigation**: restored the released loop structure so the upcoming Fig. 6 submission measures the same FRS runtime path as the authors' code.
 - **Stale score artifact**: `scripts/run_experiment.py` had still been writing a summary `scoring/scores.json`, which allowed non-canonical score blocks to persist even after the evaluator was cleaned. That path has now been removed.
 - **Gym-verification issue**: several benchmark-facing markdown files still leaked paper-specific method details and the canonical dataset path still pointed into `method/`. Those issues are now fixed, and the workspace passed a fresh `python validate.py --compare` check afterward.
 
@@ -117,4 +120,4 @@
 ## Final Status
 - Workspace remains at milestone `majority`
 - Main limitation: the separate computational-complexity scaling study remains documented in `reference.json` but is not yet reproduced in `scores.json`
-- Current turn status: execution-path blockers for the remaining Fig. 6 benchmark are fixed and a fresh CPU submission is being prepared
+- Current turn status: execution-path blockers for the remaining Fig. 6 benchmark are fixed and a fresh CPU submission is queued

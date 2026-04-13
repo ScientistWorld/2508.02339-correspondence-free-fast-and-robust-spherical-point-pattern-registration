@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-13 10:20] - majority
+- Reopened the control file from a stale permanent `done` state so the remaining Fig. 6 complexity benchmark can actually be scheduled
+- Rechecked the released SPMC/FRS implementation, fixed a small FRS timing-path mismatch, and confirmed the local submission still follows the paper's `A3/B3` scaling protocol rather than changing the algorithm
+- Prepared a fresh CPU submission for the unreproduced `computational_complexity` experiment; milestone remains `majority` until that run lands
+
 ### [2026-04-12 23:52] - majority
 - Completed final gym verification and confirmed the existing `majority` milestone is justified by the reproduced released benchmark results
 - Removed benchmark-facing method leakage from scientist documents, cleaned the container/setup split, and tightened the end-to-end reproduction script preflight
@@ -109,4 +114,4 @@
 - Updated the evaluation harness and run scripts to score `spmc`, `frs`, and `spmc_frs` offline on compute nodes
 
 ## Stop Justification
-- Completed at milestone `majority`.
+- Current turn ends with a CPU submission for the remaining computational-complexity experiment; final wrap-up is deferred until that result lands.
