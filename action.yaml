@@ -1,3 +1,3 @@
 action: done
-milestone: majority
-notes: "Made download.sh fetch the public paper repo into data/downloads and aligned dataset loading to the repo-local data path."
+gpus: 0
+notes: "Added explicit 40-rotation train and 40-rotation held-out test slices over raw_results.json; 5 metrics per slice across 2 existing experiments; spmc_frs train/test median gaps are 0.0012 deg overall and 0.0090 deg high-outlier."
