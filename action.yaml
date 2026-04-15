@@ -1,3 +1,3 @@
 action: done
 milestone: majority
-notes: "Final verification passed: the workspace is gym-ready at majority; the only remaining gap is the unreproduced reference computational-complexity experiment."
+notes: "Made download.sh fetch the public paper repo into data/downloads and aligned dataset loading to the repo-local data path."

@@ -8,18 +8,23 @@
 # Estimated total download size: ~50 MB
 # Estimated disk usage: ~50 MB
 
-set -e
+set -euo pipefail
 cd "$(dirname "$0")"
 cd ..
 
-PAPER_CODE_DIR="method/paper_code"
+PAPER_REPO_URL="https://github.com/ARLab-VT/Robust-Vector-Set-Alignment.git"
+PAPER_CODE_DIR="data/downloads/Robust-Vector-Set-Alignment"
 
-if [ -d "$PAPER_CODE_DIR" ]; then
-    echo "Paper code already exists at $PAPER_CODE_DIR"
-    echo "To update, run: git -C $PAPER_CODE_DIR pull"
+mkdir -p data/downloads
+
+if [ -d "$PAPER_CODE_DIR/.git" ]; then
+    echo "Paper code already exists at $PAPER_CODE_DIR; updating..."
+    git -C "$PAPER_CODE_DIR" fetch --depth 1 origin main
+    git -C "$PAPER_CODE_DIR" checkout -q FETCH_HEAD
 else
     echo "Cloning paper code from GitHub..."
-    git clone https://github.com/ARLab-VT/Robust-Vector-Set-Alignment "$PAPER_CODE_DIR"
+    rm -rf "$PAPER_CODE_DIR"
+    git clone --depth 1 "$PAPER_REPO_URL" "$PAPER_CODE_DIR"
 fi
 
 SOURCE_DATASET_DIR="$PAPER_CODE_DIR/vector_alignment_dataset"
@@ -31,7 +36,8 @@ if [ -d "$SOURCE_DATASET_DIR" ]; then
     N_FILES=$(ls "$CANONICAL_DATASET_DIR"/*.pkl 2>/dev/null | wc -l)
     echo "Dataset files found: $N_FILES"
 else
-    echo "WARNING: Dataset directory not found"
+    echo "ERROR: Dataset directory not found in paper repository: $SOURCE_DATASET_DIR" >&2
+    exit 1
 fi
 
 echo "Download complete."
