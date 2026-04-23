@@ -1,30 +1,29 @@
 #!/bin/bash
-# Job script for the paper's remaining computational-complexity benchmark.
+# Job script for the split-evaluation runner.
 #
-# This runs inside the compute container with:
-#   - Workspace mounted at /home/user
-#   - numpy available via setup.sh
-#   - Paper dataset at /home/user/data/vector_alignment_dataset/
-#
-# The job is resume-safe: if `scoring/raw_complexity_results.json` already
-# exists, completed scales/rotations are skipped automatically.
+# This executes the remaining held-out scoring work against the frozen
+# reproduction artifacts:
+#   1. regenerate the missing complexity raw timings on CPU,
+#   2. refresh canonical scoring/scores.json,
+#   3. write scoring/scores_train.json and scoring/scores_test.json,
+#   4. validate the resulting bundle.
 
 set -euo pipefail
 cd /home/user
 export PYTHONPATH="/opt/python-packages${PYTHONPATH:+:${PYTHONPATH}}"
 
 echo "=========================================="
-echo "Spherical Point Pattern Registration: Complexity Benchmark"
+echo "Spherical Point Pattern Registration: Split Evaluation"
 echo "=========================================="
 
-# Compute nodes have no internet. All assets must exist before submission.
 for required_path in \
+    "scoring/raw_results.json" \
     "data/vector_alignment_dataset/A3_A.pkl" \
     "data/vector_alignment_dataset/A3_A_B3.pkl" \
     "data/vector_alignment_dataset/RandomRotation100.pkl"
 do
     if [ ! -f "${required_path}" ]; then
-        echo "ERROR: required complexity asset missing: ${required_path}"
+        echo "ERROR: required artifact missing: ${required_path}"
         exit 1
     fi
 done
@@ -35,24 +34,34 @@ import numpy
 print(f"numpy OK: {numpy.__version__}")
 PY
 
-# Run the paper's Fig. 6 complexity protocol on CPU. The implementation is
-# resume-safe per scale and rotation, so interrupted jobs can continue.
 COMPLEXITY_SCALES="${COMPLEXITY_SCALES:-1000,10000,100000,1000000,10000000}"
 COMPLEXITY_ROTATIONS="${COMPLEXITY_ROTATIONS:-20}"
 RAW_COMPLEXITY_RESULTS="${RAW_COMPLEXITY_RESULTS:-scoring/raw_complexity_results.json}"
-SCORES_OUTPUT="${SCORES_OUTPUT:-scoring/scores.json}"
+
 if [ -f "${RAW_COMPLEXITY_RESULTS}" ]; then
     echo "Found existing complexity checkpoint at ${RAW_COMPLEXITY_RESULTS}; completed rotations will be skipped automatically."
 fi
-echo "Running complexity benchmark on A3/B3 for scales ${COMPLEXITY_SCALES} with ${COMPLEXITY_ROTATIONS} rotations..."
-COMPLEXITY_SCALES="${COMPLEXITY_SCALES}" COMPLEXITY_ROTATIONS="${COMPLEXITY_ROTATIONS}" \
-RAW_COMPLEXITY_RESULTS="${RAW_COMPLEXITY_RESULTS}" SCORES_OUTPUT="${SCORES_OUTPUT}" \
-    bash scripts/complexity.sh
+
+echo "Running computational-complexity benchmark..."
+python3 scripts/run_complexity_experiment.py \
+    --scales "${COMPLEXITY_SCALES}" \
+    --n-rotations "${COMPLEXITY_ROTATIONS}" \
+    --output "${RAW_COMPLEXITY_RESULTS}"
+
+echo "Refreshing canonical scores.json..."
+RAW_COMPLEXITY_RESULTS="${RAW_COMPLEXITY_RESULTS}" \
+    bash scripts/evaluate.sh
+
+echo "Writing split train/test scores..."
+RAW_COMPLEXITY_RESULTS="${RAW_COMPLEXITY_RESULTS}" \
+    bash scripts/evaluate_train.sh
+RAW_COMPLEXITY_RESULTS="${RAW_COMPLEXITY_RESULTS}" \
+    bash scripts/evaluate_test.sh
 
 echo "Validating scoring artifacts..."
 python3 validate.py --compare
 
 echo ""
 echo "=========================================="
-echo "All done! Results in scoring/scores.json"
+echo "All done! Results in scoring/scores.json, scoring/scores_train.json, and scoring/scores_test.json"
 echo "=========================================="

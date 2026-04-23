@@ -23,6 +23,7 @@ ROTATION_INDICES = (
     78, 82, 84, 85, 91, 92, 93, 95, 96, 98,
 )
 HIGH_OUTLIER_CONFIGS = {"B5", "B6", "B7"}
+COMPLEXITY_SCALES = {10**6: "time_at_1e6_points_s", 10**7: "time_at_1e7_points_s"}
 
 
 def _mean(values: list[float]) -> float:
@@ -62,6 +63,22 @@ def _success_rate(values: list[float], threshold_deg: float = 1.0) -> float:
     return float(sum(float(v) <= threshold_deg for v in values) / len(values))
 
 
+def _compute_complexity_scores(raw_results: dict) -> dict:
+    scores = {}
+    for method_name, by_scale in raw_results.items():
+        method_scores = {}
+        for scale_name, values in sorted(by_scale.items(), key=lambda item: int(item[0])):
+            metric_name = COMPLEXITY_SCALES.get(int(scale_name))
+            if metric_name is None:
+                continue
+            times = [float(v) for v in values.get("times", [])]
+            if times:
+                method_scores[metric_name] = _median(times)
+        if method_scores:
+            scores[method_name] = method_scores
+    return scores
+
+
 def _config_name(config_key: str) -> str:
     return config_key.rsplit("_", 1)[-1]
 
@@ -76,7 +93,7 @@ def _slice_series(values: list[float], config_key: str, field_name: str) -> list
     return [float(values[idx]) for idx in ROTATION_INDICES]
 
 
-def compute_scores(raw_results: dict) -> dict:
+def compute_scores(raw_results: dict, raw_complexity_results: dict | None = None) -> dict:
     method_scores = {}
     high_outlier_scores = {}
 
@@ -117,12 +134,17 @@ def compute_scores(raw_results: dict) -> dict:
         experiments["robust_alignment_all"] = {"results": method_scores}
     if high_outlier_scores:
         experiments["robust_alignment_high_outliers"] = {"results": high_outlier_scores}
+    if raw_complexity_results:
+        complexity_scores = _compute_complexity_scores(raw_complexity_results)
+        if complexity_scores:
+            experiments["computational_complexity"] = {"results": complexity_scores}
     return {"experiments": experiments}
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Aggregate train-slice rotation results")
     parser.add_argument("--input", "-i", default="scoring/raw_results.json")
+    parser.add_argument("--complexity-input", default="scoring/raw_complexity_results.json")
     parser.add_argument("--output", "-o", default="scoring/scores_train.json")
     args = parser.parse_args()
 
@@ -132,7 +154,12 @@ def main() -> None:
         sys.exit(1)
 
     raw_results = json.loads(input_path.read_text())
-    scores = compute_scores(raw_results)
+    complexity_path = Path(args.complexity_input)
+    raw_complexity_results = None
+    if complexity_path.exists():
+        raw_complexity_results = json.loads(complexity_path.read_text())
+
+    scores = compute_scores(raw_results, raw_complexity_results)
 
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
