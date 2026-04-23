@@ -48,6 +48,14 @@ def _percentile(values: list[float], percentile: float) -> float:
     return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
 
 
+def _stdev(values: list[float]) -> float:
+    if len(values) < 2:
+        return 0.0
+    mean = sum(values) / len(values)
+    variance = sum((v - mean) ** 2 for v in values) / len(values)
+    return math.sqrt(variance)
+
+
 def _success_rate(values: list[float], threshold_deg: float = 1.0) -> float:
     if not values:
         raise ValueError("success_rate requires at least one value")
@@ -91,6 +99,9 @@ def compute_scores(raw_results: dict) -> dict:
                 "mean_rotation_error_deg": _mean(all_errors),
                 "median_time_s": _median(all_times),
                 "success_rate_1deg": _success_rate(all_errors),
+                "std_rotation_error_deg": _stdev(all_errors),
+                "p95_rotation_error_deg": _percentile(all_errors, 95),
+                "max_rotation_error_deg": max(all_errors) if all_errors else 0.0,
             }
 
         if high_errors:
@@ -98,6 +109,7 @@ def compute_scores(raw_results: dict) -> dict:
                 "median_rotation_error_deg": _median(high_errors),
                 "p90_rotation_error_deg": _percentile(high_errors, 90),
                 "success_rate_1deg": _success_rate(high_errors),
+                "std_rotation_error_deg": _stdev(high_errors),
             }
 
     experiments = {}
