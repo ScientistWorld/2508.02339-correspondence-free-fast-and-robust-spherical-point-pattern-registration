@@ -7,6 +7,7 @@
 set -euo pipefail
 cd /home/user
 export PYTHONPATH="/opt/python-packages${PYTHONPATH:+:${PYTHONPATH}}"
+export PYTHONPATH="/home/user${PYTHONPATH:+:${PYTHONPATH}}"
 
 N_ROTATIONS="${N_ROTATIONS:-100}"
 ROTATION_START="${ROTATION_START:-0}"

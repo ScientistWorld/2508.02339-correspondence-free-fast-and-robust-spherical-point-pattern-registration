@@ -89,6 +89,11 @@
 - Confirmed the previous CPU submission was cancelled before producing evidence, so milestone remains `method_runs`
 - Prepared a fresh submission state for the full 100-rotation offline evaluation
 
+### [2026-04-23 23:55] - method_runs
+- Ran the first split-evaluation compute job `fd93407b-db0`; the container and setup both succeeded, but `scripts/run.sh` failed immediately when `scripts/run_complexity_experiment.py` could not import the repo-root `data` package
+- Fixed the shell entrypoints to prepend `/home/user` to `PYTHONPATH` before invoking any repository Python scripts, so direct `python3 scripts/*.py` execution resolves `data/`, `method/`, and `eval/` consistently on compute nodes
+- Kept the milestone at `method_runs` pending a successful split-evaluation rerun that writes fresh `scores_train.json` and `scores_test.json`
+
 ### [2026-04-08 21:58] - method_runs
 - Re-audited the local method code and confirmed the workspace still contains the paper's actual SPMC, FRS, and SPMC+FRS algorithms
 - Tightened the offline evaluation scripts without changing the algorithm path, then committed and pushed the submission state

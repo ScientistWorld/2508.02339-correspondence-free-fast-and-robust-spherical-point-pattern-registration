@@ -10,6 +10,7 @@
 set -euo pipefail
 cd /home/user
 export PYTHONPATH="/opt/python-packages${PYTHONPATH:+:${PYTHONPATH}}"
+export PYTHONPATH="/home/user${PYTHONPATH:+:${PYTHONPATH}}"
 
 RAW_RESULTS="${RAW_RESULTS:-scoring/raw_results.json}"
 RAW_COMPLEXITY_RESULTS="${RAW_COMPLEXITY_RESULTS:-scoring/raw_complexity_results.json}"
