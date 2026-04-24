@@ -5,17 +5,29 @@
         "spmc": {
           "median_rotation_error_deg": 0.544827870851996,
           "mean_rotation_error_deg": 1.5641872243855721,
-          "median_time_s": 0.2782798365224153
+          "median_time_s": 0.2782798365224153,
+          "success_rate_1deg": 0.6542857142857142,
+          "std_rotation_error_deg": 2.2900789549388514,
+          "p95_rotation_error_deg": 6.244751934670475,
+          "max_rotation_error_deg": 13.347115757718482
         },
         "frs": {
           "median_rotation_error_deg": 0.8364167115906077,
           "mean_rotation_error_deg": 21.532008797385284,
-          "median_time_s": 0.14672793075442314
+          "median_time_s": 0.14672793075442314,
+          "success_rate_1deg": 0.6231428571428571,
+          "std_rotation_error_deg": 50.782749606992304,
+          "p95_rotation_error_deg": 167.91630675865952,
+          "max_rotation_error_deg": 179.99658549243432
         },
         "spmc_frs": {
           "median_rotation_error_deg": 0.5965975644981016,
           "mean_rotation_error_deg": 0.6585869847087993,
-          "median_time_s": 0.3074154636124149
+          "median_time_s": 0.3074154636124149,
+          "success_rate_1deg": 0.8325714285714285,
+          "std_rotation_error_deg": 0.4263398246886062,
+          "p95_rotation_error_deg": 1.4399166244398702,
+          "max_rotation_error_deg": 2.6543501679102643
         }
       }
     },
@@ -23,15 +35,21 @@
       "results": {
         "spmc": {
           "median_rotation_error_deg": 1.0334937145031802,
-          "p90_rotation_error_deg": 6.355891665767475
+          "p90_rotation_error_deg": 6.355891665767475,
+          "success_rate_1deg": 0.49133333333333334,
+          "std_rotation_error_deg": 3.014494378230505
         },
         "frs": {
           "median_rotation_error_deg": 0.8464582178859317,
-          "p90_rotation_error_deg": 150.25888901362293
+          "p90_rotation_error_deg": 150.25888901362293,
+          "success_rate_1deg": 0.6153333333333333,
+          "std_rotation_error_deg": 51.56995975066103
         },
         "spmc_frs": {
           "median_rotation_error_deg": 0.6214782741328184,
-          "p90_rotation_error_deg": 1.317018226164659
+          "p90_rotation_error_deg": 1.317018226164659,
+          "success_rate_1deg": 0.7926666666666666,
+          "std_rotation_error_deg": 0.44238706978279957
         }
       }
     },

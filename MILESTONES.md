@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-24 17:36] - secondary_claims
+- Final verification found one scoring-contract mismatch: the canonical top-level evaluator was dropping robustness metrics that were already present in `reference.json` and the train/test slices
+- Fixed `eval/evaluate.py`, regenerated `scoring/scores.json`, and aligned `scoring/EXPERIMENTS.md` so the scored benchmark now reports the full checked-in robust-alignment metric set
+- Closed the workspace at `secondary_claims`: gym-ready for the released spherical-pattern benchmark plus the complexity study, with the spherical-image path present but still lacking a fresh scored artifact
+
 ### [2026-04-24 17:30] - secondary_claims
 - Added a reusable spherical-image benchmark path based on the paper's `SphImg2SphPoints -> SPMC+FRS` adaptation, using a verified public `world.geojson` substitute because the paper does not release its exact world-map image
 - Extended the canonical evaluator and download scripts so a fresh CPU run can score the new image experiment alongside the already reproduced robust-alignment and complexity studies

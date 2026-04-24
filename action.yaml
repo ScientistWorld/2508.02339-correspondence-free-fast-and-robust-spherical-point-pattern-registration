@@ -1,5 +1,3 @@
-action: submit
-gpus: 0
-test: true
+action: done
 milestone: secondary_claims
-notes: "Run the new spherical-image adaptation benchmark on CPU using the verified world.geojson substitute and aggregate it with the existing robust-alignment and complexity artifacts."
+notes: "Final verification passed; canonical scoring now matches the declared robust-alignment rubric and the workspace is gym-ready at secondary_claims."

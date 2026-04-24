@@ -49,6 +49,20 @@ def _max(values: list[float]) -> float:
     return float(max(values))
 
 
+def _stdev(values: list[float]) -> float:
+    if len(values) < 2:
+        return 0.0
+    mean = sum(values) / len(values)
+    variance = sum((v - mean) ** 2 for v in values) / len(values)
+    return math.sqrt(variance)
+
+
+def _success_rate(values: list[float], threshold_deg: float = 1.0) -> float:
+    if not values:
+        raise ValueError("success_rate requires at least one value")
+    return float(sum(float(v) <= threshold_deg for v in values) / len(values))
+
+
 def compute_scores(raw_results: dict) -> dict:
     """
     Compute aggregate scores from raw rotation estimation results.
@@ -76,6 +90,10 @@ def compute_scores(raw_results: dict) -> dict:
         scores[method]["median_rotation_error_deg"] = _median(errs)
         scores[method]["mean_rotation_error_deg"] = _mean(errs)
         scores[method]["median_time_s"] = _median(all_times[method])
+        scores[method]["success_rate_1deg"] = _success_rate(errs)
+        scores[method]["std_rotation_error_deg"] = _stdev(errs)
+        scores[method]["p95_rotation_error_deg"] = _percentile(errs, 95)
+        scores[method]["max_rotation_error_deg"] = _max(errs)
 
     # robust_alignment_high_outliers: B5, B6, B7 only
     for method, configs in raw_results.items():
@@ -86,6 +104,8 @@ def compute_scores(raw_results: dict) -> dict:
         if high_errs:
             scores[method]["median_rotation_error_deg_high"] = _median(high_errs)
             scores[method]["p90_rotation_error_deg_high"] = _percentile(high_errs, 90)
+            scores[method]["success_rate_1deg_high"] = _success_rate(high_errs)
+            scores[method]["std_rotation_error_deg_high"] = _stdev(high_errs)
 
     return scores
 
@@ -157,6 +177,10 @@ def build_scores_json(
                     "median_rotation_error_deg": method_scores["median_rotation_error_deg"],
                     "mean_rotation_error_deg": method_scores["mean_rotation_error_deg"],
                     "median_time_s": method_scores["median_time_s"],
+                    "success_rate_1deg": method_scores["success_rate_1deg"],
+                    "std_rotation_error_deg": method_scores["std_rotation_error_deg"],
+                    "p95_rotation_error_deg": method_scores["p95_rotation_error_deg"],
+                    "max_rotation_error_deg": method_scores["max_rotation_error_deg"],
                 }
                 for method_name, method_scores in scores.items()
             }
@@ -171,6 +195,11 @@ def build_scores_json(
                     "p90_rotation_error_deg": method_scores.get(
                         "p90_rotation_error_deg_high",
                         999.0,
+                    ),
+                    "success_rate_1deg": method_scores.get("success_rate_1deg_high", 0.0),
+                    "std_rotation_error_deg": method_scores.get(
+                        "std_rotation_error_deg_high",
+                        0.0,
                     ),
                 }
                 for method_name, method_scores in scores.items()

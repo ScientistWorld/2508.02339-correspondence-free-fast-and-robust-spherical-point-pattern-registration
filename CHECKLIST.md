@@ -30,7 +30,7 @@ Check off items as you complete them. Order doesn't matter — work however make
 - [x] `scripts/run_experiment.py` — runs SPMC, FRS, and SPMC+FRS on the paper dataset
 - [x] `scripts/run_complexity_experiment.py` — runs the paper's A3/B3 runtime-scaling benchmark
 - [x] `scripts/run_spherical_image_experiment.py` — runs the paper's spherical-image benchmark on a reproducible public world-map substitute
-- [x] `scripts/run.sh` — Ray job script for the next CPU submission
+- [x] `scripts/run.sh` — latest verified Ray job script
 
 ## Environment
 - [x] `environment/container.def` + `environment/setup.sh`
@@ -54,5 +54,6 @@ Check off items as you complete them. Order doesn't matter — work however make
 - **spmc_frs fixed in code**: the hybrid now uses the actual SPMC initialization plus FRS refinement path
 - **Current limitation**: the packaged gym still does not reproduce the paper's point-cloud-registration experiment, and the new spherical-image adaptation benchmark still needs a fresh compute-side result before it counts toward a higher milestone
 - **Current verification state**: the workspace is gym-ready for the released spherical-pattern benchmark and the complexity study, which supports `secondary_claims` but not `majority`
+- **Scoring alignment**: top-level `scores.json` now includes the same robust-alignment constraint metrics already declared in `reference.json` and the train/test slices
 - **Paper's baseline (FPFH+QUASAR)**: Not implemented — requires C++ dependencies (Point Cloud Library) that are unavailable
 - **Identity rotation baseline**: Used as reference (999° error)

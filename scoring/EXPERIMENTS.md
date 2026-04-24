@@ -12,6 +12,10 @@ The recorded metrics are:
 - `median_rotation_error_deg`
 - `mean_rotation_error_deg`
 - `median_time_s`
+- `success_rate_1deg`
+- `std_rotation_error_deg`
+- `p95_rotation_error_deg`
+- `max_rotation_error_deg`
 
 ## robust_alignment_high_outliers
 Measures robustness on the hardest clutter settings only. This experiment uses
@@ -21,6 +25,8 @@ the same released dataset, but restricts evaluation to configurations `B5`,
 The recorded metrics are:
 - `median_rotation_error_deg`
 - `p90_rotation_error_deg`
+- `success_rate_1deg`
+- `std_rotation_error_deg`
 
 This experiment exists because the paper's central claim is not only low
 overall error, but also strong performance under severe outlier corruption.

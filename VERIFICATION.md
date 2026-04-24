@@ -1,25 +1,24 @@
 # Verification Report
 
 ## Initial Assessment
-The workspace was close to gym-ready, but its control state was inconsistent with the checked-in evidence. The codebase, scoring artifacts, and validation output already supported the released spherical-pattern benchmark and the separate computational-complexity study, while `action.yaml` and `MILESTONES.md` had been left in a stale lower-state submission flow. The previous `full` claim was not justified because the paper's point-cloud-registration experiment is still not packaged, and the spherical-image adaptation only gained a benchmark path this turn rather than fresh results.
+The workspace started in a mostly good `secondary_claims` state: the released spherical-pattern benchmark and the separate complexity study were already reproduced, `validate.py --compare` passed, and the problem/method separation was intact. The main issue I found was narrower and important for gym use: the canonical top-level scorer in `eval/evaluate.py` was not emitting all of the robust-alignment constraint metrics that `scoring/reference.json` and the train/test slices already declared.
 
 ## Issues Found
-- Critical: The claimed milestone `full` was not justified by the packaged scope. The workspace reproduces the released robust-alignment benchmark and complexity study, but not the paper's point-cloud-registration experiment; the spherical-image experiment has only now been wired for a fresh compute-side run.
-- Minor: `briefing/overview.md` still said the computational-complexity study was unmeasured, which conflicted with the checked-in `raw_complexity_results.json` and `scores.json`.
-- Minor: `MILESTONES.md`, `PROGRESS.md`, `CHECKLIST.md`, and `action.yaml` were stale relative to the actual verified workspace state.
+- Minor: `scoring/scores.json` under-reported the robust-alignment rubric. The main scorer emitted only median/mean/runtime for `robust_alignment_all` and only median/p90 for `robust_alignment_high_outliers`, while `reference.json` and `scores_{train,test}.json` already included success-rate and error-tail constraints.
+- Cosmetic: `scoring/EXPERIMENTS.md`, `PROGRESS.md`, `CHECKLIST.md`, `MILESTONES.md`, and `action.yaml` reflected an in-progress submission state instead of the final verified close-out.
 
 ## Fixes Applied
-- Re-ran `python validate.py --compare` and confirmed the workspace passes structural, scoring, and train/test checks.
-- Verified `scripts/evaluate.sh` works standalone on the checked-in raw artifacts.
-- Verified the only URL in `scripts/download.sh` with `curl -I -L --max-time 15` and confirmed it resolves successfully.
-- Updated `briefing/overview.md` so the reproduction status matches the checked-in complexity results and explicitly states the narrower packaged scope.
-- Updated `MILESTONES.md`, `PROGRESS.md`, and `CHECKLIST.md` to the accurate final milestone `secondary_claims`.
-- Rewrote `VERIFICATION.md` and updated `action.yaml` to reflect the verified state instead of leaving the workspace in a stale terminal status.
+- Updated `eval/evaluate.py` so the canonical evaluator now writes `success_rate_1deg`, `std_rotation_error_deg`, `p95_rotation_error_deg`, and `max_rotation_error_deg` for `robust_alignment_all`, plus `success_rate_1deg` and `std_rotation_error_deg` for `robust_alignment_high_outliers`.
+- Regenerated `scoring/scores.json` from the existing raw artifacts with `bash scripts/evaluate.sh`.
+- Updated `scoring/EXPERIMENTS.md` so the documented metric lists match the actual scored outputs.
+- Re-ran `python3 validate.py --compare` and confirmed the workspace still passes structural and scoring checks.
+- Verified `scripts/download.sh` remains portable: no `shared/` references in committed code, and both external URLs resolve successfully with `curl -I -L`.
+- Updated the milestone/progress/checklist records and switched the control file to a final `done` state at `secondary_claims`.
 
 ## Final Judgment
-This workspace is ready to serve as a gym for the packaged problem scope: correspondence-free spherical point-pattern rotation estimation on the released benchmark, plus the dedicated complexity study. Improve-mode and from-scratch-mode agents can both use it meaningfully because the problem/evaluation split is clean and the scoring interface is reusable. It is not a `full` reproduction of the paper because the point-cloud-registration experiment is still missing, and the spherical-image benchmark now exists in code but still needs fresh compute-side evidence.
+This workspace is ready to serve as a gym for the packaged scope. From-scratch agents can use the method-agnostic `briefing/`, `data/`, `eval/`, and scoring docs without learning the paper's implementation, and improve-mode agents can build on the shipped method and raw artifacts through the same reusable evaluator. The milestone should remain `secondary_claims`: the released spherical-pattern benchmark and the dedicated complexity study are reproduced, while the point-cloud experiment is still absent and the newly added spherical-image path still lacks a fresh scored artifact.
 
 - Milestone: secondary_claims
 - Ready for gym use: yes
 - Confidence: high
-- Key limitation: The packaged gym still lacks point-cloud-registration reproduction, and the new spherical-image benchmark path is not yet backed by a fresh compute-side score artifact.
+- Key limitation: The gym is strong for the released spherical-pattern benchmark and complexity study, but it still lacks a scored spherical-image artifact and does not package the paper's point-cloud-registration experiment.
