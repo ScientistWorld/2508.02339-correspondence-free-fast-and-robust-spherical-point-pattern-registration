@@ -1,3 +1,5 @@
-action: done
+action: submit
+gpus: 0
+test: true
 milestone: secondary_claims
-notes: "Final verification passed. The workspace is gym-ready for the released spherical-pattern benchmark and complexity study, but it does not package the paper's point-cloud or spherical-image adaptation experiments, so full is not justified."
+notes: "Run the new spherical-image adaptation benchmark on CPU using the verified world.geojson substitute and aggregate it with the existing robust-alignment and complexity artifacts."
