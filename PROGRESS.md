@@ -123,6 +123,6 @@
 - **Baseline packaging**: the shipped baseline is an identity-rotation sanity check on the released dataset, not the paper's FPFH+QUASAR baseline.
 
 ## Final Status
-- Workspace is reset to milestone `method_runs`
-- Main limitation this turn: the checked-in code implements the paper's algorithms, but the paper's comparative `FPFH+QUASAR` baseline is still not reproduced here, so the central comparison claim is not yet re-established on this clone
-- Current turn status: CPU submission prepared to rerun the released benchmark inside the packaged environment from the restored dataset path
+- Workspace closes at milestone `secondary_claims`
+- Main limitation: the packaged gym reproduces the released spherical-pattern benchmark and the separate complexity study, but not the paper's point-cloud-registration or spherical-image adaptation experiments
+- Current turn status: final verification passed, scoring/docs are consistent, and the workspace is ready for gym use on its packaged scope

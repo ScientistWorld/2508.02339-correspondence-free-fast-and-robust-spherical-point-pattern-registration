@@ -18,4 +18,5 @@ The paper addresses rotation estimation between two sets of points on a unit sph
 ## Reproduction Status
 - Reproduced the released Experiment 1 benchmark end to end on the paper's dataset for all 5 patterns, 7 outlier configurations, and 100 rotations per configuration
 - Reproduced `spmc_frs` at **0.597°** median error overall and **0.621°** on the high-outlier subset, both better than the paper's reported values for the same experiment
-- The separate computational-complexity scaling study remains unmeasured in this workspace
+- Reproduced the separate computational-complexity scaling study, with canonical scores for the `10^6` and `10^7` point settings recorded in `scoring/scores.json`
+- The packaged gym does **not** reproduce the paper's point-cloud-registration adaptation or spherical-image adaptation, so the workspace scope is narrower than the full paper

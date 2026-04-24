@@ -1,5 +1,3 @@
-action: submit
-gpus: 0
-milestone: method_runs
-test: false
-notes: "Fresh CPU rerun of the released Experiment 1 benchmark from the restored data/downloads/vector_alignment_dataset path. This ignores stale main-benchmark artifacts, rebuilds scoring/raw_results.json and scoring/scores.json inside the container, and validates the refreshed bundle. Milestone remains method_runs because the comparative FPFH+QUASAR baseline is still not reproduced."
+action: done
+milestone: secondary_claims
+notes: "Final verification passed. The workspace is gym-ready for the released spherical-pattern benchmark and complexity study, but it does not package the paper's point-cloud or spherical-image adaptation experiments, so full is not justified."

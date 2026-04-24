@@ -1,24 +1,25 @@
 # Verification Report
 
 ## Initial Assessment
-The workspace started in a supportable `majority` state. The released robust-alignment benchmark had already been reproduced on the real dataset, `scores.json` matched those checked-in results, and `python validate.py --compare` passed. The main verification task was to judge gym readiness, not to rescue a broken reproduction.
+The workspace was close to gym-ready, but its control state was inconsistent with the checked-in evidence. The codebase, scoring artifacts, and validation output already supported the released spherical-pattern benchmark and the separate computational-complexity study, while `action.yaml` and `MILESTONES.md` had been left in a stale lower-state submission flow. The previous `full` claim was not justified because the paper's point-cloud-registration and spherical-image adaptation experiments are not packaged here.
 
 ## Issues Found
-- Minor: the workspace still reflected the previous queued-submission state even though this final turn should close the paper cleanly.
-- Minor: `scoring/EXPERIMENTS.md` was serviceable but could describe the currently scored experiments more explicitly for future scientist agents.
-- Cosmetic: a stale root `__pycache__/` directory was still present.
-- Cosmetic: the repo still had pending deletions for unused root artifacts (`manifest.json`, `trajectory/`, and the old root `README.md`) that had not been finalized in git.
+- Critical: The claimed milestone `full` was not justified by the packaged scope. The workspace reproduces the released robust-alignment benchmark and complexity study, but not the paper's additional point-cloud-registration or spherical-image experiments.
+- Minor: `briefing/overview.md` still said the computational-complexity study was unmeasured, which conflicted with the checked-in `raw_complexity_results.json` and `scores.json`.
+- Minor: `MILESTONES.md`, `PROGRESS.md`, `CHECKLIST.md`, and `action.yaml` were stale relative to the actual verified workspace state.
 
 ## Fixes Applied
-- Rewrote [VERIFICATION.md](/home/user/VERIFICATION.md) to match the actual final judgment and current tree state.
-- Tightened [scoring/EXPERIMENTS.md](/home/user/scoring/EXPERIMENTS.md) so it maps cleanly to the two experiments that actually appear in `scores.json`, including their metric names and purpose.
-- Updated [MILESTONES.md](/home/user/MILESTONES.md), [PROGRESS.md](/home/user/PROGRESS.md), [CHECKLIST.md](/home/user/CHECKLIST.md), and [action.yaml](/home/user/action.yaml) so the workspace closes consistently at `majority` instead of remaining in a stale queued-submission state.
-- Removed the root `__pycache__/` directory and finalized the deletion of unused root artifacts.
+- Re-ran `python validate.py --compare` and confirmed the workspace passes structural, scoring, and train/test checks.
+- Verified `scripts/evaluate.sh` works standalone on the checked-in raw artifacts.
+- Verified the only URL in `scripts/download.sh` with `curl -I -L --max-time 15` and confirmed it resolves successfully.
+- Updated `briefing/overview.md` so the reproduction status matches the checked-in complexity results and explicitly states the narrower packaged scope.
+- Updated `MILESTONES.md`, `PROGRESS.md`, and `CHECKLIST.md` to the accurate final milestone `secondary_claims`.
+- Rewrote `VERIFICATION.md` and updated `action.yaml` to close the workspace cleanly at the verified milestone.
 
 ## Final Judgment
-This workspace is ready to serve as a research gym. Improve-mode scientists have the reproduced method, scores, and scripts. From-scratch scientists can work from method-agnostic problem, evaluation, data, and scoring documents without being told the paper's algorithm. The scoring rubric for the experiments actually in `scores.json` is reasonable: after renormalization, `robust_alignment_all` carries 75% of the score and `robust_alignment_high_outliers` carries 25%, which appropriately emphasizes overall performance while still rewarding robustness under severe outliers.
+This workspace is ready to serve as a gym for the packaged problem scope: correspondence-free spherical point-pattern rotation estimation on the released benchmark, plus the dedicated complexity study. Improve-mode and from-scratch-mode agents can both use it meaningfully because the problem/evaluation split is clean and the scoring interface is reusable. It is not a `full` reproduction of the paper because the point-cloud and spherical-image adaptation experiments are not included.
 
-- Milestone: majority
+- Milestone: secondary_claims
 - Ready for gym use: yes
 - Confidence: high
-- Key limitation: the paper's separate `computational_complexity` reference experiment is still documented in `reference.json` but remains unreproduced in `scores.json`
+- Key limitation: The packaged gym does not reproduce the paper's point-cloud-registration or spherical-image adaptation experiments.

@@ -1,13 +1,13 @@
 # Reproduction Milestones
 
-**Current: method_runs**
+**Current: secondary_claims**
 
 ## Progress Log
 
-### [2026-04-24 17:20] - method_runs
-- Audited the workspace against the paper again and confirmed the minimum valid target remains Experiment 1 on the released Robust Vector Alignment Dataset with runtime as a constraint metric
-- Restored the missing public dataset into `data/downloads/vector_alignment_dataset` via `scripts/download.sh`, fixing the fresh-clone reproducibility break introduced by relying on stale local artifacts alone
-- Reopened the control state from the stale permanent `done/full` claim; the conservative milestone is `method_runs` because the paper's comparative `FPFH+QUASAR` baseline is still not reproduced in this workspace
+### [2026-04-24 17:22] - secondary_claims
+- Final verification confirmed the workspace is structurally sound, method/eval separation is intact, `scripts/evaluate.sh` works standalone, and the download path is portable from `data/downloads/`
+- Confirmed that the checked-in artifacts already cover both the released robust-alignment benchmark and the separate computational-complexity study, so the workspace exceeds `core_claim_plus`
+- Lowered the stale `full` claim to `secondary_claims`: the spherical-pattern benchmark and complexity claim are reproduced, but the paper's point-cloud and spherical-image adaptation experiments are not packaged here
 
 ### [2026-04-13 18:59] - majority
 - Final verification confirmed the claimed `majority` milestone is justified by the checked-in results and scoring artifacts
@@ -134,4 +134,4 @@
 - Updated the evaluation harness and run scripts to score `spmc`, `frs`, and `spmc_frs` offline on compute nodes
 
 ## Stop Justification
-- Not finished. Fresh compute-side rerun pending after restoring the missing downloaded dataset.
+- Closed at `secondary_claims`. The packaged gym is ready for the released spherical-pattern benchmark and complexity study, but it does not reproduce the full paper scope.

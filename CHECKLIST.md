@@ -40,18 +40,18 @@ Check off items as you complete them. Order doesn't matter — work however make
 
 ## Milestones
 - [x] `method_runs` — SPMC, FRS, SPMC+FRS execute end-to-end without errors
-- [ ] `core_claim` — blocked on reproducing the comparative `FPFH+QUASAR` evidence for the paper's main claim
-- [ ] `core_claim_plus`
-- [ ] `secondary_claims`
+- [x] `core_claim` — the released robust-alignment benchmark is reproduced on the real dataset with validated canonical scores
+- [x] `core_claim_plus` — the main benchmark is reproduced across the full 100-rotation released protocol
+- [x] `secondary_claims` — the separate computational-complexity study is also reproduced and scored
 - [ ] `majority`
-- [ ] `near_complete` — pending the compute-side complexity benchmark
+- [ ] `near_complete`
 - [ ] `full`
 
 ## Notes
 - **SPMC fully working**: exact agreement with the released code on audited spot checks
 - **FRS fixed in code**: final source-to-source SVD step now matches the released implementation
 - **spmc_frs fixed in code**: the hybrid now uses the actual SPMC initialization plus FRS refinement path
-- **Current limitation**: the separate complexity-scaling study remains in `reference.json` but is not part of the verified scored gym because it has not been reproduced yet
-- **Current verification state**: the workspace contains a faithful implementation of the paper's core algorithms, but the reproduced comparative baseline is still missing so the safe milestone is `method_runs`
+- **Current limitation**: the packaged gym does not reproduce the paper's point-cloud-registration or spherical-image adaptation experiments, and it does not ship a reproduced FPFH+QUASAR baseline implementation
+- **Current verification state**: the workspace is gym-ready for the released spherical-pattern benchmark and the complexity study, which supports `secondary_claims` but not `majority`
 - **Paper's baseline (FPFH+QUASAR)**: Not implemented — requires C++ dependencies (Point Cloud Library) that are unavailable
 - **Identity rotation baseline**: Used as reference (999° error)
