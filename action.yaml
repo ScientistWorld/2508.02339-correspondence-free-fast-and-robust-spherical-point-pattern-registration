@@ -1,3 +1,3 @@
-action: submit
+action: done
 gpus: 0
-notes: "Retry CPU split-eval after PYTHONPATH fix for direct scripts/*.py execution; regenerate raw_complexity_results.json, refresh scores.json, then write and validate scoring/scores_{train,test}.json."
+notes: "Dataset-partition train/test split plus shared post-hoc complexity rescore; 13 train metrics, 13 test metrics; alignment metrics differ slightly but consistently across slices with no byte-identical collapse, while complexity is shared by design from one benchmark artifact; all scoring artifacts regenerated and validate.py --compare passed."
