@@ -40,10 +40,10 @@ Check off items as you complete them. Order doesn't matter — work however make
 
 ## Milestones
 - [x] `method_runs` — SPMC, FRS, SPMC+FRS execute end-to-end without errors
-- [x] `core_claim` — compute-side results support the released method on all 5 patterns × 7 configs
-- [x] `core_claim_plus` — full 100-rotation benchmark completed on compute with validated scores
+- [ ] `core_claim` — blocked on reproducing the comparative `FPFH+QUASAR` evidence for the paper's main claim
+- [ ] `core_claim_plus`
 - [ ] `secondary_claims`
-- [x] `majority` — 2 of 3 scored reference experiments reproduced (main benchmark + high-outlier subset)
+- [ ] `majority`
 - [ ] `near_complete` — pending the compute-side complexity benchmark
 - [ ] `full`
 
@@ -52,6 +52,6 @@ Check off items as you complete them. Order doesn't matter — work however make
 - **FRS fixed in code**: final source-to-source SVD step now matches the released implementation
 - **spmc_frs fixed in code**: the hybrid now uses the actual SPMC initialization plus FRS refinement path
 - **Current limitation**: the separate complexity-scaling study remains in `reference.json` but is not part of the verified scored gym because it has not been reproduced yet
-- **Current verification state**: the workspace passed final gym verification and closes at `majority`
+- **Current verification state**: the workspace contains a faithful implementation of the paper's core algorithms, but the reproduced comparative baseline is still missing so the safe milestone is `method_runs`
 - **Paper's baseline (FPFH+QUASAR)**: Not implemented — requires C++ dependencies (Point Cloud Library) that are unavailable
 - **Identity rotation baseline**: Used as reference (999° error)

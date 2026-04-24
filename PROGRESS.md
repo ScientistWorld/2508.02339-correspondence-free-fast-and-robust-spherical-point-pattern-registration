@@ -1,12 +1,14 @@
 # Progress
 
 ## What Works
+- **Dataset restoration**: the paper's released Robust Vector Alignment Dataset is present again under `data/downloads/vector_alignment_dataset`, matching the checked-in loader and shell scripts
+- **Download path integrity**: `scripts/download.sh` now reproduces the actual expected runtime layout on a fresh clone by cloning the public upstream repo and copying the dataset into `data/downloads/`
 - **Reopened submission path**: the workspace is no longer left in a permanent `done` state while the Fig. 6 complexity experiment remains outstanding
 - **Method-path regression fix**: `scripts/run_experiment.py` now matches the current evaluator signature again, so `scripts/method.sh` and `scripts/reproduce.sh` no longer fail before aggregation
 - **Complexity score-contract fix**: the evaluator now emits only `time_at_1e6_points_s` and `time_at_1e7_points_s`, matching `scoring/reference.json` so a future complexity run can validate cleanly
 - **Complexity preflight fix**: `scripts/run.sh` now checks for `A3_A.pkl`, `A3_A_B3.pkl`, and `RandomRotation100.pkl`, which are the actual required assets for the Fig. 6 benchmark
 - **SPMC algorithm** fully implemented and previously validated on the paper dataset
-- **Paper's dataset**: Robust Vector Alignment Dataset fully loaded and verified (35 pickle files + 100 rotations)
+- **Paper's dataset**: Robust Vector Alignment Dataset fully loaded and verified at `data/downloads/vector_alignment_dataset` (40 pattern/config pickle files + `RandomRotation100.pkl`)
 - **Evaluation pipeline**: rotation error computation, timing, aggregation, scores.json output
 - **scripts/evaluate.sh**: method-agnostic aggregation path that reads raw results and writes scores.json
 - **data access**: baseline and method runs now share the same method-agnostic loader in `data/dataset.py`
@@ -74,10 +76,13 @@
   - `spmc_frs`: no longer falls back to pure SPMC; improves difficult cases such as `A5/B7/r1` to 0.83°
 
 ## What Remains
-- Compute-side execution of the computational complexity scaling test with varying point counts
+- Fresh compute-side rerun of the released Experiment 1 benchmark after restoring the missing dataset into the portable `data/downloads/` location
+- Optional fresh compute-side rerun of the computational-complexity scaling test if the new validation run exposes any artifact drift
 - Optional FPFH+QUASAR baseline reimplementation (requires Point Cloud Library C++ stack that is currently unavailable here)
 
 ## Issues Encountered
+- **Stale completion claim**: `action.yaml` and `MILESTONES.md` had been left at permanent `done/full` even though this clone no longer had the downloaded dataset required by `data/dataset.py`
+- **Mitigation**: restored the dataset with `scripts/download.sh`, downgraded the claimed milestone, and prepared a new CPU submission that reruns the released benchmark from the restored portable path
 - **Stale method-runner bug**: `scripts/run_experiment.py` still called `build_scores_json(...)` with the old two-argument signature after the complexity evaluator extension, which would have broken `scripts/method.sh` and `scripts/reproduce.sh`
 - **Mitigation**: updated the call site to pass the explicit empty complexity block and restored compatibility with the current evaluator
 - **Complexity schema bug**: the evaluator emitted runtime keys like `time_at_1000000_points_s` plus an unreferenced slope metric, while `scoring/reference.json` only declares `time_at_1e6_points_s` and `time_at_1e7_points_s`
@@ -118,6 +123,6 @@
 - **Baseline packaging**: the shipped baseline is an identity-rotation sanity check on the released dataset, not the paper's FPFH+QUASAR baseline.
 
 ## Final Status
-- Workspace remains at milestone `majority`
-- Main limitation: the separate computational-complexity scaling study remains documented in `reference.json` but is not yet reproduced in `scores.json`
-- Current turn status: final verification passed and the workspace is ready for gym use at `majority`
+- Workspace is reset to milestone `method_runs`
+- Main limitation this turn: the checked-in code implements the paper's algorithms, but the paper's comparative `FPFH+QUASAR` baseline is still not reproduced here, so the central comparison claim is not yet re-established on this clone
+- Current turn status: CPU submission prepared to rerun the released benchmark inside the packaged environment from the restored dataset path

@@ -1,13 +1,13 @@
 # Reproduction Milestones
 
-**Current: full**
+**Current: method_runs**
 
 ## Progress Log
 
-### [2026-04-24 00:05] - full
-- Reviewed successful split-evaluation job `9610560c-51f`: `scripts/run.sh` regenerated the raw complexity benchmark, refreshed canonical `scoring/scores.json`, wrote `scoring/scores_train.json` and `scoring/scores_test.json`, and passed `validate.py --compare`
-- Closed the last remaining reproduction gap by measuring the paper's computational-complexity experiment alongside the already reproduced robust-alignment benchmarks, so all three reference experiments are now backed by real run artifacts
-- Promoted the workspace to `full`; train/test complexity metrics now come from disjoint fixed halves of the 20-rotation timing benchmark so the primary ranking metric differentiates across slices without changing the underlying scientific quantity
+### [2026-04-24 17:20] - method_runs
+- Audited the workspace against the paper again and confirmed the minimum valid target remains Experiment 1 on the released Robust Vector Alignment Dataset with runtime as a constraint metric
+- Restored the missing public dataset into `data/downloads/vector_alignment_dataset` via `scripts/download.sh`, fixing the fresh-clone reproducibility break introduced by relying on stale local artifacts alone
+- Reopened the control state from the stale permanent `done/full` claim; the conservative milestone is `method_runs` because the paper's comparative `FPFH+QUASAR` baseline is still not reproduced in this workspace
 
 ### [2026-04-13 18:59] - majority
 - Final verification confirmed the claimed `majority` milestone is justified by the checked-in results and scoring artifacts
@@ -134,4 +134,4 @@
 - Updated the evaluation harness and run scripts to score `spmc`, `frs`, and `spmc_frs` offline on compute nodes
 
 ## Stop Justification
-- Completed at milestone `full`.
+- Not finished. Fresh compute-side rerun pending after restoring the missing downloaded dataset.

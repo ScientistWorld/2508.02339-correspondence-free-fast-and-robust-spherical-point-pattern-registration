@@ -1,4 +1,5 @@
-action: done
+action: submit
 gpus: 0
-milestone: full
-notes: "Updated download and runtime paths so the public dataset is fetched into data/downloads/vector_alignment_dataset and all runnable scripts use that fresh-clone-safe location."
+milestone: method_runs
+test: false
+notes: "Fresh CPU rerun of the released Experiment 1 benchmark from the restored data/downloads/vector_alignment_dataset path. This ignores stale main-benchmark artifacts, rebuilds scoring/raw_results.json and scoring/scores.json inside the container, and validates the refreshed bundle. Milestone remains method_runs because the comparative FPFH+QUASAR baseline is still not reproduced."
