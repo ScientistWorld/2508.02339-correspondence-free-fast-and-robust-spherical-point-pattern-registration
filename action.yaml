@@ -1,3 +1,3 @@
 action: done
 gpus: 0
-notes: "Dataset-partition train/test split for alignment plus deterministic half-split timing evaluation for complexity; 13 train metrics, 13 test metrics; both alignment and primary complexity metrics differ across slices without collapse while staying in the same range; all scoring artifacts regenerated and validate.py passed."
+notes: "Rotation-index train/test split for alignment plus deterministic even/odd timing split for complexity; 13 train metrics and 13 test metrics generated from real post-hoc runs; train/test remain close but non-identical with stable method ranking and moderate 1e7-point complexity gaps; validate.py --compare passed."
