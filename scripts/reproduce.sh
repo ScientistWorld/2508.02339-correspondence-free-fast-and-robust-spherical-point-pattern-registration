@@ -39,15 +39,23 @@ echo "[2/4] Running SPMC, FRS, and SPMC+FRS evaluation on paper's dataset..."
 N_ROTATIONS="${N_ROTATIONS:-100}" bash scripts/method.sh
 
 # Step 3: Optional complexity benchmark
-if [ "${RUN_COMPLEXITY:-0}" = "1" ]; then
-    echo "[3/4] Running computational-complexity benchmark..."
-    bash scripts/complexity.sh
+if [ "${RUN_SPHERICAL_IMAGES:-1}" = "1" ]; then
+    echo "[3/5] Running spherical-image benchmark..."
+    bash scripts/spherical_images.sh
 else
-    echo "[3/4] Skipping computational-complexity benchmark (set RUN_COMPLEXITY=1 to enable)"
+    echo "[3/5] Skipping spherical-image benchmark (set RUN_SPHERICAL_IMAGES=1 to enable)"
 fi
 
-# Step 4: Validate and report results
-echo "[4/4] Validating scoring artifacts..."
+# Step 4: Optional complexity benchmark
+if [ "${RUN_COMPLEXITY:-0}" = "1" ]; then
+    echo "[4/5] Running computational-complexity benchmark..."
+    bash scripts/complexity.sh
+else
+    echo "[4/5] Skipping computational-complexity benchmark (set RUN_COMPLEXITY=1 to enable)"
+fi
+
+# Step 5: Validate and report results
+echo "[5/5] Validating scoring artifacts..."
 python3 validate.py --compare
 echo "  Results written to scoring/scores.json"
 echo ""

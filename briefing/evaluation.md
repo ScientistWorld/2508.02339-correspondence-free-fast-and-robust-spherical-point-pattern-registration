@@ -50,4 +50,4 @@ Based on the paper's reported results:
 
 ## Current Reusable Gym Scope
 
-The packaged scoring and reusable evaluation scripts in this workspace currently cover only the released spherical-pattern registration benchmark above. The point-cloud and spherical-image experiments remain documented for paper context, but they are not part of the scored gym interface and future scientists are not evaluated on them here.
+The packaged scoring and reusable evaluation scripts in this workspace already cover the released spherical-pattern registration benchmark and the separate complexity study. This turn also adds a reusable spherical-image benchmark path (`scripts/spherical_images.sh` plus raw/eval support), but its fresh compute-side results are still pending, so it is not yet part of the checked-in scored artifact set. The point-cloud experiment remains documented for paper context only.

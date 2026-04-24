@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-04-24 17:30] - secondary_claims
+- Added a reusable spherical-image benchmark path based on the paper's `SphImg2SphPoints -> SPMC+FRS` adaptation, using a verified public `world.geojson` substitute because the paper does not release its exact world-map image
+- Extended the canonical evaluator and download scripts so a fresh CPU run can score the new image experiment alongside the already reproduced robust-alignment and complexity studies
+- Milestone remains `secondary_claims` until the new spherical-image submission finishes and produces fresh compute-side evidence
+
 ### [2026-04-24 17:22] - secondary_claims
 - Final verification confirmed the workspace is structurally sound, method/eval separation is intact, `scripts/evaluate.sh` works standalone, and the download path is portable from `data/downloads/`
 - Confirmed that the checked-in artifacts already cover both the released robust-alignment benchmark and the separate computational-complexity study, so the workspace exceeds `core_claim_plus`

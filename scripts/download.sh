@@ -6,7 +6,7 @@
 # data/downloads/ so future methods can use it without depending on method/.
 #
 # Estimated total download size: ~50 MB
-# Estimated disk usage: ~50 MB
+# Estimated disk usage: ~55 MB
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -15,6 +15,9 @@ cd ..
 PAPER_REPO_URL="https://github.com/ARLab-VT/Robust-Vector-Set-Alignment.git"
 PAPER_CODE_DIR="data/downloads/Robust-Vector-Set-Alignment"
 CANONICAL_DATASET_DIR="data/downloads/vector_alignment_dataset"
+WORLD_GEOJSON_URL="https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"
+WORLD_GEOJSON_DIR="data/downloads/world_geojson"
+WORLD_GEOJSON_PATH="$WORLD_GEOJSON_DIR/world.geojson"
 
 mkdir -p data/downloads
 
@@ -40,7 +43,14 @@ else
     exit 1
 fi
 
+[ -f "$WORLD_GEOJSON_PATH" ] || {
+    echo "Downloading world.geojson for the spherical-image benchmark..."
+    mkdir -p "$WORLD_GEOJSON_DIR"
+    curl -L "$WORLD_GEOJSON_URL" -o "$WORLD_GEOJSON_PATH"
+}
+
 echo "Download complete."
 echo ""
 echo "Dataset location: $CANONICAL_DATASET_DIR"
 echo "Paper code location: $PAPER_CODE_DIR"
+echo "World geojson location: $WORLD_GEOJSON_PATH"

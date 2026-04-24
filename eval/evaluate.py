@@ -45,6 +45,10 @@ def _percentile(values: list[float], percentile: float) -> float:
     return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
 
 
+def _max(values: list[float]) -> float:
+    return float(max(values))
+
+
 def compute_scores(raw_results: dict) -> dict:
     """
     Compute aggregate scores from raw rotation estimation results.
@@ -107,7 +111,42 @@ def compute_complexity_scores(raw_results: dict) -> dict:
     return scores
 
 
-def build_scores_json(scores: dict, complexity_scores: dict, output_path: str):
+def compute_spherical_image_scores(raw_results: dict) -> dict:
+    scores = {}
+    for method, configs in raw_results.items():
+        all_errs = []
+        all_tms = []
+        high_errs = []
+        for config_name, data in configs.items():
+            errs = [float(v) for v in data.get("errors", [])]
+            tms = [float(v) for v in data.get("times", [])]
+            all_errs.extend(errs)
+            all_tms.extend(tms)
+            if config_name == "Img5":
+                high_errs.extend(errs)
+
+        if not all_errs:
+            continue
+
+        method_scores = {
+            "median_rotation_error_deg": _median(all_errs),
+            "mean_rotation_error_deg": _mean(all_errs),
+            "median_time_s": _median(all_tms) if all_tms else 0.0,
+        }
+        if high_errs:
+            method_scores["median_rotation_error_deg_img5"] = _median(high_errs)
+            method_scores["max_rotation_error_deg_img5"] = _max(high_errs)
+        scores[method] = method_scores
+
+    return scores
+
+
+def build_scores_json(
+    scores: dict,
+    complexity_scores: dict,
+    output_path: str,
+    spherical_image_scores: dict | None = None,
+):
     """Build the full scores.json structure and write it."""
     experiments = {}
 
@@ -149,6 +188,33 @@ def build_scores_json(scores: dict, complexity_scores: dict, output_path: str):
             }
         }
 
+    if spherical_image_scores:
+        experiments["spherical_image_alignment_all"] = {
+            "results": {
+                method_name: {
+                    "median_rotation_error_deg": method_scores["median_rotation_error_deg"],
+                    "mean_rotation_error_deg": method_scores["mean_rotation_error_deg"],
+                    "median_time_s": method_scores["median_time_s"],
+                }
+                for method_name, method_scores in spherical_image_scores.items()
+            }
+        }
+        experiments["spherical_image_alignment_high_clutter"] = {
+            "results": {
+                method_name: {
+                    "median_rotation_error_deg": method_scores.get(
+                        "median_rotation_error_deg_img5",
+                        method_scores["median_rotation_error_deg"],
+                    ),
+                    "max_rotation_error_deg": method_scores.get(
+                        "max_rotation_error_deg_img5",
+                        method_scores["median_rotation_error_deg"],
+                    ),
+                }
+                for method_name, method_scores in spherical_image_scores.items()
+            }
+        }
+
     output = {"experiments": experiments}
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
@@ -163,15 +229,18 @@ def main():
                         help="Input raw rotation benchmark JSON file")
     parser.add_argument("--complexity-input", default="scoring/raw_complexity_results.json",
                         help="Input raw complexity benchmark JSON file")
+    parser.add_argument("--spherical-image-input", default="scoring/raw_spherical_image_results.json",
+                        help="Input raw spherical-image benchmark JSON file")
     parser.add_argument("--output", "-o", default="scoring/scores.json",
                         help="Output scores JSON file")
     args = parser.parse_args()
 
     raw_path = Path(args.input)
     complexity_path = Path(args.complexity_input)
+    spherical_image_path = Path(args.spherical_image_input)
 
-    if not raw_path.exists() and not complexity_path.exists():
-        print(f"ERROR: No raw results found at {raw_path} or {complexity_path}")
+    if not raw_path.exists() and not complexity_path.exists() and not spherical_image_path.exists():
+        print(f"ERROR: No raw results found at {raw_path}, {complexity_path}, or {spherical_image_path}")
         print("Run a benchmark first to generate raw result files.")
         sys.exit(1)
 
@@ -185,7 +254,12 @@ def main():
         raw_complexity_results = json.loads(complexity_path.read_text())
         complexity_scores = compute_complexity_scores(raw_complexity_results)
 
-    build_scores_json(scores, complexity_scores, args.output)
+    spherical_image_scores = {}
+    if spherical_image_path.exists():
+        raw_spherical_image_results = json.loads(spherical_image_path.read_text())
+        spherical_image_scores = compute_spherical_image_scores(raw_spherical_image_results)
+
+    build_scores_json(scores, complexity_scores, args.output, spherical_image_scores)
 
 
 if __name__ == "__main__":

@@ -16,13 +16,15 @@ export PYTHONPATH="/home/user${PYTHONPATH:+:${PYTHONPATH}}"
 
 RAW_RESULTS="${RAW_RESULTS:-scoring/raw_results.json}"
 RAW_COMPLEXITY_RESULTS="${RAW_COMPLEXITY_RESULTS:-scoring/raw_complexity_results.json}"
+RAW_SPHERICAL_IMAGE_RESULTS="${RAW_SPHERICAL_IMAGE_RESULTS:-scoring/raw_spherical_image_results.json}"
 SCORES_OUTPUT="${SCORES_OUTPUT:-scoring/scores.json}"
 
-if [ ! -f "${RAW_RESULTS}" ] && [ ! -f "${RAW_COMPLEXITY_RESULTS}" ]; then
+if [ ! -f "${RAW_RESULTS}" ] && [ ! -f "${RAW_COMPLEXITY_RESULTS}" ] && [ ! -f "${RAW_SPHERICAL_IMAGE_RESULTS}" ]; then
     echo "ERROR: no raw benchmark results found"
     echo "Expected one of:"
     echo "  ${RAW_RESULTS}"
     echo "  ${RAW_COMPLEXITY_RESULTS}"
+    echo "  ${RAW_SPHERICAL_IMAGE_RESULTS}"
     exit 1
 fi
 
@@ -32,6 +34,7 @@ echo "Aggregating ${RAW_RESULTS} -> ${SCORES_OUTPUT}..."
 python3 eval/evaluate.py \
     --input "${RAW_RESULTS}" \
     --complexity-input "${RAW_COMPLEXITY_RESULTS}" \
+    --spherical-image-input "${RAW_SPHERICAL_IMAGE_RESULTS}" \
     --output "${SCORES_OUTPUT}"
 
 echo "Evaluation complete. Results in ${SCORES_OUTPUT}"

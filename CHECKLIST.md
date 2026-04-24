@@ -29,13 +29,14 @@ Check off items as you complete them. Order doesn't matter — work however make
 - [x] `scripts/baseline.sh` — identity sanity baseline on the released dataset
 - [x] `scripts/run_experiment.py` — runs SPMC, FRS, and SPMC+FRS on the paper dataset
 - [x] `scripts/run_complexity_experiment.py` — runs the paper's A3/B3 runtime-scaling benchmark
-- [x] `scripts/run.sh` — Ray job script for the remaining resume-safe CPU complexity benchmark
+- [x] `scripts/run_spherical_image_experiment.py` — runs the paper's spherical-image benchmark on a reproducible public world-map substitute
+- [x] `scripts/run.sh` — Ray job script for the next CPU submission
 
 ## Environment
 - [x] `environment/container.def` + `environment/setup.sh`
 
 ## Data
-- [x] Dataset acquired: paper's Robust Vector Alignment Dataset at data/vector_alignment_dataset/ (copied from the paper's released repo)
+- [x] Dataset acquired: paper's Robust Vector Alignment Dataset at `data/downloads/vector_alignment_dataset/` (copied from the paper's released repo)
 - [x] Pretrained models downloaded if needed (N/A — no ML models used)
 
 ## Milestones
@@ -51,7 +52,7 @@ Check off items as you complete them. Order doesn't matter — work however make
 - **SPMC fully working**: exact agreement with the released code on audited spot checks
 - **FRS fixed in code**: final source-to-source SVD step now matches the released implementation
 - **spmc_frs fixed in code**: the hybrid now uses the actual SPMC initialization plus FRS refinement path
-- **Current limitation**: the packaged gym does not reproduce the paper's point-cloud-registration or spherical-image adaptation experiments, and it does not ship a reproduced FPFH+QUASAR baseline implementation
+- **Current limitation**: the packaged gym still does not reproduce the paper's point-cloud-registration experiment, and the new spherical-image adaptation benchmark still needs a fresh compute-side result before it counts toward a higher milestone
 - **Current verification state**: the workspace is gym-ready for the released spherical-pattern benchmark and the complexity study, which supports `secondary_claims` but not `majority`
 - **Paper's baseline (FPFH+QUASAR)**: Not implemented — requires C++ dependencies (Point Cloud Library) that are unavailable
 - **Identity rotation baseline**: Used as reference (999° error)

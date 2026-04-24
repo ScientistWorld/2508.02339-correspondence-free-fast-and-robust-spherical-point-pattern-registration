@@ -1,6 +1,10 @@
 # Progress
 
 ## What Works
+- **Spherical-image benchmark path**: added a deterministic `SphImg2SphPoints -> SPMC+FRS` experiment driven by a verified public `world.geojson` asset, with reusable generation code in `data/spherical_images.py`
+- **Spherical-image runner**: added `scripts/run_spherical_image_experiment.py` and `scripts/spherical_images.sh`, which checkpoint raw image-benchmark results into `scoring/raw_spherical_image_results.json`
+- **Evaluator extension**: `eval/evaluate.py` and `scripts/evaluate.sh` now aggregate optional spherical-image raw results into canonical `scoring/scores.json`
+- **Download-path extension**: `scripts/download.sh` now fetches the verified `world.geojson` asset required for the spherical-image benchmark
 - **Dataset restoration**: the paper's released Robust Vector Alignment Dataset is present again under `data/downloads/vector_alignment_dataset`, matching the checked-in loader and shell scripts
 - **Download path integrity**: `scripts/download.sh` now reproduces the actual expected runtime layout on a fresh clone by cloning the public upstream repo and copying the dataset into `data/downloads/`
 - **Reopened submission path**: the workspace is no longer left in a permanent `done` state while the Fig. 6 complexity experiment remains outstanding
@@ -29,7 +33,7 @@
 - **Complexity benchmark path**: added `scripts/run_complexity_experiment.py` and `scripts/complexity.sh` for the paper's separate Fig. 6 runtime-scaling study on `A3/B3`
 - **Evaluator extension**: `eval/evaluate.py` and `scripts/evaluate.sh` now aggregate both the main benchmark raw results and optional complexity raw results into one canonical `scoring/scores.json`
 - **Final gym verification**: method-agnostic briefing and scoring docs were reviewed and rewritten where needed so future from-scratch agents can understand the task without seeing the paper's implementation choices
-- **Dataset separation fix**: the canonical released dataset now lives under `data/vector_alignment_dataset`, and the shared loader in `data/dataset.py` no longer depends on assets inside `method/`
+- **Dataset separation fix**: the canonical released dataset now lives under `data/downloads/vector_alignment_dataset`, and the shared loader in `data/dataset.py` no longer depends on assets inside `method/`
 - **Complexity submission prep**: the SPMC geographic conversion is now vectorized without changing the paper's computation, making the remaining Fig. 6 benchmark materially more feasible at large scales
 - **FRS memory hardening**: the iterative search now keeps only the initial and final source clouds needed for the closed-form SVD estimate, avoiding unnecessary history retention during the largest scale runs
 - **FRS timing fidelity fix**: the FRS loop now rebuilds the fixed target histograms each iteration, matching the released runtime path used for the paper's timing study instead of a slightly faster cached variant
@@ -76,11 +80,14 @@
   - `spmc_frs`: no longer falls back to pure SPMC; improves difficult cases such as `A5/B7/r1` to 0.83°
 
 ## What Remains
+- Fresh compute-side run of the new spherical-image benchmark so the checked-in scores can claim that experiment and potentially justify promotion beyond `secondary_claims`
 - Fresh compute-side rerun of the released Experiment 1 benchmark after restoring the missing dataset into the portable `data/downloads/` location
 - Optional fresh compute-side rerun of the computational-complexity scaling test if the new validation run exposes any artifact drift
 - Optional FPFH+QUASAR baseline reimplementation (requires Point Cloud Library C++ stack that is currently unavailable here)
 
 ## Issues Encountered
+- **Missing spherical-image asset**: the paper does not release its exact world-map image, so the workspace previously had no portable asset or benchmark path for Experiment 3
+- **Mitigation**: verified a public `world.geojson` download source, added deterministic rasterization to the paper's `180 x 360` template resolution, and wired the resulting benchmark into the standard scoring flow
 - **Stale completion claim**: `action.yaml` and `MILESTONES.md` had been left at permanent `done/full` even though this clone no longer had the downloaded dataset required by `data/dataset.py`
 - **Mitigation**: restored the dataset with `scripts/download.sh`, downgraded the claimed milestone, and prepared a new CPU submission that reruns the released benchmark from the restored portable path
 - **Stale method-runner bug**: `scripts/run_experiment.py` still called `build_scores_json(...)` with the old two-argument signature after the complexity evaluator extension, which would have broken `scripts/method.sh` and `scripts/reproduce.sh`
@@ -124,5 +131,5 @@
 
 ## Final Status
 - Workspace closes at milestone `secondary_claims`
-- Main limitation: the packaged gym reproduces the released spherical-pattern benchmark and the separate complexity study, but not the paper's point-cloud-registration or spherical-image adaptation experiments
-- Current turn status: final verification passed, scoring/docs are consistent, and the workspace is ready for gym use on its packaged scope
+- Main limitation: the packaged gym reproduces the released spherical-pattern benchmark and the separate complexity study, while the point-cloud experiment is still missing and the spherical-image benchmark is awaiting fresh compute-side evidence
+- Current turn status: the spherical-image benchmark path is now implemented and queued for a fresh CPU submission; milestone remains `secondary_claims` until that result lands
