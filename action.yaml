@@ -1,4 +1,4 @@
 action: done
 gpus: 0
 milestone: full
-notes: "Reached `full`: the real SPMC, FRS, and SPMC+FRS methods have compute-backed results for robust alignment, high-outlier robustness, and computational complexity; split train/test scores are generated and validate.py --compare passes."
+notes: "Updated download and runtime paths so the public dataset is fetched into data/downloads/vector_alignment_dataset and all runnable scripts use that fresh-clone-safe location."
