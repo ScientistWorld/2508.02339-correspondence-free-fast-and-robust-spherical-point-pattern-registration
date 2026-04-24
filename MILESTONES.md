@@ -134,4 +134,4 @@
 - Updated the evaluation harness and run scripts to score `spmc`, `frs`, and `spmc_frs` offline on compute nodes
 
 ## Stop Justification
-- Closed at `secondary_claims`. The packaged gym is ready for the released spherical-pattern benchmark and complexity study, but it does not reproduce the full paper scope.
+- Completed at milestone `secondary_claims`.
