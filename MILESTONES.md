@@ -134,4 +134,4 @@
 - Updated the evaluation harness and run scripts to score `spmc`, `frs`, and `spmc_frs` offline on compute nodes
 
 ## Stop Justification
-- Completed at milestone `full`.
+- Completed at milestone `majority`.
