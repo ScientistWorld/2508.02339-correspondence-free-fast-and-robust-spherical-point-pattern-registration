@@ -11,7 +11,7 @@ from pathlib import Path
 import pickle
 
 
-DATASET_DIR = Path(__file__).resolve().parent / "vector_alignment_dataset"
+DATASET_DIR = Path(__file__).resolve().parent / "downloads" / "vector_alignment_dataset"
 PATTERNS = ("A1", "A2", "A3", "A4", "A5")
 CONFIGS = ("B1", "B2", "B3", "B4", "B5", "B6", "B7")
 

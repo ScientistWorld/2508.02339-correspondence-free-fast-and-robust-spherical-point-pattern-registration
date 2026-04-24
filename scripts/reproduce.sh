@@ -10,7 +10,7 @@
 # Assumes:
 #   - Container is built with numpy available
 #   - Working directory is /home/user
-#   - Paper dataset at data/vector_alignment_dataset/
+#   - Paper dataset at data/downloads/vector_alignment_dataset/
 
 set -euo pipefail
 cd /home/user
@@ -24,8 +24,8 @@ echo "=========================================="
 # Step 1: Verify dataset is already present. Compute nodes have no internet.
 echo "[1/4] Verifying paper dataset..."
 for required_path in \
-    "data/vector_alignment_dataset/A1_A.pkl" \
-    "data/vector_alignment_dataset/RandomRotation100.pkl"
+    "data/downloads/vector_alignment_dataset/A1_A.pkl" \
+    "data/downloads/vector_alignment_dataset/RandomRotation100.pkl"
 do
     if [ ! -f "${required_path}" ]; then
         echo "  ERROR: dataset missing required asset ${required_path}. Run scripts/download.sh before reproduce.sh."

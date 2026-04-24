@@ -19,9 +19,9 @@ echo "=========================================="
 
 for required_path in \
     "scoring/raw_results.json" \
-    "data/vector_alignment_dataset/A3_A.pkl" \
-    "data/vector_alignment_dataset/A3_A_B3.pkl" \
-    "data/vector_alignment_dataset/RandomRotation100.pkl"
+    "data/downloads/vector_alignment_dataset/A3_A.pkl" \
+    "data/downloads/vector_alignment_dataset/A3_A_B3.pkl" \
+    "data/downloads/vector_alignment_dataset/RandomRotation100.pkl"
 do
     if [ ! -f "${required_path}" ]; then
         echo "ERROR: required artifact missing: ${required_path}"
