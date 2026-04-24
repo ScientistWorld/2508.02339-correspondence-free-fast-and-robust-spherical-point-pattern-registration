@@ -24,6 +24,14 @@ SCORING_DIR = WORKSPACE_DIR / "scoring"
 # ── Scoring validation ───────────────────────────────────────────────────────
 
 
+_FORBIDDEN_METRIC_PATTERNS = re.compile(
+    r"(?:author|deviation|published|vs_paper|fit_to_published|"
+    r"reproduction_error|paper_method|prompt_deviation|"
+    r"error_vs_|agreement_with|fidelity_to)",
+    re.IGNORECASE,
+)
+
+
 def validate_reference(data: dict) -> list[str]:
     """Validate reference.json structure. Returns list of errors."""
     errors = []
@@ -90,6 +98,14 @@ def validate_reference(data: dict) -> list[str]:
                 errors.append(f"{prefix}.metrics.{metric_name}: missing 'coefficient'")
             elif not isinstance(metric_def["coefficient"], (int, float)):
                 errors.append(f"{prefix}.metrics.{metric_name}.coefficient: must be a number")
+            if _FORBIDDEN_METRIC_PATTERNS.search(metric_name):
+                errors.append(
+                    f"{prefix}.metrics.{metric_name}: metric name matches a "
+                    f"forbidden paper-agreement pattern. The gym measures "
+                    f"the scientific quantity, not agreement with the paper. "
+                    f"Either remove this metric or rename it to reflect "
+                    f"the underlying quantity it actually measures."
+                )
 
         # primary_metric must be in metrics
         primary = exp.get("primary_metric")
@@ -969,6 +985,145 @@ def check_at_least_one_train_test_differs() -> list[str]:
     ]
 
 
+def check_primary_metric_differs_train_test() -> list[str]:
+    """Reject papers whose primary metric is identical on train and test.
+
+    The coarser ``check_at_least_one_train_test_differs`` compares entire
+    method dicts. A single differing secondary metric passes that check
+    even when the primary metric — the one the gym ranks agents by — is
+    identical across slices. This happens when the primary metric is
+    global (per-run, not per-sample) and the data split only varies
+    sample-level outputs.
+
+    Uses ``primary_metric`` from ``reference.json`` (a validated,
+    required field) to identify the metric that matters per experiment.
+    """
+    ref_path = SCORING_DIR / "reference.json"
+    train_path = SCORING_DIR / "scores_train.json"
+    test_path = SCORING_DIR / "scores_test.json"
+    if not all(p.is_file() for p in (ref_path, train_path, test_path)):
+        return []
+    try:
+        ref = json.loads(ref_path.read_text())
+        train = json.loads(train_path.read_text())
+        test = json.loads(test_path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return []
+
+    ref_exps = ref.get("experiments", {})
+    train_exps = _extract_scores_experiments(train)
+    test_exps = _extract_scores_experiments(test)
+
+    errors: list[str] = []
+    for exp_name in sorted(set(train_exps) & set(test_exps) & set(ref_exps)):
+        primary = ref_exps[exp_name].get("primary_metric")
+        if not primary:
+            continue
+
+        train_methods = train_exps[exp_name]
+        test_methods = test_exps[exp_name]
+        shared_methods = [
+            m for m in sorted(set(train_methods) & set(test_methods))
+            if not m.startswith("_")
+        ]
+        if not shared_methods:
+            continue
+
+        all_identical = True
+        for method in shared_methods:
+            train_val = train_methods[method].get(primary) if isinstance(train_methods[method], dict) else None
+            test_val = test_methods[method].get(primary) if isinstance(test_methods[method], dict) else None
+            if train_val != test_val:
+                all_identical = False
+                break
+
+        if all_identical:
+            sample_method = shared_methods[0]
+            sample_val = (
+                train_methods[sample_method].get(primary)
+                if isinstance(train_methods[sample_method], dict) else None
+            )
+            errors.append(
+                f"experiments.{exp_name}: primary metric '{primary}' is "
+                f"identical between scores_train.json and scores_test.json "
+                f"for every method (e.g., {sample_method}={sample_val}). "
+                f"The train/test split does not differentiate the metric "
+                f"the gym ranks agents by — consider a metric split or a "
+                f"different evaluation axis instead of a data split."
+            )
+
+    return errors
+
+
+def check_primary_metric_discriminates_on_train() -> list[str]:
+    """Reject papers whose primary metric is identical across methods on train.
+
+    The train slice is what a future agent optimizes against during
+    development.  If every method on train gets the same primary-metric
+    value (the metric saturates — e.g., ``coverage = 1.0`` for all
+    methods), the train slice gives that agent no ranking signal: every
+    approach they try looks equally good.  The gym cannot measure
+    improvement and the anti-shortcut design collapses.
+
+    Skips experiments with fewer than 2 methods that report a numeric
+    primary-metric value.
+    """
+    ref_path = SCORING_DIR / "reference.json"
+    train_path = SCORING_DIR / "scores_train.json"
+    if not all(p.is_file() for p in (ref_path, train_path)):
+        return []
+    try:
+        ref = json.loads(ref_path.read_text())
+        train = json.loads(train_path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return []
+
+    ref_exps = ref.get("experiments", {})
+    train_exps = _extract_scores_experiments(train)
+
+    errors: list[str] = []
+    for exp_name in sorted(set(train_exps) & set(ref_exps)):
+        primary = ref_exps[exp_name].get("primary_metric")
+        if not primary:
+            continue
+
+        methods = train_exps[exp_name]
+        if not isinstance(methods, dict):
+            continue
+
+        values: list[tuple[str, float]] = []
+        for name, data in methods.items():
+            if name.startswith("_") or not isinstance(data, dict):
+                continue
+            v = data.get(primary)
+            if isinstance(v, (int, float)) and not isinstance(v, bool):
+                values.append((name, float(v)))
+
+        if len(values) < 2:
+            continue
+        if len({v for _, v in values}) > 1:
+            continue
+
+        # All values identical across all reporting methods.
+        sample_val = values[0][1]
+        methods_shown = ", ".join(f"{n}={v}" for n, v in values[:4])
+        errors.append(
+            f"experiments.{exp_name}: primary metric '{primary}' is "
+            f"identical ({sample_val}) across every method on the train "
+            f"slice ({methods_shown}). The train slice cannot rank methods "
+            f"on this metric, so a future agent gets no feedback signal "
+            f"while developing against scores_train.json. "
+            f"Fix: either (1) change primary_metric on this experiment to "
+            f"a metric whose values already differ across methods on "
+            f"train, or (2) adjust the experiment so '{primary}' actually "
+            f"spreads methods out (harder inputs, a tighter operating "
+            f"point, a stricter scoring protocol). Do NOT simply delete "
+            f"the experiment — find a metric that discriminates."
+        )
+
+    return errors
+
+
 _SHARED_PATTERN = re.compile(r"(?<![A-Za-z0-9_/])/?shared/(?:datasets|models|hf_cache)\b")
 
 
@@ -1200,6 +1355,29 @@ def main():
         if ((SCORING_DIR / "scores_train.json").is_file()
             and (SCORING_DIR / "scores_test.json").is_file()):
             print("  scores_train.json ↔ scores_test.json value differentiation — OK")
+
+    # 11. Primary metric must differ between train and test
+    primary_errors = check_primary_metric_differs_train_test()
+    if primary_errors:
+        print(f"  primary metric train/test differentiation — {len(primary_errors)} error(s):")
+        for e in primary_errors:
+            print(f"    ✗ {e}")
+        ok = False
+    else:
+        if ((SCORING_DIR / "scores_train.json").is_file()
+            and (SCORING_DIR / "scores_test.json").is_file()):
+            print("  primary metric train/test differentiation — OK")
+
+    # 12. Primary metric must discriminate between methods on train
+    disc_errors = check_primary_metric_discriminates_on_train()
+    if disc_errors:
+        print(f"  primary metric discriminates methods on train — {len(disc_errors)} error(s):")
+        for e in disc_errors:
+            print(f"    ✗ {e}")
+        ok = False
+    else:
+        if (SCORING_DIR / "scores_train.json").is_file():
+            print("  primary metric discriminates methods on train — OK")
 
     # Summary
     print()
