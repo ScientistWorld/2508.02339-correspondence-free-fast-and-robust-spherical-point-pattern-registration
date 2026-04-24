@@ -969,6 +969,81 @@ def check_at_least_one_train_test_differs() -> list[str]:
     ]
 
 
+def check_primary_metric_differs_train_test() -> list[str]:
+    """Reject papers whose primary metric is identical on train and test.
+
+    ``check_at_least_one_train_test_differs`` catches total byte-identity
+    across the whole method dict. But a paper can pass that check on a
+    technicality — a secondary metric differs while the primary metric
+    (the one the gym actually ranks agents by) is identical between slices.
+    This happens when the primary metric is **global** (computed per-run,
+    not per-sample) — e.g., throughput, total runtime — and the split only
+    varies sample-level outputs that the primary metric ignores.
+
+    For each shared experiment, look up ``primary_metric`` from
+    ``reference.json``. If that metric's value is identical across every
+    method in both ``scores_train.json`` and ``scores_test.json``, the
+    split provides zero anti-shortcut signal on the metric that matters.
+    """
+    ref_path = SCORING_DIR / "reference.json"
+    train_path = SCORING_DIR / "scores_train.json"
+    test_path = SCORING_DIR / "scores_test.json"
+    if not all(p.is_file() for p in (ref_path, train_path, test_path)):
+        return []
+    try:
+        ref = json.loads(ref_path.read_text())
+        train = json.loads(train_path.read_text())
+        test = json.loads(test_path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return []
+
+    ref_exps = ref.get("experiments", {})
+    train_exps = _extract_scores_experiments(train)
+    test_exps = _extract_scores_experiments(test)
+
+    errors: list[str] = []
+    for exp_name in sorted(set(train_exps) & set(test_exps) & set(ref_exps)):
+        primary = ref_exps[exp_name].get("primary_metric")
+        if not primary:
+            continue
+
+        train_methods = train_exps[exp_name]
+        test_methods = test_exps[exp_name]
+        shared_methods = sorted(set(train_methods) & set(test_methods))
+        if not shared_methods:
+            continue
+
+        all_identical = True
+        for method in shared_methods:
+            if method.startswith("_"):
+                continue
+            train_val = train_methods[method].get(primary) if isinstance(train_methods[method], dict) else None
+            test_val = test_methods[method].get(primary) if isinstance(test_methods[method], dict) else None
+            if train_val != test_val:
+                all_identical = False
+                break
+
+        if all_identical and shared_methods:
+            sample_method = shared_methods[0]
+            sample_val = (
+                train_methods[sample_method].get(primary)
+                if isinstance(train_methods[sample_method], dict) else None
+            )
+            errors.append(
+                f"experiments.{exp_name}: primary metric '{primary}' is "
+                f"identical between scores_train.json and scores_test.json "
+                f"for every method (e.g., {sample_method}={sample_val}). "
+                f"The train/test split does not differentiate the metric "
+                f"the gym actually ranks agents by. This typically happens "
+                f"when the primary metric is global (per-run, not "
+                f"per-sample) and the split only varies sample-level "
+                f"outputs. Consider a metric split or a different "
+                f"evaluation axis instead of a data split."
+            )
+
+    return errors
+
+
 _SHARED_PATTERN = re.compile(r"(?<![A-Za-z0-9_/])/?shared/(?:datasets|models|hf_cache)\b")
 
 
