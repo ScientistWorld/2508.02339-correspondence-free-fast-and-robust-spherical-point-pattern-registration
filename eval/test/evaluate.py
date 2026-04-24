@@ -24,6 +24,7 @@ ROTATION_INDICES = (
 )
 HIGH_OUTLIER_CONFIGS = {"B5", "B6", "B7"}
 COMPLEXITY_SCALES = {10**6: "time_at_1e6_points_s", 10**7: "time_at_1e7_points_s"}
+COMPLEXITY_ROTATION_INDICES = (1, 3, 5, 7, 9, 11, 13, 15, 17, 19)
 
 
 def _mean(values: list[float]) -> float:
@@ -63,6 +64,16 @@ def _success_rate(values: list[float], threshold_deg: float = 1.0) -> float:
     return float(sum(float(v) <= threshold_deg for v in values) / len(values))
 
 
+def _slice_complexity_times(values: list[float], scale_name: str) -> list[float]:
+    missing = [idx for idx in COMPLEXITY_ROTATION_INDICES if idx >= len(values)]
+    if missing:
+        raise ValueError(
+            f"complexity scale {scale_name} has {len(values)} entries, but the {SLICE_NAME} "
+            f"slice requires the released 20-rotation benchmark artifact"
+        )
+    return [float(values[idx]) for idx in COMPLEXITY_ROTATION_INDICES]
+
+
 def _compute_complexity_scores(raw_results: dict) -> dict:
     scores = {}
     for method_name, by_scale in raw_results.items():
@@ -71,7 +82,7 @@ def _compute_complexity_scores(raw_results: dict) -> dict:
             metric_name = COMPLEXITY_SCALES.get(int(scale_name))
             if metric_name is None:
                 continue
-            times = [float(v) for v in values.get("times", [])]
+            times = _slice_complexity_times(values.get("times", []), scale_name)
             if times:
                 method_scores[metric_name] = _median(times)
         if method_scores:

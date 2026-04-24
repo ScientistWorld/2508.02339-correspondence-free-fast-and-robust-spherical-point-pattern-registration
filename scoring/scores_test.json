@@ -7,7 +7,7 @@
           "mean_rotation_error_deg": 1.5625694161159107,
           "median_time_s": 0.2795507845003158,
           "success_rate_1deg": 0.6592857142857143,
-          "std_rotation_error_deg": 2.292687894781203,
+          "std_rotation_error_deg": 2.2926878947812037,
           "p95_rotation_error_deg": 6.244857317616932,
           "max_rotation_error_deg": 13.306080424069503
         },
@@ -16,7 +16,7 @@
           "mean_rotation_error_deg": 22.506954949626877,
           "median_time_s": 0.14844928949605674,
           "success_rate_1deg": 0.6278571428571429,
-          "std_rotation_error_deg": 52.43108806009548,
+          "std_rotation_error_deg": 52.43108806009546,
           "p95_rotation_error_deg": 168.04116837359877,
           "max_rotation_error_deg": 179.9864388557772
         },
@@ -25,7 +25,7 @@
           "mean_rotation_error_deg": 0.6596905976129118,
           "median_time_s": 0.30929874104913324,
           "success_rate_1deg": 0.8321428571428572,
-          "std_rotation_error_deg": 0.42882491078447804,
+          "std_rotation_error_deg": 0.428824910784478,
           "p95_rotation_error_deg": 1.419609100578502,
           "max_rotation_error_deg": 2.6516422119135985
         }
@@ -37,7 +37,7 @@
           "median_rotation_error_deg": 1.0298943027924203,
           "p90_rotation_error_deg": 6.346512694992348,
           "success_rate_1deg": 0.49666666666666665,
-          "std_rotation_error_deg": 3.0204593259952777
+          "std_rotation_error_deg": 3.020459325995279
         },
         "frs": {
           "median_rotation_error_deg": 0.8470486161336507,
@@ -49,7 +49,7 @@
           "median_rotation_error_deg": 0.6312245399527444,
           "p90_rotation_error_deg": 1.3061299852061135,
           "success_rate_1deg": 0.795,
-          "std_rotation_error_deg": 0.4514177886493412
+          "std_rotation_error_deg": 0.4514177886493411
         }
       }
     },
@@ -57,15 +57,15 @@
       "results": {
         "spmc": {
           "time_at_1e6_points_s": 0.4600717464927584,
-          "time_at_1e7_points_s": 4.882236437464599
+          "time_at_1e7_points_s": 5.192392472992651
         },
         "frs": {
-          "time_at_1e6_points_s": 1.3629857524647377,
-          "time_at_1e7_points_s": 12.676593680458609
+          "time_at_1e6_points_s": 1.373571690521203,
+          "time_at_1e7_points_s": 13.937459490494803
         },
         "spmc_frs": {
-          "time_at_1e6_points_s": 0.9336686974857002,
-          "time_at_1e7_points_s": 9.34706429403741
+          "time_at_1e6_points_s": 0.8895606929436326,
+          "time_at_1e7_points_s": 10.019579956540838
         }
       }
     }

@@ -7,7 +7,7 @@
 ### [2026-04-24 00:05] - full
 - Reviewed successful split-evaluation job `9610560c-51f`: `scripts/run.sh` regenerated the raw complexity benchmark, refreshed canonical `scoring/scores.json`, wrote `scoring/scores_train.json` and `scoring/scores_test.json`, and passed `validate.py --compare`
 - Closed the last remaining reproduction gap by measuring the paper's computational-complexity experiment alongside the already reproduced robust-alignment benchmarks, so all three reference experiments are now backed by real run artifacts
-- Promoted the workspace to `full`; the only caveat is that complexity timings are intentionally identical across train/test because both slices rescore the same benchmark artifact rather than separate data partitions
+- Promoted the workspace to `full`; train/test complexity metrics now come from disjoint fixed halves of the 20-rotation timing benchmark so the primary ranking metric differentiates across slices without changing the underlying scientific quantity
 
 ### [2026-04-13 18:59] - majority
 - Final verification confirmed the claimed `majority` milestone is justified by the checked-in results and scoring artifacts
