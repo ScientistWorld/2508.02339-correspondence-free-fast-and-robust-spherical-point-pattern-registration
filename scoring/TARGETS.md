@@ -21,15 +21,18 @@ Methods must remain reliable when the source set is dominated by clutter.
 - **Experiment**: robust_alignment_high_outliers
 - **How to measure**: Evaluate only the released `B5`, `B6`, and `B7` settings and summarize both the typical error and the high-error tail.
 
+## Constraint: complexity_scaling
+Methods should preserve the paper's practical efficiency claim as the point
+count grows on the dedicated `A3/B3` scaling study.
+
+- **Metric**: time_at_1e6_points_s and time_at_1e7_points_s (lower is better)
+- **Experiment**: computational_complexity
+- **How to measure**: Run the paper's `10^3` to `10^7` point scaling protocol on the released `A3/B3` setup and report the median runtime at the scored scales.
+
 ## Current scored scope
 
-The current gym score is defined only by experiments that already appear in `scoring/scores.json`.
+The current gym score is defined by the experiments that appear in `scoring/scores.json`.
 At verification time, that means:
 - `robust_alignment_all`
 - `robust_alignment_high_outliers`
-
-The paper's separate computational-complexity study remains documented in `scoring/reference.json`, but it is not yet part of the verified scored baseline because it has not been reproduced in `scores.json`.
-
-## Unreproduced reference context
-
-`reference.json` also documents the paper's separate `computational_complexity` experiment for context. That reference experiment is not part of the current scored baseline because no corresponding results are present in `scores.json`.
+- `computational_complexity`

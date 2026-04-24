@@ -1,3 +1,4 @@
 action: done
 gpus: 0
-notes: "Rotation-index train/test split for alignment plus deterministic even/odd timing split for complexity; 13 train metrics and 13 test metrics generated from real post-hoc runs; train/test remain close but non-identical with stable method ranking and moderate 1e7-point complexity gaps; validate.py --compare passed."
+milestone: full
+notes: "Reached `full`: the real SPMC, FRS, and SPMC+FRS methods have compute-backed results for robust alignment, high-outlier robustness, and computational complexity; split train/test scores are generated and validate.py --compare passes."
