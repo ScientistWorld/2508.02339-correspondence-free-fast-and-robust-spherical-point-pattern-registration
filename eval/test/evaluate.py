@@ -33,6 +33,7 @@ import math
 import os
 import pickle
 import resource
+import signal
 import struct
 import subprocess
 import sys
@@ -451,7 +452,7 @@ def run_group(entry, factory: InstanceFactory, group: str, workdir: Path, env: d
     cpu = _children_cpu() - cpu_before
     if failure is None and proc.returncode != 0:
         failure = f"method process exited with code {proc.returncode}"
-    if cpu > budget:
+    if cpu > budget or proc.returncode in (-signal.SIGXCPU, -signal.SIGKILL) and cpu >= budget - 1.0:
         failure = f"CPU budget exceeded: {cpu:.1f}s > {budget:.1f}s for {n} instances"
     if failure is not None:
         tail = _log_tail(log_path)

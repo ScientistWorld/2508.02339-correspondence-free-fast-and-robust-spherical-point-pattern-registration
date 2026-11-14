@@ -46,4 +46,10 @@ run_step shortcuts_train $TR --method-dir $C/shortcuts --output $R/shortcuts_sco
 run_step baselines_train $TR --method-dir baseline --output $R/baselines_scores_train.json
 run_step v_refine1440_train $TR --method-dir $C/v_refine1440 --output $R/v_refine1440_scores_train.json
 
+# Round 2: smoothed polish / dual-initialisation candidates for a genuinely better variant.
+run_step v_polish_test $T --method-dir $C/v_polish --output $R/v_polish_scores_test.json $(TI v_polish)
+run_step v_dual_test $T --method-dir $C/v_dual --output $R/v_dual_scores_test.json $(TI v_dual)
+run_step v_dual_polish_test $T --method-dir $C/v_dual_polish --output $R/v_dual_polish_scores_test.json $(TI v_dual_polish)
+run_step v_polish_train $TR --method-dir $C/v_polish --output $R/v_polish_scores_train.json
+
 python3 notes/hardening/analyze.py

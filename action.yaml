@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: false
 milestone: secondary_claims
-notes: "Hardening check (resumed; split into <15-min steps because the CPU node drains every ~25 min): variants, baselines, brute force, all REDTEAM shortcuts and scenarios through the new hidden test. Reference train+test already done."
+notes: "Hardening round 2 (CPU, short resumable steps): smoothed-polish and dual-initialisation candidates for a genuinely better variant through the hidden test (+train check). All shortcut checks already done."

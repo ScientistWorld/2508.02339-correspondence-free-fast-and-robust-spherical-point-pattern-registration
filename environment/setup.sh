@@ -16,4 +16,4 @@ mkdir -p "${PYTHON_TARGET}"
 # Bypass the scheduler's uv/pip shell wrappers here. The wrappers succeeded,
 # but they still emitted fakeroot writability warnings to stderr; using the
 # container's real pip with --target keeps the install scoped to /opt.
-command python3 -m pip install --target "${PYTHON_TARGET}" numpy pillow
+command python3 -m pip install --target "${PYTHON_TARGET}" numpy==2.2.6 pillow==12.3.0

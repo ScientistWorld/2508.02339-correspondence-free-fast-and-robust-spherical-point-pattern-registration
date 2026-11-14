@@ -108,6 +108,9 @@ def main() -> None:
     valid = [k for k in cohort if status.get(k, {}).get("status", "ok") == "ok"]
     sig_valid = sigmas(rows, valid)
     sig_all = sigmas(rows, cohort)
+    # Sensitivity: only methods that genuinely register (robust median < 20 deg).
+    honest = [k for k in valid if rows[k]["robust_alignment_all"]["median_rotation_error_deg"] < 20.0]
+    sig_honest = sigmas(rows, honest)
     table = []
     for key in rows:
         table.append({
@@ -117,6 +120,7 @@ def main() -> None:
             "cpu_seconds": status.get(key, {}).get("cpu_seconds", {}),
             "rank_valid_cohort": rank(rows[key], ref_vals, sig_valid),
             "rank_all_cohort": rank(rows[key], ref_vals, sig_all),
+            "rank_honest_cohort": rank(rows[key], ref_vals, sig_honest),
             "metrics": rows[key],
         })
     table.sort(key=lambda r: -r["rank_valid_cohort"])
@@ -132,6 +136,8 @@ def main() -> None:
         ref_full = metrics_from_instances(ref_inst)
         self_noise = [rank(metrics_from_instances(ref_inst, d), ref_full, sig_valid) for d in draws]
         boot["reference_self_rank_95pct_halfwidth"] = float(np.percentile(np.abs(self_noise), 95))
+        self_noise_h = [rank(metrics_from_instances(ref_inst, d), ref_full, sig_honest) for d in draws[:300]]
+        boot["reference_self_rank_95pct_halfwidth_honest_sigma"] = float(np.percentile(np.abs(self_noise_h), 95))
         for path in sorted(RES.glob("*_test_instances.json")):
             data = json.loads(path.read_text())
             for method, inst in data.items():
@@ -142,9 +148,14 @@ def main() -> None:
                 full = rank(metrics_from_instances(inst), ref_full, sig_valid)
                 diffs = [rank(metrics_from_instances(inst, d), metrics_from_instances(ref_inst, d), sig_valid)
                          for d in draws]
+                diffs_h = [rank(metrics_from_instances(inst, d), metrics_from_instances(ref_inst, d), sig_honest)
+                           for d in draws[:300]]
                 boot[f"{path.name.split('_test_instances')[0]}:{method}"] = {
                     "rank_vs_reference": full,
                     "paired_bootstrap_95ci": [float(np.percentile(diffs, 2.5)), float(np.percentile(diffs, 97.5))],
+                    "rank_vs_reference_honest_sigma": rank(metrics_from_instances(inst), ref_full, sig_honest),
+                    "paired_bootstrap_95ci_honest_sigma": [float(np.percentile(diffs_h, 2.5)),
+                                                           float(np.percentile(diffs_h, 97.5))],
                 }
 
     # Determinism of the stored reference.
@@ -187,6 +198,8 @@ def main() -> None:
     summary = {
         "reference": REFERENCE,
         "sigma_valid_cohort": {f"{e}.{m}": s for (e, m), s in sig_valid.items()},
+        "sigma_honest_cohort": {f"{e}.{m}": s for (e, m), s in sig_honest.items()},
+        "honest_cohort": honest,
         "table": table,
         "paired_bootstrap": boot,
         "reference_rerun_identical": determinism,
@@ -195,16 +208,17 @@ def main() -> None:
     }
     (RES / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 
-    lines = ["| attempt | status | robust med | robust succ1 | robust p95 | high med | img med | sparse med | sparse succ5 | rank (valid σ) | rank (all σ) |",
-             "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
+    lines = ["| attempt | status | robust med | robust succ1 | robust p95 | high med | img med | sparse med | sparse succ5 | rank (valid σ) | rank (all σ) | rank (honest σ) |",
+             "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
     for r in table:
         m = r["metrics"]
-        lines.append("| {} | {} | {:.3f} | {:.3f} | {:.3f} | {:.3f} | {:.3f} | {:.3f} | {:.3f} | {:+.3f} | {:+.3f} |".format(
+        lines.append("| {} | {} | {:.3f} | {:.3f} | {:.3f} | {:.3f} | {:.3f} | {:.3f} | {:.3f} | {:+.3f} | {:+.3f} | {:+.3f} |".format(
             r["attempt"], r["status"],
             m["robust_alignment_all"]["median_rotation_error_deg"], m["robust_alignment_all"]["success_rate_1deg"],
             m["robust_alignment_all"]["p95_rotation_error_deg"], m["robust_alignment_high_outliers"]["median_rotation_error_deg"],
             m["spherical_image_alignment_all"]["median_rotation_error_deg"], m["sparse_alignment"]["median_rotation_error_deg"],
-            m["sparse_alignment"]["success_rate_5deg"], r["rank_valid_cohort"], r["rank_all_cohort"]))
+            m["sparse_alignment"]["success_rate_5deg"], r["rank_valid_cohort"], r["rank_all_cohort"],
+            r["rank_honest_cohort"]))
     lines.append("")
     lines.append(f"Reference rerun identical: {determinism}")
     lines.append(f"Paired bootstrap: {json.dumps(boot, indent=1)}")
