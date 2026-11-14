@@ -1,0 +1,65 @@
+{
+  "experiments": {
+    "robust_alignment_all": {
+      "results": {
+        "spmc_frs_polish": {
+          "median_rotation_error_deg": 0.1650452900272822,
+          "mean_rotation_error_deg": 0.19322905198697357,
+          "success_rate_1deg": 0.9934285714285714,
+          "p95_rotation_error_deg": 0.3506955799210696,
+          "max_rotation_error_deg": 2.6524750291438335
+        }
+      }
+    },
+    "robust_alignment_high_outliers": {
+      "results": {
+        "spmc_frs_polish": {
+          "median_rotation_error_deg": 0.1850395294489273,
+          "p90_rotation_error_deg": 0.34104159209934315,
+          "success_rate_1deg": 0.9973333333333333
+        }
+      }
+    },
+    "spherical_image_alignment_all": {
+      "results": {
+        "spmc_frs_polish": {
+          "median_rotation_error_deg": 1.2256054670397734,
+          "mean_rotation_error_deg": 2.5316458021561585,
+          "success_rate_1deg": 0.386
+        }
+      }
+    },
+    "spherical_image_alignment_high_clutter": {
+      "results": {
+        "spmc_frs_polish": {
+          "median_rotation_error_deg": 1.5529698664832459,
+          "max_rotation_error_deg": 140.2981822558273
+        }
+      }
+    },
+    "sparse_alignment": {
+      "results": {
+        "spmc_frs_polish": {
+          "median_rotation_error_deg": 1.2817571458808983,
+          "mean_rotation_error_deg": 23.49958806794032,
+          "success_rate_5deg": 0.738
+        }
+      }
+    }
+  },
+  "_diagnostics": {
+    "numpy": "2.2.6",
+    "cpu_seconds_per_instance_budget": 1.0,
+    "integrity_error": null,
+    "methods": {
+      "spmc_frs_polish": {
+        "status": "ok",
+        "cpu_seconds": {
+          "sparse": 83.42,
+          "images": 29.56,
+          "robust": 245.5
+        }
+      }
+    }
+  }
+}
