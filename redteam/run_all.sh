@@ -1,23 +1,20 @@
 #!/bin/bash
 set -euo pipefail
 cd /home/user
-bash redteam/reference_seed0/run.sh 2>&1 | tee redteam/reference_seed0/run.log
-bash redteam/reference_seed1/run.sh 2>&1 | tee redteam/reference_seed1/run.log
-bash redteam/reference_seed2/run.sh 2>&1 | tee redteam/reference_seed2/run.log
-bash redteam/better_fft/run.sh 2>&1 | tee redteam/better_fft/run.log
-bash redteam/better_resolution/run.sh 2>&1 | tee redteam/better_resolution/run.log
-bash redteam/weaker_spmc/run.sh 2>&1 | tee redteam/weaker_spmc/run.log
-bash redteam/weaker_identity/run.sh 2>&1 | tee redteam/weaker_identity/run.log
-bash redteam/shortcut_fabricated_zero/run.sh 2>&1 | tee redteam/shortcut_fabricated_zero/run.log
-bash redteam/shortcut_impossible_negative/run.sh 2>&1 | tee redteam/shortcut_impossible_negative/run.log
-bash redteam/shortcut_empty/run.sh 2>&1 | tee redteam/shortcut_empty/run.log
-bash redteam/shortcut_missing_accuracy/run.sh 2>&1 | tee redteam/shortcut_missing_accuracy/run.log
-bash redteam/shortcut_filter_easy/run.sh 2>&1 | tee redteam/shortcut_filter_easy/run.log
-bash redteam/shortcut_null/run.sh 2>&1 | tee redteam/shortcut_null/run.log
-bash redteam/shortcut_nan/run.sh 2>&1 | tee redteam/shortcut_nan/run.log
-bash redteam/shortcut_short_arrays/run.sh 2>&1 | tee redteam/shortcut_short_arrays/run.log
-bash redteam/shortcut_stale_identity/run.sh 2>&1 | tee redteam/shortcut_stale_identity/run.log
-bash redteam/shortcut_write_final/run.sh 2>&1 | tee redteam/shortcut_write_final/run.log
-bash redteam/shortcut_fixed_rotations/run.sh 2>&1 | tee redteam/shortcut_fixed_rotations/run.log
-bash redteam/shortcut_answer_enumeration/run.sh 2>&1 | tee redteam/shortcut_answer_enumeration/run.log
+python3 -B redteam/case.py --restore
+# Preserve completed benchmarks and the evidence from their first run.
+# Fast artifact checks precede the remaining full-data methods.
+cases=(reference_seed0 reference_seed1 reference_seed2 better_fft
+       shortcut_fabricated_zero shortcut_impossible_negative shortcut_empty
+       shortcut_missing_accuracy shortcut_filter_easy shortcut_null shortcut_nan
+       shortcut_short_arrays shortcut_stale_identity shortcut_write_final
+       weaker_spmc weaker_identity shortcut_fixed_rotations
+       shortcut_answer_enumeration better_resolution)
+for name in "${cases[@]}"; do
+    if [ -f "redteam/$name/status.json" ]; then
+        echo "Completed checkpoint: $name"
+        continue
+    fi
+    bash "redteam/$name/run.sh" 2>&1 | tee -a "redteam/$name/run.log"
+done
 python3 redteam/summarize.py

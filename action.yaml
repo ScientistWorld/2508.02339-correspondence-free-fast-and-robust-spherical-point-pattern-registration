@@ -2,4 +2,4 @@ action: submit
 gpus: 0
 test: false
 milestone: secondary_claims
-notes: "Bundled scoring audit: 3 full reference seeds, genuine faster/finer and weaker variants, original complexity scales, and 12 reproducible shortcut checks."
+notes: "Resume scoring audit checkpoints after worker loss: remaining weaker and finer variants, public-answer enumeration and 12 shortcut checks. Completed 3 seeds and exact FFT improvement retained."
