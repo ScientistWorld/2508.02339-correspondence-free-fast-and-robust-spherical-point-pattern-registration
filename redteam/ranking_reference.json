@@ -1,0 +1,81 @@
+{
+  "experiments": {
+    "robust_alignment_all": {
+      "description": "Robust alignment on synthetic spherical patterns — median rotational error across all 5 datasets (A1-A5) and 7 outlier configurations (B1-B7), 100 rotations each. Paper's main result.",
+      "weight": 0.45,
+      "primary_metric": "median_rotation_error_deg",
+      "metrics": {
+        "median_rotation_error_deg": {"higher_is_better": false, "coefficient": -1.0},
+        "mean_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.3},
+        "median_time_s": {"higher_is_better": false, "coefficient": -0.1},
+        "success_rate_1deg": {"higher_is_better": true, "coefficient": 0.4, "description": "Fraction of evaluated rotations with angular error at or below 1 degree, catching methods that improve the median while failing many instances."},
+        "std_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.2, "description": "Standard deviation of rotation errors — catches inconsistent methods that occasionally produce large errors."},
+        "p95_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.4, "description": "95th percentile rotation error — measures worst-case behavior on typical samples."},
+        "max_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.15, "description": "Maximum rotation error across all evaluations — detects catastrophic failures."}
+      },
+      "results": {
+        "fpfh_quasar":   {"type": "baseline", "median_rotation_error_deg": 12.7, "mean_rotation_error_deg": 38.2, "median_time_s": 23.18},
+        "spmc":          {"type": "proposed", "median_rotation_error_deg": 1.5, "mean_rotation_error_deg": 5.8, "median_time_s": 0.5},
+        "frs":           {"type": "proposed", "median_rotation_error_deg": 2.1, "mean_rotation_error_deg": 8.3, "median_time_s": 1.2},
+        "spmc_frs":      {"type": "proposed", "median_rotation_error_deg": 0.8, "mean_rotation_error_deg": 2.1, "median_time_s": 0.9}
+      }
+    },
+    "robust_alignment_high_outliers": {
+      "description": "Robust alignment at high outlier ratios (B5: 50%, B6: 75%, B7: 90% outliers) — tests the method's robustness to extreme clutter",
+      "weight": 0.15,
+      "primary_metric": "median_rotation_error_deg",
+      "metrics": {
+        "median_rotation_error_deg": {"higher_is_better": false, "coefficient": -1.0},
+        "p90_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.5},
+        "success_rate_1deg": {"higher_is_better": true, "coefficient": 0.4, "description": "Fraction of high-outlier rotations solved within 1 degree, measuring whether robustness holds across individual cluttered cases."},
+        "std_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.2, "description": "Standard deviation of rotation errors under high-outlier conditions — measures consistency of robustness."}
+      },
+      "results": {
+        "fpfh_quasar":   {"type": "baseline", "median_rotation_error_deg": 62.4, "p90_rotation_error_deg": 148.5},
+        "spmc":          {"type": "proposed", "median_rotation_error_deg": 3.2, "p90_rotation_error_deg": 15.7},
+        "frs":           {"type": "proposed", "median_rotation_error_deg": 4.8, "p90_rotation_error_deg": 28.3},
+        "spmc_frs":      {"type": "proposed", "median_rotation_error_deg": 1.1, "p90_rotation_error_deg": 6.2}
+      }
+    },
+    "computational_complexity": {
+      "description": "Runtime scaling: time vs number of points, demonstrating O(n) complexity",
+      "weight": 0.15,
+      "primary_metric": "time_at_1e6_points_s",
+      "metrics": {
+        "time_at_1e6_points_s": {"higher_is_better": false, "coefficient": -0.5},
+        "time_at_1e7_points_s": {"higher_is_better": false, "coefficient": -0.5}
+      },
+      "results": {
+        "fpfh_quasar":   {"type": "baseline", "time_at_1e6_points_s": 45.2, "time_at_1e7_points_s": 580.0},
+        "spmc":          {"type": "proposed", "time_at_1e6_points_s": 0.3, "time_at_1e7_points_s": 1.8},
+        "frs":           {"type": "proposed", "time_at_1e6_points_s": 0.8, "time_at_1e7_points_s": 5.2},
+        "spmc_frs":      {"type": "proposed", "time_at_1e6_points_s": 0.6, "time_at_1e7_points_s": 3.5}
+      }
+    },
+    "spherical_image_alignment_all": {
+      "description": "Rotation estimation from spherical images using SphImg2SphPoints followed by SPMC+FRS, evaluated on five clutter settings over the released R100 rotations.",
+      "weight": 0.15,
+      "primary_metric": "median_rotation_error_deg",
+      "metrics": {
+        "median_rotation_error_deg": {"higher_is_better": false, "coefficient": -1.0},
+        "mean_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.3},
+        "median_time_s": {"higher_is_better": false, "coefficient": -0.1}
+      },
+      "results": {
+        "spmc_frs": {"type": "proposed", "median_rotation_error_deg": 0.89, "mean_rotation_error_deg": 0.89, "median_time_s": 0.9}
+      }
+    },
+    "spherical_image_alignment_high_clutter": {
+      "description": "Hardest spherical-image setting (Img5, about 19.3% clutter). Captures both typical and worst-case image-alignment error.",
+      "weight": 0.10,
+      "primary_metric": "median_rotation_error_deg",
+      "metrics": {
+        "median_rotation_error_deg": {"higher_is_better": false, "coefficient": -1.0},
+        "max_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.4}
+      },
+      "results": {
+        "spmc_frs": {"type": "proposed", "median_rotation_error_deg": 1.32, "max_rotation_error_deg": 2.96}
+      }
+    }
+  }
+}
