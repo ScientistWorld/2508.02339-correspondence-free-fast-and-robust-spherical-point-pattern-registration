@@ -1,64 +1,34 @@
 #!/bin/bash
-# Reproduce the paper's results end-to-end.
-#
-# This script runs inside the compute container and:
-#   1. Verifies the paper's dataset is available
-#   2. Runs SPMC, FRS, and SPMC+FRS evaluation on the paper's dataset
-#   3. Optionally runs the paper's computational-complexity benchmark
-#   4. Runs evaluation and writes scoring/scores.json
-#
-# Assumes:
-#   - Container is built with numpy available
-#   - Working directory is /home/user
-#   - Paper dataset at data/downloads/vector_alignment_dataset/
-
+# Reproduce the reference end to end (CPU only, no internet needed once
+# scripts/download.sh has been run):
+#   1. verify the downloaded public assets
+#   2. run SPMC / FRS / SPMC+FRS through the public train evaluator
+#   3. run them through the hidden test
+#   4. optionally (RUN_COMPLEXITY=1) the unscored Fig. 6 timing diagnostic
 set -euo pipefail
-cd /home/user
-export PYTHONPATH="/opt/python-packages${PYTHONPATH:+:${PYTHONPATH}}"
-export PYTHONPATH="/home/user${PYTHONPATH:+:${PYTHONPATH}}"
+cd "$(dirname "$0")/.."
+export PYTHONPATH="$(pwd):/opt/python-packages${PYTHONPATH:+:${PYTHONPATH}}"
 
-echo "=========================================="
-echo "End-to-End Reproduction"
-echo "=========================================="
-
-# Step 1: Verify dataset is already present. Compute nodes have no internet.
-echo "[1/4] Verifying paper dataset..."
-for required_path in \
-    "data/downloads/vector_alignment_dataset/A1_A.pkl" \
-    "data/downloads/vector_alignment_dataset/RandomRotation100.pkl"
-do
-    if [ ! -f "${required_path}" ]; then
-        echo "  ERROR: dataset missing required asset ${required_path}. Run scripts/download.sh before reproduce.sh."
+for required in data/downloads/vector_alignment_dataset/A1_A.pkl \
+                data/downloads/vector_alignment_dataset/RandomRotation100.pkl \
+                data/downloads/world_geojson/world.geojson; do
+    if [ ! -f "$required" ]; then
+        echo "ERROR: missing $required - run scripts/download.sh first" >&2
         exit 1
     fi
 done
-echo "  Dataset already present."
 
-# Step 2: Run the paper methods and aggregate scores
-echo "[2/4] Running SPMC, FRS, and SPMC+FRS evaluation on paper's dataset..."
-N_ROTATIONS="${N_ROTATIONS:-100}" bash scripts/method.sh
+echo "[1/3] Train evaluation (released dataset) -> scoring/scores_train.json"
+bash scripts/evaluate_train.sh
+cp scoring/scores_train.json scoring/scores.json
 
-# Step 3: Optional complexity benchmark
-if [ "${RUN_SPHERICAL_IMAGES:-1}" = "1" ]; then
-    echo "[3/5] Running spherical-image benchmark..."
-    bash scripts/spherical_images.sh
-else
-    echo "[3/5] Skipping spherical-image benchmark (set RUN_SPHERICAL_IMAGES=1 to enable)"
-fi
+echo "[2/3] Hidden test -> scoring/scores_test.json"
+bash scripts/evaluate_test.sh
 
-# Step 4: Optional complexity benchmark
 if [ "${RUN_COMPLEXITY:-0}" = "1" ]; then
-    echo "[4/5] Running computational-complexity benchmark..."
+    echo "[3/3] Unscored runtime-scaling diagnostic (paper Fig. 6)"
     bash scripts/complexity.sh
 else
-    echo "[4/5] Skipping computational-complexity benchmark (set RUN_COMPLEXITY=1 to enable)"
+    echo "[3/3] Skipping unscored runtime diagnostic (set RUN_COMPLEXITY=1)"
 fi
-
-# Step 5: Validate and report results
-echo "[5/5] Validating scoring artifacts..."
-python3 validate.py --compare
-echo "  Results written to scoring/scores.json"
-echo ""
-echo "=========================================="
-echo "Reproduction complete!"
-echo "=========================================="
+python3 validate.py

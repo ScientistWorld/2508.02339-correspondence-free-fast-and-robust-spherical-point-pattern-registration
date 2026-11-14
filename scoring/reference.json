@@ -1,80 +1,277 @@
 {
+  "_notes": [
+    "Coefficients set relative importance only; direction comes from higher_is_better. Each metric's improvement over the stored reference (scoring/scores_test.json, method spmc_frs) is normalised by its spread across ranked attempts.",
+    "No metric depends on wall-clock time. The paper's speed claim (< 1 s per case, O(n)) is enforced as a constraint instead: the evaluator caps every method at 1 CPU-second per instance (kernel-measured, ~20x the reference); exceeding it fails the run.",
+    "A failed run (crash, invalid/non-SO(3) output, import failure, CPU budget overrun) receives the worst value of every metric: 180 deg for error metrics, 0 for success rates.",
+    "results.*: numbers transcribed by earlier iterations. The paper prints per-(pattern, config) box-plot medians in Fig. 4 and the textual claims listed under _paper_reported_unscored; the aggregate robust-alignment values below are earlier approximations of those figures and are kept unchanged. sparse_alignment has no paper counterpart: its results are this gym's measured reference (hidden test).",
+    "Image experiments use a public world-map substitute (the paper's image is unreleased) with synthetic clutter at the paper's five clutter levels, so the paper's 0.89/1.32/2.96 deg values are indicative, not same-setup targets."
+  ],
+  "_paper_reported_unscored": {
+    "text_claims": {
+      "spmc_frs_combined_median_deg": "< 1 (Sec. 5.1)",
+      "spmc_A5_median_B1_to_B7_deg": [
+        0.24,
+        11.32
+      ],
+      "fpfh_quasar_one_to_one_median_deg": {
+        "A1B1": 0.11,
+        "A2B1": 0.04,
+        "A3B1_A4B1_A5B1": "> 100"
+      },
+      "fpfh_quasar_median_time_s": 23.18,
+      "ours_time": "under 1 second across all cases (Fig. 5)",
+      "frs_iterations": "about 11 on average, max 34 (Sec. 4.4)",
+      "spherical_images": {
+        "median_all_deg": 0.89,
+        "img5_median_deg": 1.32,
+        "img5_peak_deg": 2.96
+      }
+    },
+    "fig4_A1_medians_deg": {
+      "spmc": [
+        0.26,
+        0.28,
+        0.28,
+        0.46,
+        0.39,
+        0.35,
+        0.55
+      ],
+      "spmc_frs": [
+        0.67,
+        0.26,
+        0.28,
+        0.46,
+        0.36,
+        0.82,
+        0.31
+      ],
+      "fpfh_quasar": [
+        0.11,
+        169.24,
+        152.18,
+        160.27,
+        6.91,
+        93.9,
+        104.76
+      ],
+      "_order": "B1..B7; read from the printed box-plot medians of Fig. 4 (Dataset A1)"
+    },
+    "earlier_runtime_transcriptions_s": {
+      "robust_alignment_all.median_time_s": {
+        "fpfh_quasar": 23.18,
+        "spmc": 0.5,
+        "frs": 1.2,
+        "spmc_frs": 0.9
+      },
+      "spherical_image_alignment_all.median_time_s": {
+        "spmc_frs": 0.9
+      },
+      "computational_complexity": {
+        "fpfh_quasar": {
+          "time_at_1e6_points_s": 45.2,
+          "time_at_1e7_points_s": 580.0
+        },
+        "spmc": {
+          "time_at_1e6_points_s": 0.3,
+          "time_at_1e7_points_s": 1.8
+        },
+        "frs": {
+          "time_at_1e6_points_s": 0.8,
+          "time_at_1e7_points_s": 5.2
+        },
+        "spmc_frs": {
+          "time_at_1e6_points_s": 0.6,
+          "time_at_1e7_points_s": 3.5
+        }
+      }
+    }
+  },
   "experiments": {
     "robust_alignment_all": {
-      "description": "Robust alignment on synthetic spherical patterns — median rotational error across all 5 datasets (A1-A5) and 7 outlier configurations (B1-B7), 100 rotations each. Paper's main result.",
+      "description": "Paper Experiment 1 (Sec. 5.1 / 9.1): 5 template patterns A1-A5 x 7 source configurations B1-B7 (none; 0.01 noise; +10/25/50/75/90% uniform outliers) x 100 uniformly random rotations = 3,500 registrations. Hidden test: fresh secret noise/outlier realisations and rotations of the same protocol. Errors are geodesic rotation errors in degrees.",
       "weight": 0.45,
       "primary_metric": "median_rotation_error_deg",
       "metrics": {
-        "median_rotation_error_deg": {"higher_is_better": false, "coefficient": -1.0},
-        "mean_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.3},
-        "median_time_s": {"higher_is_better": false, "coefficient": -0.1},
-        "success_rate_1deg": {"higher_is_better": true, "coefficient": 0.4, "description": "Fraction of evaluated rotations with angular error at or below 1 degree, catching methods that improve the median while failing many instances."},
-        "std_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.2, "description": "Standard deviation of rotation errors — catches inconsistent methods that occasionally produce large errors."},
-        "p95_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.4, "description": "95th percentile rotation error — measures worst-case behavior on typical samples."},
-        "max_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.15, "description": "Maximum rotation error across all evaluations — detects catastrophic failures."}
+        "median_rotation_error_deg": {
+          "higher_is_better": false,
+          "coefficient": -1.0
+        },
+        "mean_rotation_error_deg": {
+          "higher_is_better": false,
+          "coefficient": -0.3
+        },
+        "success_rate_1deg": {
+          "higher_is_better": true,
+          "coefficient": 0.4,
+          "description": "Fraction of registrations with error <= 1 deg."
+        },
+        "p95_rotation_error_deg": {
+          "higher_is_better": false,
+          "coefficient": -0.4,
+          "description": "95th-percentile error: typical worst-case behaviour."
+        },
+        "max_rotation_error_deg": {
+          "higher_is_better": false,
+          "coefficient": -0.15,
+          "description": "Largest error: catastrophic failures."
+        }
       },
       "results": {
-        "fpfh_quasar":   {"type": "baseline", "median_rotation_error_deg": 12.7, "mean_rotation_error_deg": 38.2, "median_time_s": 23.18},
-        "spmc":          {"type": "proposed", "median_rotation_error_deg": 1.5, "mean_rotation_error_deg": 5.8, "median_time_s": 0.5},
-        "frs":           {"type": "proposed", "median_rotation_error_deg": 2.1, "mean_rotation_error_deg": 8.3, "median_time_s": 1.2},
-        "spmc_frs":      {"type": "proposed", "median_rotation_error_deg": 0.8, "mean_rotation_error_deg": 2.1, "median_time_s": 0.9}
+        "fpfh_quasar": {
+          "type": "baseline",
+          "median_rotation_error_deg": 12.7,
+          "mean_rotation_error_deg": 38.2
+        },
+        "spmc": {
+          "type": "proposed",
+          "median_rotation_error_deg": 1.5,
+          "mean_rotation_error_deg": 5.8
+        },
+        "frs": {
+          "type": "proposed",
+          "median_rotation_error_deg": 2.1,
+          "mean_rotation_error_deg": 8.3
+        },
+        "spmc_frs": {
+          "type": "proposed",
+          "median_rotation_error_deg": 0.8,
+          "mean_rotation_error_deg": 2.1
+        }
       }
     },
     "robust_alignment_high_outliers": {
-      "description": "Robust alignment at high outlier ratios (B5: 50%, B6: 75%, B7: 90% outliers) — tests the method's robustness to extreme clutter",
-      "weight": 0.15,
+      "description": "The B5-B7 subset (50/75/90% added outliers) of robust_alignment_all: 1,500 registrations. The paper's robustness claim: the hybrid stays accurate where SPMC's mean alignment degrades.",
+      "weight": 0.2,
       "primary_metric": "median_rotation_error_deg",
       "metrics": {
-        "median_rotation_error_deg": {"higher_is_better": false, "coefficient": -1.0},
-        "p90_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.5},
-        "success_rate_1deg": {"higher_is_better": true, "coefficient": 0.4, "description": "Fraction of high-outlier rotations solved within 1 degree, measuring whether robustness holds across individual cluttered cases."},
-        "std_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.2, "description": "Standard deviation of rotation errors under high-outlier conditions — measures consistency of robustness."}
+        "median_rotation_error_deg": {
+          "higher_is_better": false,
+          "coefficient": -1.0
+        },
+        "p90_rotation_error_deg": {
+          "higher_is_better": false,
+          "coefficient": -0.5
+        },
+        "success_rate_1deg": {
+          "higher_is_better": true,
+          "coefficient": 0.4,
+          "description": "Fraction of high-outlier registrations with error <= 1 deg."
+        }
       },
       "results": {
-        "fpfh_quasar":   {"type": "baseline", "median_rotation_error_deg": 62.4, "p90_rotation_error_deg": 148.5},
-        "spmc":          {"type": "proposed", "median_rotation_error_deg": 3.2, "p90_rotation_error_deg": 15.7},
-        "frs":           {"type": "proposed", "median_rotation_error_deg": 4.8, "p90_rotation_error_deg": 28.3},
-        "spmc_frs":      {"type": "proposed", "median_rotation_error_deg": 1.1, "p90_rotation_error_deg": 6.2}
-      }
-    },
-    "computational_complexity": {
-      "description": "Runtime scaling: time vs number of points, demonstrating O(n) complexity",
-      "weight": 0.15,
-      "primary_metric": "time_at_1e6_points_s",
-      "metrics": {
-        "time_at_1e6_points_s": {"higher_is_better": false, "coefficient": -0.5},
-        "time_at_1e7_points_s": {"higher_is_better": false, "coefficient": -0.5}
-      },
-      "results": {
-        "fpfh_quasar":   {"type": "baseline", "time_at_1e6_points_s": 45.2, "time_at_1e7_points_s": 580.0},
-        "spmc":          {"type": "proposed", "time_at_1e6_points_s": 0.3, "time_at_1e7_points_s": 1.8},
-        "frs":           {"type": "proposed", "time_at_1e6_points_s": 0.8, "time_at_1e7_points_s": 5.2},
-        "spmc_frs":      {"type": "proposed", "time_at_1e6_points_s": 0.6, "time_at_1e7_points_s": 3.5}
+        "fpfh_quasar": {
+          "type": "baseline",
+          "median_rotation_error_deg": 62.4,
+          "p90_rotation_error_deg": 148.5
+        },
+        "spmc": {
+          "type": "proposed",
+          "median_rotation_error_deg": 3.2,
+          "p90_rotation_error_deg": 15.7
+        },
+        "frs": {
+          "type": "proposed",
+          "median_rotation_error_deg": 4.8,
+          "p90_rotation_error_deg": 28.3
+        },
+        "spmc_frs": {
+          "type": "proposed",
+          "median_rotation_error_deg": 1.1,
+          "p90_rotation_error_deg": 6.2
+        }
       }
     },
     "spherical_image_alignment_all": {
-      "description": "Rotation estimation from spherical images using SphImg2SphPoints followed by SPMC+FRS, evaluated on five clutter settings over the released R100 rotations.",
-      "weight": 0.15,
+      "description": "Paper Experiment 3 (Sec. 5.3): a 360x180 world-map image (public GeoJSON substitute) is the template; sources add clutter at 0/5/10/15/19.3% of the sphere, are rotated and re-rasterised; both images become point sets via SphImg2SphPoints (intensity threshold 0.21, done by the evaluator). 5 clutter levels x 100 rotations = 500 registrations.",
+      "weight": 0.1,
       "primary_metric": "median_rotation_error_deg",
       "metrics": {
-        "median_rotation_error_deg": {"higher_is_better": false, "coefficient": -1.0},
-        "mean_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.3},
-        "median_time_s": {"higher_is_better": false, "coefficient": -0.1}
+        "median_rotation_error_deg": {
+          "higher_is_better": false,
+          "coefficient": -1.0
+        },
+        "mean_rotation_error_deg": {
+          "higher_is_better": false,
+          "coefficient": -0.3
+        },
+        "success_rate_1deg": {
+          "higher_is_better": true,
+          "coefficient": 0.4,
+          "description": "Fraction of image registrations with error <= 1 deg."
+        }
       },
       "results": {
-        "spmc_frs": {"type": "proposed", "median_rotation_error_deg": 0.89, "mean_rotation_error_deg": 0.89, "median_time_s": 0.9}
+        "spmc_frs": {
+          "type": "proposed",
+          "median_rotation_error_deg": 0.89,
+          "mean_rotation_error_deg": 0.89
+        },
+        "spmc": {
+          "type": "baseline"
+        },
+        "frs": {
+          "type": "baseline"
+        }
       }
     },
     "spherical_image_alignment_high_clutter": {
-      "description": "Hardest spherical-image setting (Img5, about 19.3% clutter). Captures both typical and worst-case image-alignment error.",
-      "weight": 0.10,
+      "description": "The hardest image setting (Img5, about 19.3% clutter) of spherical_image_alignment_all: 100 registrations; typical and worst-case error.",
+      "weight": 0.05,
       "primary_metric": "median_rotation_error_deg",
       "metrics": {
-        "median_rotation_error_deg": {"higher_is_better": false, "coefficient": -1.0},
-        "max_rotation_error_deg": {"higher_is_better": false, "coefficient": -0.4}
+        "median_rotation_error_deg": {
+          "higher_is_better": false,
+          "coefficient": -1.0
+        },
+        "max_rotation_error_deg": {
+          "higher_is_better": false,
+          "coefficient": -0.4
+        }
       },
       "results": {
-        "spmc_frs": {"type": "proposed", "median_rotation_error_deg": 1.32, "max_rotation_error_deg": 2.96}
+        "spmc_frs": {
+          "type": "proposed",
+          "median_rotation_error_deg": 1.32,
+          "max_rotation_error_deg": 2.96
+        },
+        "spmc": {
+          "type": "baseline"
+        },
+        "frs": {
+          "type": "baseline"
+        }
+      }
+    },
+    "sparse_alignment": {
+      "description": "Where the paper's method falls short (the low-density end of its Fig. 6 study, 10^3 points): template and source are INDEPENDENT 1,000- or 3,000-point samples of the same pattern (no shared points), source with 0.01 noise and 10% uniform outliers. 5 patterns x 2 sizes x 50 rotations = 500 registrations. No paper numbers exist; results are this gym's measured reference.",
+      "weight": 0.2,
+      "primary_metric": "median_rotation_error_deg",
+      "metrics": {
+        "median_rotation_error_deg": {
+          "higher_is_better": false,
+          "coefficient": -1.0
+        },
+        "mean_rotation_error_deg": {
+          "higher_is_better": false,
+          "coefficient": -0.3
+        },
+        "success_rate_5deg": {
+          "higher_is_better": true,
+          "coefficient": 0.4,
+          "description": "Fraction of sparse registrations with error <= 5 deg (not grossly failed)."
+        }
+      },
+      "results": {
+        "spmc_frs": {
+          "type": "proposed"
+        },
+        "spmc": {
+          "type": "proposed"
+        },
+        "frs": {
+          "type": "proposed"
+        }
       }
     }
   }

@@ -1,27 +1,13 @@
 #!/bin/bash
-# Run the paper's computational-complexity benchmark (Fig. 6).
-#
-# Usage:
-#   bash scripts/complexity.sh
-
+# UNSCORED diagnostic: the paper's runtime-scaling study (Fig. 6) on A3/B3
+# resampled to 1e3..1e7 points, 20 rotations. Wall-clock times depend on the
+# machine, so they are reported to outputs/complexity_timing.json only and are
+# never part of a ranked score.
 set -euo pipefail
-cd /home/user
-export PYTHONPATH="/opt/python-packages${PYTHONPATH:+:${PYTHONPATH}}"
-export PYTHONPATH="/home/user${PYTHONPATH:+:${PYTHONPATH}}"
-
-COMPLEXITY_SCALES="${COMPLEXITY_SCALES:-1000,10000,100000,1000000,10000000}"
-COMPLEXITY_ROTATIONS="${COMPLEXITY_ROTATIONS:-20}"
-RAW_COMPLEXITY_RESULTS="${RAW_COMPLEXITY_RESULTS:-scoring/raw_complexity_results.json}"
-SCORES_OUTPUT="${SCORES_OUTPUT:-scoring/scores.json}"
-
-echo "Running computational-complexity benchmark on A3/B3..."
+cd "$(dirname "$0")/.."
+export PYTHONPATH="$(pwd):/opt/python-packages${PYTHONPATH:+:${PYTHONPATH}}"
+mkdir -p outputs
 python3 scripts/run_complexity_experiment.py \
-    --scales "${COMPLEXITY_SCALES}" \
-    --n-rotations "${COMPLEXITY_ROTATIONS}" \
-    --output "${RAW_COMPLEXITY_RESULTS}"
-
-echo "Re-aggregating scores with the method-agnostic evaluator..."
-RAW_COMPLEXITY_RESULTS="${RAW_COMPLEXITY_RESULTS}" SCORES_OUTPUT="${SCORES_OUTPUT}" \
-    bash scripts/evaluate.sh
-
-echo "Complexity benchmark complete."
+    --scales "${COMPLEXITY_SCALES:-1000,10000,100000,1000000,10000000}" \
+    --n-rotations "${COMPLEXITY_ROTATIONS:-20}" \
+    --output "${COMPLEXITY_OUTPUT:-outputs/complexity_timing.json}"

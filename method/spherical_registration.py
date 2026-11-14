@@ -508,3 +508,29 @@ def register_rotation(template_points: np.ndarray, source_points: np.ndarray,
         raise ValueError(f"Unknown method: {method}")
 
     return R, t, info
+
+
+# =============================================================================
+# Registry read by eval/train and eval/test (see briefing/evaluation.md)
+# =============================================================================
+# Each entry maps (template (N,3), source (M,3)) -> 3x3 rotation R with
+# source ~= template @ R.T.  The evaluators discover every METHODS dict under
+# method/ and score each entry; they never read numbers a method writes.
+
+def _spmc_rotation(template: np.ndarray, source: np.ndarray) -> np.ndarray:
+    return spmc(template, source)[0]
+
+
+def _frs_rotation(template: np.ndarray, source: np.ndarray) -> np.ndarray:
+    return frs(template, source)[0]
+
+
+def _spmc_frs_rotation(template: np.ndarray, source: np.ndarray) -> np.ndarray:
+    return spmc_frs(template, source)[0]
+
+
+METHODS = {
+    "spmc": _spmc_rotation,          # Algorithm 1 (ablation)
+    "frs": _frs_rotation,            # Algorithm 2 (ablation)
+    "spmc_frs": _spmc_frs_rotation,  # Algorithm 3: the paper's proposed hybrid (reference)
+}

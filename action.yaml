@@ -1,8 +1,8 @@
 # Once you set action to 'submit' or 'done', STOP immediately.
 # Do NOT sleep, poll, or wait for jobs. The system reads this file
 # only after your turn ends.
-action: pending
+action: submit
 gpus: 0
 test: false
 milestone: secondary_claims
-notes: ""
+notes: "Hardening check: new evaluators that run every registered method themselves (secret fresh test instances, CPU budget, worst-value failures). Runs reference train+test, variants, baselines, brute force and all REDTEAM shortcuts; ~2h CPU."
