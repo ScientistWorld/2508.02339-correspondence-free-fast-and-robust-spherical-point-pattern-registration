@@ -1,0 +1,25 @@
+{
+  "experiments": {
+    "robust_alignment_all": {
+      "results": {
+        "spmc_frs": {
+          "median_rotation_error_deg": 0.545326122483442,
+          "mean_rotation_error_deg": 0.6071455898856162,
+          "median_time_s": 0.03179046849254519,
+          "success_rate_1deg": 0.835,
+          "std_rotation_error_deg": 0.4710232590745953,
+          "p95_rotation_error_deg": 1.1360587884631572,
+          "max_rotation_error_deg": 2.6428755528354433
+        }
+      }
+    },
+    "computational_complexity": {
+      "results": {
+        "spmc_frs": {
+          "time_at_1e6_points_s": 2.532515944505576,
+          "time_at_1e7_points_s": 12.822794982464984
+        }
+      }
+    }
+  }
+}

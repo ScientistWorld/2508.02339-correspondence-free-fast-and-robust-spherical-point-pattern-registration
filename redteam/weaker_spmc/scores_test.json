@@ -1,0 +1,35 @@
+{
+  "experiments": {
+    "robust_alignment_all": {
+      "results": {
+        "spmc_frs": {
+          "median_rotation_error_deg": 0.5385581603689917,
+          "mean_rotation_error_deg": 1.5625694161159107,
+          "median_time_s": 0.014147744019282982,
+          "success_rate_1deg": 0.6592857142857143,
+          "std_rotation_error_deg": 2.292687894781203,
+          "p95_rotation_error_deg": 6.244857317616932,
+          "max_rotation_error_deg": 13.306080424069503
+        }
+      }
+    },
+    "robust_alignment_high_outliers": {
+      "results": {
+        "spmc_frs": {
+          "median_rotation_error_deg": 1.0298943027924203,
+          "p90_rotation_error_deg": 6.346512694992348,
+          "success_rate_1deg": 0.49666666666666665,
+          "std_rotation_error_deg": 3.0204593259952777
+        }
+      }
+    },
+    "computational_complexity": {
+      "results": {
+        "spmc_frs": {
+          "time_at_1e6_points_s": 0.5876046159828547,
+          "time_at_1e7_points_s": 5.222547725978075
+        }
+      }
+    }
+  }
+}

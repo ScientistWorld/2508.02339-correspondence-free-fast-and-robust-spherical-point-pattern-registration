@@ -1,0 +1,13 @@
+Aggregating test slice scoring/raw_results.json -> scoring/scores_test.json...
+Traceback (most recent call last):
+  File "/home/user/eval/test/evaluate.py", line 182, in <module>
+    main()
+  File "/home/user/eval/test/evaluate.py", line 173, in main
+    scores = compute_scores(raw_results, raw_complexity_results)
+  File "/home/user/eval/test/evaluate.py", line 117, in compute_scores
+    errors = _slice_series(data.get("errors", []), config_key, "errors")
+  File "/home/user/eval/test/evaluate.py", line 104, in _slice_series
+    return [float(values[idx]) for idx in ROTATION_INDICES]
+  File "/home/user/eval/test/evaluate.py", line 104, in <listcomp>
+    return [float(values[idx]) for idx in ROTATION_INDICES]
+TypeError: float() argument must be a string or a real number, not 'NoneType'

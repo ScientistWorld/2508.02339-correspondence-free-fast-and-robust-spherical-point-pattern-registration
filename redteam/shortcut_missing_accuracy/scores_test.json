@@ -1,0 +1,12 @@
+{
+  "experiments": {
+    "computational_complexity": {
+      "results": {
+        "spmc_frs": {
+          "time_at_1e6_points_s": 0.0,
+          "time_at_1e7_points_s": 0.0
+        }
+      }
+    }
+  }
+}
