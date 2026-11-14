@@ -264,13 +264,22 @@
       },
       "results": {
         "spmc_frs": {
-          "type": "proposed"
+          "type": "proposed",
+          "median_rotation_error_deg": 1.6767,
+          "mean_rotation_error_deg": 23.7042,
+          "success_rate_5deg": 0.738
         },
         "spmc": {
-          "type": "proposed"
+          "type": "proposed",
+          "median_rotation_error_deg": 5.674,
+          "mean_rotation_error_deg": 31.7608,
+          "success_rate_5deg": 0.48
         },
         "frs": {
-          "type": "proposed"
+          "type": "proposed",
+          "median_rotation_error_deg": 3.0522,
+          "mean_rotation_error_deg": 40.2528,
+          "success_rate_5deg": 0.584
         }
       }
     }

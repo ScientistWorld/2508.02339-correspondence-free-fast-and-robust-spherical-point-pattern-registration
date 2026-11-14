@@ -1,10 +1,10 @@
 """Brute force the paper's method exists to avoid: enumerate a fixed grid of
-6,000 rotations covering SO(3) and keep the one whose rotated template best
+4,000 rotations covering SO(3) and keep the one whose rotated template best
 overlaps a smoothed density map of the source (a discretised spherical
 cross-correlation).  Sized to stay inside the evaluator's CPU budget."""
 import numpy as np
 
-_G = 6000
+_G = 4000
 _q = np.random.default_rng(12345).normal(size=(_G, 4))
 _q /= np.linalg.norm(_q, axis=1, keepdims=True)
 _w, _x, _y, _z = _q.T
@@ -37,7 +37,7 @@ def bruteforce_grid(template, source):
     template = template / np.linalg.norm(template, axis=1, keepdims=True)
     source = source / np.linalg.norm(source, axis=1, keepdims=True)
     rng = np.random.default_rng(0)
-    sample = template[rng.choice(len(template), min(1500, len(template)), replace=False)]
+    sample = template[rng.choice(len(template), min(800, len(template)), replace=False)]
     density = _density(source)
     best, best_score = np.eye(3), -np.inf
     for start in range(0, _G, 500):

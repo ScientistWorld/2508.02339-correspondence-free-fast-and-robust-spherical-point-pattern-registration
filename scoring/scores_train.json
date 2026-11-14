@@ -2,70 +2,130 @@
   "experiments": {
     "robust_alignment_all": {
       "results": {
-        "spmc": {
-          "median_rotation_error_deg": 0.5477377586376182,
-          "mean_rotation_error_deg": 1.565072473554238,
-          "median_time_s": 0.2775259366026148,
-          "success_rate_1deg": 0.655,
-          "std_rotation_error_deg": 2.2804784039611716,
-          "p95_rotation_error_deg": 6.248192049632182,
-          "max_rotation_error_deg": 13.347115757718482
-        },
         "frs": {
-          "median_rotation_error_deg": 0.8390694530106919,
-          "mean_rotation_error_deg": 22.794248732773774,
-          "median_time_s": 0.14646510605234653,
-          "success_rate_1deg": 0.6178571428571429,
-          "std_rotation_error_deg": 52.51185499882091,
-          "p95_rotation_error_deg": 168.29008473238207,
-          "max_rotation_error_deg": 179.99658549243432
+          "median_rotation_error_deg": 0.836416711590172,
+          "mean_rotation_error_deg": 21.53200879738526,
+          "success_rate_1deg": 0.6231428571428571,
+          "p95_rotation_error_deg": 167.9163067586596,
+          "max_rotation_error_deg": 179.9965854926478
+        },
+        "spmc": {
+          "median_rotation_error_deg": 0.5448278708519954,
+          "mean_rotation_error_deg": 1.56418722438563,
+          "success_rate_1deg": 0.6542857142857142,
+          "p95_rotation_error_deg": 6.244751934670481,
+          "max_rotation_error_deg": 13.347115757718427
         },
         "spmc_frs": {
-          "median_rotation_error_deg": 0.5990430729120702,
-          "mean_rotation_error_deg": 0.6586579612967878,
-          "median_time_s": 0.3052074608858675,
-          "success_rate_1deg": 0.83,
-          "std_rotation_error_deg": 0.4231561415984798,
-          "p95_rotation_error_deg": 1.4431394524293857,
-          "max_rotation_error_deg": 2.6428755528354433
+          "median_rotation_error_deg": 0.596597564495658,
+          "mean_rotation_error_deg": 0.6585869847088626,
+          "success_rate_1deg": 0.8325714285714285,
+          "p95_rotation_error_deg": 1.4399166244394905,
+          "max_rotation_error_deg": 2.6543501679113635
         }
       }
     },
     "robust_alignment_high_outliers": {
       "results": {
-        "spmc": {
-          "median_rotation_error_deg": 1.0229562765203275,
-          "p90_rotation_error_deg": 6.362178899315175,
-          "success_rate_1deg": 0.49666666666666665,
-          "std_rotation_error_deg": 3.0027610065041856
-        },
         "frs": {
-          "median_rotation_error_deg": 0.8476060838833062,
-          "p90_rotation_error_deg": 152.0322844067448,
-          "success_rate_1deg": 0.61,
-          "std_rotation_error_deg": 54.51917710752271
+          "median_rotation_error_deg": 0.8464582178863628,
+          "p90_rotation_error_deg": 150.25888901362293,
+          "success_rate_1deg": 0.6153333333333333
+        },
+        "spmc": {
+          "median_rotation_error_deg": 1.033493714503532,
+          "p90_rotation_error_deg": 6.35589166576759,
+          "success_rate_1deg": 0.49133333333333334
         },
         "spmc_frs": {
-          "median_rotation_error_deg": 0.6221953351280063,
-          "p90_rotation_error_deg": 1.3074761759135083,
-          "success_rate_1deg": 0.7916666666666666,
-          "std_rotation_error_deg": 0.4356733457693137
+          "median_rotation_error_deg": 0.6214782741334047,
+          "p90_rotation_error_deg": 1.3170182261637733,
+          "success_rate_1deg": 0.7926666666666666
         }
       }
     },
-    "computational_complexity": {
+    "spherical_image_alignment_all": {
       "results": {
-        "spmc": {
-          "time_at_1e6_points_s": 0.4563467790139839,
-          "time_at_1e7_points_s": 4.734639805566985
-        },
         "frs": {
-          "time_at_1e6_points_s": 1.3152017105021514,
-          "time_at_1e7_points_s": 11.947873245517258
+          "median_rotation_error_deg": 0.7843703203696133,
+          "mean_rotation_error_deg": 7.362619053288139,
+          "success_rate_1deg": 0.674
+        },
+        "spmc": {
+          "median_rotation_error_deg": 7.125188435824049,
+          "mean_rotation_error_deg": 11.324736253067197,
+          "success_rate_1deg": 0.006
         },
         "spmc_frs": {
-          "time_at_1e6_points_s": 1.041668118967209,
-          "time_at_1e7_points_s": 7.913573462981731
+          "median_rotation_error_deg": 0.6935662328447916,
+          "mean_rotation_error_deg": 0.8112594956598541,
+          "success_rate_1deg": 0.756
+        }
+      }
+    },
+    "spherical_image_alignment_high_clutter": {
+      "results": {
+        "frs": {
+          "median_rotation_error_deg": 1.389477444206221,
+          "max_rotation_error_deg": 26.922525242018622
+        },
+        "spmc": {
+          "median_rotation_error_deg": 25.809411664818292,
+          "max_rotation_error_deg": 28.323315278891286
+        },
+        "spmc_frs": {
+          "median_rotation_error_deg": 1.3379175863300063,
+          "max_rotation_error_deg": 2.7420481049757117
+        }
+      }
+    },
+    "sparse_alignment": {
+      "results": {
+        "frs": {
+          "median_rotation_error_deg": 3.036088944906204,
+          "mean_rotation_error_deg": 40.980436376781014,
+          "success_rate_5deg": 0.596
+        },
+        "spmc": {
+          "median_rotation_error_deg": 5.82420502239917,
+          "mean_rotation_error_deg": 31.351610453950684,
+          "success_rate_5deg": 0.478
+        },
+        "spmc_frs": {
+          "median_rotation_error_deg": 1.468065366745079,
+          "mean_rotation_error_deg": 20.707999018567467,
+          "success_rate_5deg": 0.766
+        }
+      }
+    }
+  },
+  "_diagnostics": {
+    "numpy": "2.2.6",
+    "cpu_seconds_per_instance_budget": 1.0,
+    "integrity_error": null,
+    "methods": {
+      "frs": {
+        "status": "ok",
+        "cpu_seconds": {
+          "sparse": 118.37,
+          "images": 49.22,
+          "robust": 738.2
+        }
+      },
+      "spmc": {
+        "status": "ok",
+        "cpu_seconds": {
+          "sparse": 2.17,
+          "images": 5.14,
+          "robust": 50.61
+        }
+      },
+      "spmc_frs": {
+        "status": "ok",
+        "cpu_seconds": {
+          "sparse": 79.08,
+          "images": 22.98,
+          "robust": 218.25
         }
       }
     }

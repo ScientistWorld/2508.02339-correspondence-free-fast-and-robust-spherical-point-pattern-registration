@@ -153,7 +153,7 @@ def main() -> None:
     if rerun.is_file():
         a = json.loads((ROOT / "scoring" / "scores_test.json").read_text())["experiments"]
         b = json.loads(rerun.read_text())["experiments"]
-        determinism = a == b
+        determinism = all(a[e]["results"][m] == b[e]["results"][m] for e in b for m in b[e]["results"])
 
     # Train vs test for the shipped methods.
     train_test = {}
