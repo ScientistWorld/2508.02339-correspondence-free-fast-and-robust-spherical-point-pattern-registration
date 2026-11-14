@@ -4,6 +4,11 @@
 
 ## Progress Log
 
+### [2026-11-14 22:00] - secondary_claims
+- Hardening (final iteration): the hidden test now runs every registered method itself on fresh secret instances (new rotations and noise/outlier/clutter/subsample realisations), recomputes every metric from the returned rotations, fails invalid/crashing/over-budget runs with worst values, and verifies asset hashes; no metric depends on wall-clock time (1 CPU-s/instance budget instead)
+- Implemented the previously unscored spherical-image experiments and added `sparse_alignment` (where the method falls short); removed the timing experiment and non-monotone std metrics
+- Reference SPMC+FRS on the hidden test: 0.587 deg median (train 0.597 deg; matches paper Fig. 4); every REDTEAM shortcut now fails or collapses; three honest variants beat the reference beyond paired-bootstrap noise (see HARDENING.md)
+
 ### [2026-04-24 17:36] - secondary_claims
 - Final verification found one scoring-contract mismatch: the canonical top-level evaluator was dropping robustness metrics that were already present in `reference.json` and the train/test slices
 - Fixed `eval/evaluate.py`, regenerated `scoring/scores.json`, and aligned `scoring/EXPERIMENTS.md` so the scored benchmark now reports the full checked-in robust-alignment metric set

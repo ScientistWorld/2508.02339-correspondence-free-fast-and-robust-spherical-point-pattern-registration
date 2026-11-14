@@ -20,16 +20,15 @@ Check off items as you complete them. Order doesn't matter — work however make
 ## Code
 - [x] Evaluation code in `eval/` — method-agnostic rotation error computation
 - [x] Method implementation in `method/spherical_registration.py`
-- [ ] Baseline implementation in `baseline/` (paper baseline still unavailable; `scripts/baseline.sh` provides only an identity sanity check)
+- [x] Baseline implementation in `baseline/` (identity + principal-axes moment matching; the paper's FPFH+QUASAR comparator is still unavailable)
 
 ## Scripts
 - [x] `scripts/evaluate.sh` — self-contained evaluation pipeline
 - [x] `scripts/reproduce.sh` — calls evaluate.sh
 - [x] `scripts/download.sh` — idempotent, clones paper repo
 - [x] `scripts/baseline.sh` — identity sanity baseline on the released dataset
-- [x] `scripts/run_experiment.py` — runs SPMC, FRS, and SPMC+FRS on the paper dataset
 - [x] `scripts/run_complexity_experiment.py` — runs the paper's A3/B3 runtime-scaling benchmark
-- [x] `scripts/run_spherical_image_experiment.py` — runs the paper's spherical-image benchmark on a reproducible public world-map substitute
+- [x] `eval/train` + `eval/test` run every registered method (pattern, image and sparse experiments); see `HARDENING.md`
 - [x] `scripts/run.sh` — latest verified Ray job script
 
 ## Environment

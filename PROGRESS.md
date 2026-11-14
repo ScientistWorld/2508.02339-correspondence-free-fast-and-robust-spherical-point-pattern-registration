@@ -133,3 +133,6 @@
 - Workspace closes at milestone `secondary_claims`
 - Main limitation: the packaged gym reproduces the released spherical-pattern benchmark and the separate complexity study, while the point-cloud experiment is still missing and the spherical-image benchmark is awaiting fresh compute-side evidence
 - Final verification status: the workspace is gym-ready at `secondary_claims`; the top-level scorer now matches the declared robust-alignment rubric and no further submission is required for this close-out
+
+## Hardening iteration (2026-11-14)
+Evaluation rebuilt so the hidden test runs the methods on secret fresh instances and recomputes every score; shortcuts from REDTEAM.md closed; image and sparse experiments scored; runtime replaced by a CPU budget. Details, before/after numbers and remaining limitations: `HARDENING.md`.

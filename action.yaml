@@ -1,8 +1,6 @@
 # Once you set action to 'submit' or 'done', STOP immediately.
 # Do NOT sleep, poll, or wait for jobs. The system reads this file
 # only after your turn ends.
-action: submit
-gpus: 0
-test: false
+action: done
 milestone: secondary_claims
-notes: "Hardening round 2 (CPU, short resumable steps): smoothed-polish and dual-initialisation candidates for a genuinely better variant through the hidden test (+train check). All shortcut checks already done."
+notes: "Hardened: hidden test runs every registered method on secret fresh instances, recomputes all scores, worst values on any failure, CPU budget instead of wall-clock metrics, image + sparse experiments scored; all REDTEAM shortcuts closed; 3 honest variants beat the reference beyond paired noise (HARDENING.md)."

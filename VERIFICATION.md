@@ -1,3 +1,5 @@
+> **Superseded:** this report describes the pre-hardening gym (raw-result aggregation). The current evaluation design and its verification are in `HARDENING.md`.
+
 # Verification Report
 
 ## Initial Assessment
