@@ -16,11 +16,13 @@ The paper addresses rotation estimation between two sets of points on a unit sph
 - Robust point cloud registration on ModelNet40 with overlap as low as 65%
 
 ## Reproduction Status
-- Reproduced the released Experiment 1 benchmark end to end on the paper's dataset for all 5 patterns, 7 outlier configurations, and 100 rotations per configuration
-- Reproduced `spmc_frs` at **0.597°** median error overall and **0.621°** on the high-outlier subset, both better than the paper's reported values for the same experiment
-- Reproduced the separate computational-complexity scaling study, with canonical scores for the `10^6` and `10^7` point settings recorded in `scoring/scores.json`
-- Added a reproducible spherical-image benchmark path this turn, but it still needs a fresh compute-side run before the checked-in scores can claim that experiment
-- The packaged gym still does **not** reproduce the paper's point-cloud-registration adaptation, so the workspace scope remains narrower than the full paper
+- SPMC, FRS and SPMC+FRS are implemented in `method/spherical_registration.py` (a faithful NumPy port of the released code) and registered in its `METHODS` dict.
+- Experiment 1 (released dataset, 5 patterns x 7 configurations x 100 rotations): SPMC+FRS **0.597 deg** median on the public instances and **0.587 deg** on the hidden test (fresh realisations of the same protocol); per-configuration medians match the paper's Fig. 4 (A1 row identical; A5 SPMC 0.24 -> 11.32 deg). The hybrid beats SPMC and FRS alone, as the paper claims.
+- Experiment 3 (spherical images, public world-map substitute): SPMC+FRS **0.69 / 0.87 deg** median (train / hidden test) vs. the paper's 0.89 deg; Img5 median 1.34 / 1.19 deg vs. 1.32 deg.
+- The paper's runtime study (Fig. 6) was reproduced in earlier iterations (git history); runtime is no longer a ranked metric (machine-dependent). Compute is constrained by a 1 CPU-second-per-instance budget; SPMC+FRS uses ~0.07 s.
+- Added beyond the paper: `sparse_alignment` (independent 1k/3k-point samples), where the reference fails grossly on ~26% of instances.
+- Not reproduced: the FPFH+QUASAR comparator and the point-cloud-registration experiments (ModelNet40 / 3DMatch / KITTI).
+- Evaluation was hardened in the final iteration (see `HARDENING.md`): the hidden test runs every registered method itself on secret instances.
 
 ---
 
@@ -28,22 +30,22 @@ The paper addresses rotation estimation between two sets of points on a unit sph
 
 ## Research Question
 
-Given two sets of 3D unit vectors (points on the unit sphere S²), find the rotation matrix R in SO(3) that best aligns a source set to a template set — without any correspondences between individual points in the two sets, and in the presence of noise and outliers.
+Given two sets of 3D unit vectors (points on the unit sphere S²), find the rotation matrix R in SO(3) that best aligns a template set to a source set — without any correspondences between individual points, with arbitrary point order, and in the presence of noise, outliers, structured clutter and sparse sampling.
 
 ## Why It Matters
 
-Rotation estimation between spherical point sets (the Wahba problem in 3D) is fundamental to many applications: attitude estimation, 3D point cloud registration, image stitching, robotics, and spherical image alignment. Existing methods either rely on known point correspondences (unrealistic in practice) or use expensive O(n³) spectral approaches. A fast, correspondence-free method would enable real-time rotation estimation in these domains.
+Rotation estimation between spherical point sets (the Wahba problem for 3D unit vectors) underlies attitude estimation, point-cloud registration via spherical embeddings, image stitching and spherical-image alignment. Correspondences are usually unavailable or unreliable, and approaches that search the rotation space densely become expensive as the required angular resolution grows. A method that is accurate, robust and fast enough for real-time use is the goal.
 
 ## Success Criteria
 
 A successful solution must:
-1. **Estimate rotation accurately**: Return a rotation matrix R such that applying R to the source set aligns it with the template set
-2. **Handle outliers**: Degrade gracefully when the source set contains random outlier points (points with no correspondence)
-3. **Run in linear time**: Computational complexity should be O(n) with respect to the number of points
-4. **Correspondence-free**: No prior matching or pairing between points in source and template sets
-5. **Robust to noise**: Handle Gaussian noise in point positions
+1. **Estimate rotation accurately** across very different spherical patterns (localized trajectories, scattered islands, non-uniform densities, a world-map image)
+2. **Handle outliers and clutter**: stay accurate when up to 90% extra random points, or structured clutter, are added to the source
+3. **Handle sparse, independent sampling**: template and source may be different samples of the same underlying pattern
+4. **Stay fast**: well under one CPU-second per registration, scaling linearly with the number of points
+5. **Be correspondence-free**: no prior matching between points; point order carries no information
 
-Success is measured by rotational angular error (in degrees) between the estimated and ground-truth rotation matrices, and by computation time.
+Success is measured by the geodesic angular error (degrees) between the estimated and ground-truth rotations, summarised by medians, tails and success rates; see `briefing/evaluation.md`.
 
 ---
 
@@ -96,57 +98,59 @@ For 3D point cloud registration:
 
 # Evaluation
 
-## Metrics
+## What you submit
 
-### Primary Metric: Rotational Angular Error
-The angular error between the estimated rotation matrix R_est and ground truth rotation matrix R_true. Computed as:
+Put a Python module in `method/` (any `method/<name>.py`) that defines a
+dictionary `METHODS` mapping a method name to a function
+
+```python
+def estimate(template: np.ndarray, source: np.ndarray) -> np.ndarray:
+    """template (N,3), source (M,3): float64 unit vectors, no correspondences,
+    arbitrary point order. Return a 3x3 rotation R with source ~= template @ R.T
+    (R rotates the template onto the source)."""
 ```
-error = arccos((trace(R_true^T * R_est) - 1) / 2) * (180/pi)
-```
-This gives the minimum rotation angle (in degrees) needed to go from R_est to R_true. Lower is better.
 
-### Secondary Metric: Computation Time
-Wall-clock time in seconds to compute the rotation estimate. Lower is better.
+Every entry of every `METHODS` dict on disk is scored; you may register several.
+A module without `METHODS` is treated as a helper and ignored. The evaluators
+run each method in a separate process, feed it point sets one instance at a
+time, and compute every number themselves from the returned matrices. Nothing a
+method prints or writes to disk is read.
 
-### Constraint: Outlier Handling
-The method must maintain accuracy across varying outlier ratios (0% to 90%) and noise levels (Gaussian noise with std 0.01).
+- `bash scripts/evaluate_train.sh` → `scoring/scores_train.json` (public instances, use it while developing)
+- `bash scripts/evaluate_test.sh` → `scoring/scores_test.json` (hidden test: same generators, fresh secret realisations; this is what is ranked)
 
-## Baselines and Targets
+Both take no arguments, use the same metrics and the same rules.
 
-Based on the paper's reported results:
-- **Feature-matching baseline**: Median angular error varies widely (0.04° to >100°) depending on dataset difficulty; median computation is on the order of tens of seconds
-- **Paper-reported top method**: Median angular error below 1° across the full robust-alignment benchmark; runtime under 1 second
-- **Random baseline**: For random rotation guesses, median error would be roughly tens of degrees and far worse than the reported methods
+## Error measure
 
-## Evaluation Protocol
+Geodesic rotation error in degrees between the returned `R` and the ground truth:
+`arccos((trace(R_true^T R) - 1) / 2)`, in [0, 180].
 
-### Scored Gym Benchmark: Released Spherical Pattern Registration
-- 5 template spherical patterns (A1–A5) with distinct characteristics
-- 7 source configurations per template (B1–B7):
-  - B1: no noise, no outliers (one-to-one correspondence)
-  - B2: Gaussian noise (std=0.01), no outliers
-  - B3: 10% outliers + noise
-  - B4: 25% outliers + noise
-  - B5: 50% outliers + noise
-  - B6: 75% outliers + noise
-  - B7: 90% outliers + noise
-- 100 random rotations (R100) applied per configuration
-- Total: 5 × 7 × 100 = 3500 evaluations per method
-- Report median and distribution of angular errors across all configurations
+## Validity, failures, compute
 
-### Additional Paper Experiment: Point Cloud Registration (ModelNet40)
-- Complete-to-complete (Comp2Comp): both source and target have 2500 points from same object
-- Partial-to-complete (Part2Comp): source is partial view, target is complete object
-- Report rotation error (degrees) and translation error (meters)
+- Each returned matrix must be finite, 3x3, orthonormal (max |RᵀR − I| ≤ 1e-4) and have determinant +1. Matrices are never repaired.
+- **Any** invalid output, exception, import error, empty `METHODS` dict, or process crash marks the method's whole run as **failed**: every metric of every experiment gets its worst value (180° for error metrics, 0 for success rates). Skipping hard instances therefore never pays.
+- **Compute budget:** each method gets 1 CPU-second per instance (plus 60 s start-up) per instance group, measured by the operating system on the method's process tree, BLAS threads pinned to 1. Exceeding it fails the run. This is the problem's speed requirement (registration well under a second per case, linear in the number of points); no metric depends on wall-clock time.
 
-### Additional Paper Experiment: Spherical Image Rotation Estimation
-- Template: 2D world map projected onto sphere
-- Source: same image with added clutter (0% to ~19%) and random rotations
-- Report median angular error
+## Experiments and metrics
 
-## Current Reusable Gym Scope
+All instances: a template point set and a rotated, corrupted source; rotations are uniform on SO(3).
 
-The packaged scoring and reusable evaluation scripts in this workspace already cover the released spherical-pattern registration benchmark and the separate complexity study. This turn also adds a reusable spherical-image benchmark path (`scripts/spherical_images.sh` plus raw/eval support), but its fresh compute-side results are still pending, so it is not yet part of the checked-in scored artifact set. The point-cloud experiment remains documented for paper context only.
+| Experiment | Instances | Metrics (direction) |
+|---|---|---|
+| `robust_alignment_all` (weight 0.45) | 5 spherical patterns × 7 corruption levels × 100 rotations = 3,500 | median error ↓ (primary), mean error ↓, success rate ≤1° ↑, 95th-percentile error ↓, max error ↓ |
+| `robust_alignment_high_outliers` (0.20) | the 1,500 instances with 50/75/90% added outliers | median ↓ (primary), 90th percentile ↓, success ≤1° ↑ |
+| `spherical_image_alignment_all` (0.10) | world-map image vs cluttered, rotated, re-rasterised copies; 5 clutter levels (0–19.3% of the sphere) × 100 | median ↓ (primary), mean ↓, success ≤1° ↑ |
+| `spherical_image_alignment_high_clutter` (0.05) | the 100 instances with ~19.3% clutter | median ↓ (primary), max ↓ |
+| `sparse_alignment` (0.20) | template and source are independent 1,000- or 3,000-point samples of a pattern (no shared points), source with noise and 10% outliers; 5 patterns × 2 sizes × 50 | median ↓ (primary), mean ↓, success ≤5° ↑ |
+
+Corruption levels of the pattern experiments: B1 none (source = template points, shuffled); B2 Gaussian noise σ = 0.01 on each coordinate then renormalised; B3–B7 the same noise plus 10/25/50/75/90% (of the template size) points drawn uniformly on the sphere. Image point sets are the pixels of a 360×180 equirectangular image whose intensity exceeds 0.21 (pixel centres mapped to the sphere); the evaluator does this conversion.
+
+Train uses the public released pattern dataset (`data/downloads/vector_alignment_dataset`, the 7 released source sets per pattern and the released 100 rotations), one public clutter realisation per image level, and public seeds for the sparse samples. The hidden test regenerates every source, clutter mask, subsample and rotation from a secret seed, so instance-specific tuning to the public data does not transfer.
+
+## Ranking
+
+Each scored metric's improvement over the stored reference (in its better direction), divided by its spread across ranked attempts, times its coefficient in `scoring/reference.json` and the experiment weight, summed. Coefficients set importance, not units.
 
 ---
 
@@ -2439,6 +2443,160 @@ The packaged scoring and reusable evaluation scripts in this workspace already c
 
 <details>
 <summary>Progress Log</summary>
+
+### [2026-04-24 17:36] - secondary_claims
+- Final verification found one scoring-contract mismatch: the canonical top-level evaluator was dropping robustness metrics that were already present in `reference.json` and the train/test slices
+- Fixed `eval/evaluate.py`, regenerated `scoring/scores.json`, and aligned `scoring/EXPERIMENTS.md` so the scored benchmark now reports the full checked-in robust-alignment metric set
+- Closed the workspace at `secondary_claims`: gym-ready for the released spherical-pattern benchmark plus the complexity study, with the spherical-image path present but still lacking a fresh scored artifact
+
+### [2026-04-24 17:30] - secondary_claims
+- Added a reusable spherical-image benchmark path based on the paper's `SphImg2SphPoints -> SPMC+FRS` adaptation, using a verified public `world.geojson` substitute because the paper does not release its exact world-map image
+- Extended the canonical evaluator and download scripts so a fresh CPU run can score the new image experiment alongside the already reproduced robust-alignment and complexity studies
+- Milestone remains `secondary_claims` until the new spherical-image submission finishes and produces fresh compute-side evidence
+
+### [2026-04-24 17:22] - secondary_claims
+- Final verification confirmed the workspace is structurally sound, method/eval separation is intact, `scripts/evaluate.sh` works standalone, and the download path is portable from `data/downloads/`
+- Confirmed that the checked-in artifacts already cover both the released robust-alignment benchmark and the separate computational-complexity study, so the workspace exceeds `core_claim_plus`
+- Lowered the stale `full` claim to `secondary_claims`: the spherical-pattern benchmark and complexity claim are reproduced, but the paper's point-cloud and spherical-image adaptation experiments are not packaged here
+
+### [2026-04-13 18:59] - majority
+- Final verification confirmed the claimed `majority` milestone is justified by the checked-in results and scoring artifacts
+- Rechecked folder structure, method/eval separation, method-agnostic scientist docs, and the scoring rubric for the experiments actually present in `scores.json`
+- Closed the workspace for gym use at `majority`; the remaining limitation is still the unreproduced reference `computational_complexity` experiment
+
+### [2026-04-13 10:35] - majority
+- Final verification confirmed the claimed `majority` milestone remains justified by the reproduced released benchmark and reusable scoring artifacts
+- Fixed the remaining environment-packaging issue by removing Python package installation from `environment/container.def`, leaving `setup.sh` as the single Python dependency entrypoint
+- Closed the workspace for gym use at `majority`; the only remaining gap is the unreproduced reference computational-complexity experiment
+
+### [2026-04-13 10:20] - majority
+- Reopened the control file from a stale permanent `done` state so the remaining Fig. 6 complexity benchmark can actually be scheduled
+- Rechecked the released SPMC/FRS implementation, fixed a small FRS timing-path mismatch, and confirmed the local submission still follows the paper's `A3/B3` scaling protocol rather than changing the algorithm
+- Prepared a fresh CPU submission for the unreproduced `computational_complexity` experiment; milestone remains `majority` until that run lands
+
+### [2026-04-12 23:52] - majority
+- Completed final gym verification and confirmed the existing `majority` milestone is justified by the reproduced released benchmark results
+- Removed benchmark-facing method leakage from scientist documents, cleaned the container/setup split, and tightened the end-to-end reproduction script preflight
+- No new experiment was required for verification; the remaining limitation is still the unreproduced computational-complexity study
+
+### [2026-04-12 23:48] - majority
+- Reopened the workspace from an incorrect permanent `done` state because the paper's Fig. 6 computational-complexity experiment is still unmeasured
+- Fixed a stale evaluator-call regression in `scripts/run_experiment.py` so `scripts/method.sh` and `scripts/reproduce.sh` are executable again
+- Fixed the complexity scoring contract to emit only the metric names declared in `scoring/reference.json` and tightened `scripts/run.sh` to preflight the actual `A3/B3` assets before a fresh CPU submission
+
+### [2026-04-09 14:10] - majority
+- Finalized the benchmark-facing wrap-up documents so the scored targets, experiments, constraints, and direction are consistent with the checked-in `scores.json`
+- Confirmed `python validate.py` still passes after the final documentation cleanup
+- Closed the workspace at `majority`; the only remaining unreproduced reference item is the separate computational-complexity study
+
+### [2026-04-09 14:01] - majority
+- Ran final gym verification on folder structure, method/eval separation, briefing files, scoring files, and reusable scripts
+- Fixed the remaining scoring-rubric issue by aligning `scoring/TARGETS.md` to the experiments actually present in `scoring/scores.json`
+- Rebalanced reference experiment weights so the current scored gym emphasizes the full benchmark more than the overlapping high-outlier subset; milestone remains `majority`
+
+### [2026-04-09 13:50] - majority
+- Audited the remaining Fig. 6 benchmark path and confirmed the workspace was incorrectly left in a permanent `done` state before the final reference experiment was actually attempted
+- Kept the paper algorithm unchanged but vectorized SPMC's geographic conversion so the original `10^3` to `10^7` complexity protocol is practical enough to attempt on compute
+- Preparing a final CPU submission for the paper's computational-complexity experiment; milestone remains `majority` until that run finishes
+
+### [2026-04-09 13:32] - majority
+- Added a dedicated, reusable Fig. 6 computational-complexity benchmark path for the paper's `A3/B3` scaling study
+- Extended the method-agnostic evaluator so `scores.json` can include the complexity experiment alongside the already reproduced main benchmark
+- Preparing a CPU submission for the remaining paper reference experiment; milestone stays `majority` until the new job finishes
+
+### [2026-04-09 12:32] - majority
+- Reviewed job `6cc72205-3b7`: the real paper methods completed the full 100-rotation benchmark on the released dataset after auto-resuming through scheduler restarts
+- Reproduced the paper's two main scored experiments end-to-end: overall robust alignment and the high-outlier subset, both with canonical `scores.json` and validation passing
+- The remaining unmeasured reference experiment is the separate computational-complexity scaling study, so the workspace now clears the `majority` threshold
+
+### [2026-04-09 12:23] - core_claim
+- Reviewed successful continuation job `9141a59a-c99`: the real paper methods completed all 35 pattern/config groups for the 20-rotation slice on the released dataset and produced canonical `scoring/scores.json`
+- The reproduced results support the central claim: `spmc_frs` reached 0.586° median error overall and 0.626° on the high-outlier subset while remaining under 0.30s median runtime
+- Promoted the workspace to `core_claim` and reset `scripts/run.sh` to resume the full 100-rotation paper protocol from the saved checkpoint
+
+### [2026-04-09 12:06] - method_runs
+- Reviewed job `768b2584-16c`: the real paper methods completed and checkpointed all 21 `A1`-`A3` pattern/config groups for the 20-rotation slice before the Ray worker was orphaned
+- Confirmed `scoring/raw_results.json` now contains 420 compute-side evaluations from the released paper dataset, but the job died before the final standalone aggregation step
+- Patched the run path to resume from the saved raw checkpoint, skip completed configs, and rewrite canonical `scoring/scores.json` after every per-config checkpoint so partial progress remains usable
+
+### [2026-04-09 11:11] - method_runs
+- Reviewed job `24712a1a-0f8`: the method launched successfully, passed the NumPy smoke test, and reached 1000/3500 evaluations before the Ray worker died and the job was orphaned
+- Confirmed the blocker is queue/runtime fragility rather than algorithm correctness
+- Reworked the evaluation path to support rotation slices and incremental raw-result checkpoints so shorter CPU jobs can still produce canonical scores
+
+### [2026-04-09 11:03] - method_runs
+- The setup overlay build failed before submission because `/usr/local` is not writable in this fakeroot environment, so `uv pip install --system numpy` could not complete
+- Reworked Python dependency installation to use `/opt/python-packages` inside the overlay and exported that path from `scripts/run.sh`
+- Kept the next job as the same full offline CPU evaluation; the only change is the environment install target
+
+### [2026-04-09 10:59] - method_runs
+- Reviewed failed CPU job `62d88eed-373`: the run exited immediately with `ModuleNotFoundError: No module named 'numpy'`
+- Identified the packaging bug: `environment/setup.sh` had installed NumPy under `/home/user`, but the job bind-mount hides that path at runtime
+- Fixed the environment to install NumPy with `uv pip install --system` and added a startup dependency smoke test to `scripts/run.sh` before the full evaluation
+
+### [2026-04-09 10:55] - method_runs
+- Removed the last non-canonical score-writing path: `scripts/run_experiment.py` now writes only raw per-instance results, leaving `scoring/scores.json` exclusively to `eval/evaluate.py`
+- Pruned the checked-in `scoring/scores.json` to only directly measured experiments, removing the stale computational-complexity block
+- Kept the milestone at `method_runs` pending fresh compute-side evidence from the full 100-rotation CPU run
+
+### [2026-04-08 22:02] - method_runs
+- Removed the unmeasured computational-complexity extrapolation from the canonical evaluator so future scores only report experiments actually run
+- Confirmed the previous CPU submission was cancelled before producing evidence, so milestone remains `method_runs`
+- Prepared a fresh submission state for the full 100-rotation offline evaluation
+
+### [2026-04-23 23:55] - method_runs
+- Ran the first split-evaluation compute job `fd93407b-db0`; the container and setup both succeeded, but `scripts/run.sh` failed immediately when `scripts/run_complexity_experiment.py` could not import the repo-root `data` package
+- Fixed the shell entrypoints to prepend `/home/user` to `PYTHONPATH` before invoking any repository Python scripts, so direct `python3 scripts/*.py` execution resolves `data/`, `method/`, and `eval/` consistently on compute nodes
+- Kept the milestone at `method_runs` pending a successful split-evaluation rerun that writes fresh `scores_train.json` and `scores_test.json`
+
+### [2026-04-08 21:58] - method_runs
+- Re-audited the local method code and confirmed the workspace still contains the paper's actual SPMC, FRS, and SPMC+FRS algorithms
+- Tightened the offline evaluation scripts without changing the algorithm path, then committed and pushed the submission state
+- Kept the milestone at `method_runs` pending the fresh compute-side 100-rotation evaluation
+
+### [2026-04-08 18:29] - method_runs
+- Corrected the environment packaging to follow protocol: Python dependencies now live in `environment/setup.sh`, and `environment/container.def` is OS-level only
+- Revalidated the workspace locally with `python validate.py --compare`
+- Prepared the workspace for a full 100-rotation CPU submission; milestone remains `method_runs` until fresh compute results land
+
+### [2026-04-08 04:18] - method_runs
+- Ran the real `scripts/method.sh -> scripts/evaluate.sh -> validate.py --compare` path locally with `N_ROTATIONS=1`
+- Confirmed the cleaned offline pipeline produces `scoring/raw_results.json` and a valid `scoring/scores.json`
+- Kept the milestone at `method_runs` until the submitted full 100-rotation CPU run finishes
+
+### [2026-04-08 04:05] - method_runs
+- Cleaned the execution path so `run.sh` performs one consistent offline evaluation flow
+- Restricted `scripts/evaluate.sh` to the method-agnostic aggregator in `eval/`
+- Updated checklist/progress bookkeeping to remove stale `core_claim` assertions before the next validation run
+
+### [2026-04-08 00:53] - method_runs
+- Audited the previous agent's workspace before trusting the claimed `core_claim`
+- Confirmed the codebase implements the paper's actual SPMC, FRS, and SPMC+FRS algorithms rather than a surrogate
+- Determined that `scoring/scores.json` was stale and still reflected the pre-fix hybrid path, so the prior milestone claim was not yet supportable
+- Fixed the remaining hybrid rotation-convention bug (`source @ R_spmc` before FRS refinement)
+- Revalidated representative cases locally against the paper's released code and kept the workspace at `method_runs` pending a fresh compute-side evaluation
+
+### [2026-04-08 00:36] - method_runs
+- Audited the local implementation against the paper's released `vector_alignment_utils.py`
+- Fixed FRS to match the paper's source-to-source final SVD estimate instead of aligning to the template
+- Implemented the actual hybrid `SPMC+FRS` path instead of delegating to SPMC alone
+- Restored the paper's default non-FFT circular shift search and corrected shift-to-degree scaling
+- Updated the evaluation harness and run scripts to score `spmc`, `frs`, and `spmc_frs` offline on compute nodes
+
+</details>
+
+### Iteration 11: claude-opus-5-5 (hardener)
+- **Milestone**: `secondary_claims` | **Status**: done
+- **Working time**: 46m | **GPU**: 0.0h
+- **Jobs**: 5 total (3 completed, 0 failed)
+
+<details>
+<summary>Progress Log</summary>
+
+### [2026-11-14 22:00] - secondary_claims
+- Hardening (final iteration): the hidden test now runs every registered method itself on fresh secret instances (new rotations and noise/outlier/clutter/subsample realisations), recomputes every metric from the returned rotations, fails invalid/crashing/over-budget runs with worst values, and verifies asset hashes; no metric depends on wall-clock time (1 CPU-s/instance budget instead)
+- Implemented the previously unscored spherical-image experiments and added `sparse_alignment` (where the method falls short); removed the timing experiment and non-monotone std metrics
+- Reference SPMC+FRS on the hidden test: 0.587 deg median (train 0.597 deg; matches paper Fig. 4); every REDTEAM shortcut now fails or collapses; three honest variants beat the reference beyond paired-bootstrap noise (see HARDENING.md)
 
 ### [2026-04-24 17:36] - secondary_claims
 - Final verification found one scoring-contract mismatch: the canonical top-level evaluator was dropping robustness metrics that were already present in `reference.json` and the train/test slices
