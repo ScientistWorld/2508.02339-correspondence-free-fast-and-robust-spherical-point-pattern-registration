@@ -1,8 +1,5 @@
-# Once you set action to 'submit' or 'done', STOP immediately.
-# Do NOT sleep, poll, or wait for jobs. The system reads this file
-# only after your turn ends.
-action: pending
+action: submit
 gpus: 0
 test: false
 milestone: secondary_claims
-notes: ""
+notes: "Bundled scoring audit: 3 full reference seeds, genuine faster/finer and weaker variants, original complexity scales, and 12 reproducible shortcut checks."
