@@ -1,5 +1,8 @@
-action: done
+# Once you set action to 'submit' or 'done', STOP immediately.
+# Do NOT sleep, poll, or wait for jobs. The system reads this file
+# only after your turn ends.
+action: pending
 gpus: 0
 test: false
 milestone: secondary_claims
-notes: "Audit complete: 19 runs, 3 reference seeds, honest ordering checked, 6 shortcuts meet or tie stored reference; report and evidence committed, benchmark files restored."
+notes: ""
