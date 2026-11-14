@@ -1,0 +1,65 @@
+{
+  "experiments": {
+    "robust_alignment_all": {
+      "results": {
+        "bruteforce_grid": {
+          "median_rotation_error_deg": 10.070809660200695,
+          "mean_rotation_error_deg": 25.811582334317293,
+          "success_rate_1deg": 0.001142857142857143,
+          "p95_rotation_error_deg": 137.24077197446812,
+          "max_rotation_error_deg": 179.96290374801384
+        }
+      }
+    },
+    "robust_alignment_high_outliers": {
+      "results": {
+        "bruteforce_grid": {
+          "median_rotation_error_deg": 10.019295961495025,
+          "p90_rotation_error_deg": 87.8291341464547,
+          "success_rate_1deg": 0.002
+        }
+      }
+    },
+    "spherical_image_alignment_all": {
+      "results": {
+        "bruteforce_grid": {
+          "median_rotation_error_deg": 8.802847679831036,
+          "mean_rotation_error_deg": 9.301338985620141,
+          "success_rate_1deg": 0.004
+        }
+      }
+    },
+    "spherical_image_alignment_high_clutter": {
+      "results": {
+        "bruteforce_grid": {
+          "median_rotation_error_deg": 10.183037116010208,
+          "max_rotation_error_deg": 24.47196248302192
+        }
+      }
+    },
+    "sparse_alignment": {
+      "results": {
+        "bruteforce_grid": {
+          "median_rotation_error_deg": 9.912376994377201,
+          "mean_rotation_error_deg": 26.205859095523266,
+          "success_rate_5deg": 0.122
+        }
+      }
+    }
+  },
+  "_diagnostics": {
+    "numpy": "2.2.6",
+    "cpu_seconds_per_instance_budget": 1.0,
+    "integrity_error": null,
+    "methods": {
+      "bruteforce_grid": {
+        "status": "ok",
+        "cpu_seconds": {
+          "sparse": 42.4,
+          "images": 43.72,
+          "robust": 300.83
+        }
+      }
+    }
+  }
+}

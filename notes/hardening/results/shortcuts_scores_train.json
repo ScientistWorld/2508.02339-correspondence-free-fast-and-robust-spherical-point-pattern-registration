@@ -1,0 +1,361 @@
+{
+  "experiments": {
+    "robust_alignment_all": {
+      "results": {
+        "public_answer_enumeration": {
+          "median_rotation_error_deg": 0.0,
+          "mean_rotation_error_deg": 5.524152617109718e-07,
+          "success_rate_1deg": 1.0,
+          "p95_rotation_error_deg": 2.091309789151873e-06,
+          "max_rotation_error_deg": 2.4148365394514667e-06
+        },
+        "skip_hard_instances": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0,
+          "p95_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "empty_registry": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0,
+          "p95_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "import_error": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0,
+          "p95_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "nan_matrix": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0,
+          "p95_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "reflection": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0,
+          "p95_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "scaled_identity": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0,
+          "p95_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "wrong_shape": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0,
+          "p95_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "zero_matrix": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0,
+          "p95_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "read_hidden_seed": {
+          "median_rotation_error_deg": 132.9017790794527,
+          "mean_rotation_error_deg": 128.40370362713878,
+          "success_rate_1deg": 0.0,
+          "p95_rotation_error_deg": 175.38652010752617,
+          "max_rotation_error_deg": 179.59994887872057
+        }
+      }
+    },
+    "robust_alignment_high_outliers": {
+      "results": {
+        "public_answer_enumeration": {
+          "median_rotation_error_deg": 0.0,
+          "p90_rotation_error_deg": 1.7075472925031877e-06,
+          "success_rate_1deg": 1.0
+        },
+        "skip_hard_instances": {
+          "median_rotation_error_deg": 180.0,
+          "p90_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "empty_registry": {
+          "median_rotation_error_deg": 180.0,
+          "p90_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "import_error": {
+          "median_rotation_error_deg": 180.0,
+          "p90_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "nan_matrix": {
+          "median_rotation_error_deg": 180.0,
+          "p90_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "reflection": {
+          "median_rotation_error_deg": 180.0,
+          "p90_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "scaled_identity": {
+          "median_rotation_error_deg": 180.0,
+          "p90_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "wrong_shape": {
+          "median_rotation_error_deg": 180.0,
+          "p90_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "zero_matrix": {
+          "median_rotation_error_deg": 180.0,
+          "p90_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "read_hidden_seed": {
+          "median_rotation_error_deg": 132.9017790794527,
+          "p90_rotation_error_deg": 174.25962682548047,
+          "success_rate_1deg": 0.0
+        }
+      }
+    },
+    "spherical_image_alignment_all": {
+      "results": {
+        "public_answer_enumeration": {
+          "median_rotation_error_deg": 129.5069716246486,
+          "mean_rotation_error_deg": 131.23852398795484,
+          "success_rate_1deg": 0.0
+        },
+        "skip_hard_instances": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "empty_registry": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "import_error": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "nan_matrix": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "reflection": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "scaled_identity": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "wrong_shape": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "zero_matrix": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "read_hidden_seed": {
+          "median_rotation_error_deg": 132.9017790794527,
+          "mean_rotation_error_deg": 128.40370362713878,
+          "success_rate_1deg": 0.0
+        }
+      }
+    },
+    "spherical_image_alignment_high_clutter": {
+      "results": {
+        "public_answer_enumeration": {
+          "median_rotation_error_deg": 129.7963935414207,
+          "max_rotation_error_deg": 179.2637387046302
+        },
+        "skip_hard_instances": {
+          "median_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "empty_registry": {
+          "median_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "import_error": {
+          "median_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "nan_matrix": {
+          "median_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "reflection": {
+          "median_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "scaled_identity": {
+          "median_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "wrong_shape": {
+          "median_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "zero_matrix": {
+          "median_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "read_hidden_seed": {
+          "median_rotation_error_deg": 132.9017790794527,
+          "max_rotation_error_deg": 179.59994887872057
+        }
+      }
+    },
+    "sparse_alignment": {
+      "results": {
+        "public_answer_enumeration": {
+          "median_rotation_error_deg": 107.04986705715292,
+          "mean_rotation_error_deg": 102.34315997803729,
+          "success_rate_5deg": 0.002
+        },
+        "skip_hard_instances": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_5deg": 0.0
+        },
+        "empty_registry": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_5deg": 0.0
+        },
+        "import_error": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_5deg": 0.0
+        },
+        "nan_matrix": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_5deg": 0.0
+        },
+        "reflection": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_5deg": 0.0
+        },
+        "scaled_identity": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_5deg": 0.0
+        },
+        "wrong_shape": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_5deg": 0.0
+        },
+        "zero_matrix": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_5deg": 0.0
+        },
+        "read_hidden_seed": {
+          "median_rotation_error_deg": 133.6478375985995,
+          "mean_rotation_error_deg": 125.4998899821818,
+          "success_rate_5deg": 0.0
+        }
+      }
+    }
+  },
+  "_diagnostics": {
+    "numpy": "2.2.6",
+    "cpu_seconds_per_instance_budget": 1.0,
+    "integrity_error": null,
+    "methods": {
+      "public_answer_enumeration": {
+        "status": "ok",
+        "cpu_seconds": {
+          "sparse": 0.24,
+          "images": 0.54,
+          "robust": 3.93
+        }
+      },
+      "skip_hard_instances": {
+        "status": "failed",
+        "cpu_seconds": {
+          "sparse": 78.27,
+          "images": 22.48,
+          "robust": 20.75
+        },
+        "failure": "robust: method raised an exception on instance 600 [log:     rotation = np.asarray(fn(template, source), dtype=np.float64) |   File \"/home/user/notes/hardening/cases/shortcuts/crash_large.py\", line 8, in skip_hard |     raise RuntimeError(\"declining a hard instance\") | RuntimeError: declining a hard instance | Traceback (most recent call last): |   File \"/home/user/eval/train/runner.py\", line 119, in <module>]"
+      },
+      "empty_registry": {
+        "status": "failed",
+        "cpu_seconds": {},
+        "failure": "METHODS registry is empty"
+      },
+      "import_error": {
+        "status": "failed",
+        "cpu_seconds": {},
+        "failure": "RuntimeError: deliberate import-time failure"
+      },
+      "nan_matrix": {
+        "status": "failed",
+        "cpu_seconds": {
+          "sparse": 0.08
+        },
+        "failure": "sparse: invalid output on instance 0: non-finite entries"
+      },
+      "reflection": {
+        "status": "failed",
+        "cpu_seconds": {
+          "sparse": 0.09
+        },
+        "failure": "sparse: invalid output on instance 0: determinant is not +1 (reflection)"
+      },
+      "scaled_identity": {
+        "status": "failed",
+        "cpu_seconds": {
+          "sparse": 0.07
+        },
+        "failure": "sparse: invalid output on instance 0: not orthonormal (max |R^T R - I| = 3)"
+      },
+      "wrong_shape": {
+        "status": "failed",
+        "cpu_seconds": {
+          "sparse": 0.07
+        },
+        "failure": "sparse: method raised an exception on instance 0 [log: Traceback (most recent call last): |   File \"/home/user/eval/train/runner.py\", line 93, in serve |     raise ValueError(f\"method returned shape {rotation.shape}, expected (3, 3)\") | ValueError: method returned shape (4, 4), expected (3, 3)]"
+      },
+      "zero_matrix": {
+        "status": "failed",
+        "cpu_seconds": {
+          "sparse": 0.07
+        },
+        "failure": "sparse: invalid output on instance 0: not orthonormal (max |R^T R - I| = 1)"
+      },
+      "read_hidden_seed": {
+        "status": "ok",
+        "cpu_seconds": {
+          "sparse": 0.1,
+          "images": 0.27,
+          "robust": 1.89
+        }
+      }
+    }
+  }
+}

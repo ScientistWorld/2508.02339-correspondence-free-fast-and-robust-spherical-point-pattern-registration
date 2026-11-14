@@ -1,0 +1,124 @@
+{
+  "experiments": {
+    "robust_alignment_all": {
+      "results": {
+        "frs": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0,
+          "p95_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "spmc": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0,
+          "p95_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "spmc_frs": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0,
+          "p95_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        }
+      }
+    },
+    "robust_alignment_high_outliers": {
+      "results": {
+        "frs": {
+          "median_rotation_error_deg": 180.0,
+          "p90_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "spmc": {
+          "median_rotation_error_deg": 180.0,
+          "p90_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "spmc_frs": {
+          "median_rotation_error_deg": 180.0,
+          "p90_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        }
+      }
+    },
+    "spherical_image_alignment_all": {
+      "results": {
+        "frs": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "spmc": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        },
+        "spmc_frs": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        }
+      }
+    },
+    "spherical_image_alignment_high_clutter": {
+      "results": {
+        "frs": {
+          "median_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "spmc": {
+          "median_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        },
+        "spmc_frs": {
+          "median_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        }
+      }
+    },
+    "sparse_alignment": {
+      "results": {
+        "frs": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_5deg": 0.0
+        },
+        "spmc": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_5deg": 0.0
+        },
+        "spmc_frs": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_5deg": 0.0
+        }
+      }
+    }
+  },
+  "_diagnostics": {
+    "numpy": "2.2.6",
+    "cpu_seconds_per_instance_budget": 1.0,
+    "integrity_error": "asset /home/user/data/downloads/vector_alignment_dataset/A1_A.pkl has sha256 77d701a6530cb05a3785fbb7d29c0ef8f3cb1ae0356a84f832d0f34fe5859264, expected f255b3abf2cf5f72fce8219cd038f56ca4351b9863744de21805427b3673f840",
+    "methods": {
+      "frs": {
+        "status": "failed",
+        "cpu_seconds": {},
+        "failure": "asset /home/user/data/downloads/vector_alignment_dataset/A1_A.pkl has sha256 77d701a6530cb05a3785fbb7d29c0ef8f3cb1ae0356a84f832d0f34fe5859264, expected f255b3abf2cf5f72fce8219cd038f56ca4351b9863744de21805427b3673f840"
+      },
+      "spmc": {
+        "status": "failed",
+        "cpu_seconds": {},
+        "failure": "asset /home/user/data/downloads/vector_alignment_dataset/A1_A.pkl has sha256 77d701a6530cb05a3785fbb7d29c0ef8f3cb1ae0356a84f832d0f34fe5859264, expected f255b3abf2cf5f72fce8219cd038f56ca4351b9863744de21805427b3673f840"
+      },
+      "spmc_frs": {
+        "status": "failed",
+        "cpu_seconds": {},
+        "failure": "asset /home/user/data/downloads/vector_alignment_dataset/A1_A.pkl has sha256 77d701a6530cb05a3785fbb7d29c0ef8f3cb1ae0356a84f832d0f34fe5859264, expected f255b3abf2cf5f72fce8219cd038f56ca4351b9863744de21805427b3673f840"
+      }
+    }
+  }
+}

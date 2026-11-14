@@ -1,0 +1,6 @@
+cwd=hidden_test_z55of67y uid=374202 DENIED (PermissionError)
+cwd=hidden_test_z55of67y uid=374202 DENIED (PermissionError)
+cwd=hidden_test_z55of67y uid=374202 DENIED (PermissionError)
+cwd=train_eval_dtscaldm uid=374202 READABLE
+cwd=train_eval_dtscaldm uid=374202 READABLE
+cwd=train_eval_dtscaldm uid=374202 READABLE

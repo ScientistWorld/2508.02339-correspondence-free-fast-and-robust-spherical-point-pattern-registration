@@ -1,0 +1,64 @@
+{
+  "experiments": {
+    "robust_alignment_all": {
+      "results": {
+        "cpu_hog_3s": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0,
+          "p95_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        }
+      }
+    },
+    "robust_alignment_high_outliers": {
+      "results": {
+        "cpu_hog_3s": {
+          "median_rotation_error_deg": 180.0,
+          "p90_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        }
+      }
+    },
+    "spherical_image_alignment_all": {
+      "results": {
+        "cpu_hog_3s": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_1deg": 0.0
+        }
+      }
+    },
+    "spherical_image_alignment_high_clutter": {
+      "results": {
+        "cpu_hog_3s": {
+          "median_rotation_error_deg": 180.0,
+          "max_rotation_error_deg": 180.0
+        }
+      }
+    },
+    "sparse_alignment": {
+      "results": {
+        "cpu_hog_3s": {
+          "median_rotation_error_deg": 180.0,
+          "mean_rotation_error_deg": 180.0,
+          "success_rate_5deg": 0.0
+        }
+      }
+    }
+  },
+  "_diagnostics": {
+    "numpy": "2.2.6",
+    "cpu_seconds_per_instance_budget": 1.0,
+    "integrity_error": null,
+    "methods": {
+      "cpu_hog_3s": {
+        "status": "failed",
+        "cpu_seconds": {
+          "sparse": 559.38
+        },
+        "failure": "sparse: method process died (EOFError: method process terminated)"
+      }
+    }
+  }
+}
