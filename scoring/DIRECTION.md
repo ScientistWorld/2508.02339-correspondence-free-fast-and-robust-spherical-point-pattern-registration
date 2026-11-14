@@ -1,21 +1,24 @@
 # Research Direction
 
 ## Scope
-This gym is about correspondence-free rotation estimation for spherical point patterns. A scientist should try to improve rotation accuracy and robustness on the released benchmark while preserving the problem definition and evaluation protocol.
+Correspondence-free rotation estimation for spherical point patterns, scored
+on fresh hidden instances by the evaluators in `eval/`.
 
-## What Good Progress Looks Like
-- Lower median rotation error on the full benchmark
-- Better robustness on the hardest outlier settings
-- Faster runtime without sacrificing the accuracy gains above
-- Runtime scaling that remains close to linear on the dedicated complexity study
+## What good progress looks like
+- Lower median error on the pattern benchmark without more gross failures
+  (watch success rate, p95 and max as well as the median)
+- Robustness when most source points are outliers
+- Robust image registration under structured clutter
+- Reliable registration of sparse, independently sampled point sets (the
+  current reference fails grossly on about a quarter of them)
+- All within about a CPU-second per registration
 
-## Valid Research Space
-Scientists may explore geometric, statistical, optimization-based, or learned approaches, as long as they still solve the same benchmarked task: estimate the rotation directly from the two unordered spherical point sets without using benchmark-specific correspondences.
+## Known weak points of the reference
+The reference's 1-degree histograms limit precision (median ~0.6 deg even
+without noise); its mean-direction initialisation is unstable when patterns
+cover the whole sphere or are sparsely sampled; fine-resolution histograms
+alone become noisy and alias on pixel-grid images.
 
-## Out of Bounds
-- Switching to a different task, dataset, or output representation
-- Using privileged correspondences or labels that are unavailable at evaluation time
-- Improving scores only by scaling compute or changing the benchmark protocol instead of improving the method
-
-## Practical Guidance
-Work should stay focused on methods that operate on the released spherical point-set benchmark and produce comparable rotation matrices under the existing evaluator. Improvements should be measured through the canonical `scripts/evaluate.sh` interface.
+## Out of bounds
+Changing the task, the data, the thresholds or the evaluator; exploiting
+anything other than the two point sets given per instance.

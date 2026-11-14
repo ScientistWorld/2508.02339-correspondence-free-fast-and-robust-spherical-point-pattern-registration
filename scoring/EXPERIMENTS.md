@@ -1,42 +1,46 @@
-# Experiment Overview
+# Experiments
 
-This file describes the experiments that are currently scored in `scores.json`.
+Every experiment below is produced by the evaluators themselves: they run each
+registered method (`METHODS` dicts under `method/`), compute the geodesic error
+of every returned rotation, and aggregate. `scripts/evaluate_train.sh` uses the
+public instances; `scripts/evaluate_test.sh` (ranked) uses fresh secret
+realisations of the same generators. A failed run (invalid matrix, exception,
+import failure, empty registry, CPU budget of 1 s/instance exceeded) gets the
+worst value of every metric (180 deg errors, 0 success).
 
-## robust_alignment_all
-Measures overall performance on the released Robust Vector Alignment Dataset.
-Each method is evaluated on all 5 template patterns (`A1`-`A5`), all 7 source
-configurations (`B1`-`B7`), and all 100 released rotations. This is the main
-benchmark for the gym.
+## robust_alignment_all (weight 0.45)
+Spherical pattern registration: 5 template patterns (A1-A5: localized
+trajectory, complex trajectory, small islands, large islands, non-uniform
+density) x 7 source corruption levels (B1 none; B2 Gaussian noise 0.01; B3-B7
+noise plus 10/25/50/75/90% uniform outliers) x 100 random rotations = 3,500.
+Metrics: `median_rotation_error_deg` (primary), `mean_rotation_error_deg`,
+`success_rate_1deg`, `p95_rotation_error_deg`, `max_rotation_error_deg`.
 
-The recorded metrics are:
-- `median_rotation_error_deg`
-- `mean_rotation_error_deg`
-- `median_time_s`
-- `success_rate_1deg`
-- `std_rotation_error_deg`
-- `p95_rotation_error_deg`
-- `max_rotation_error_deg`
+## robust_alignment_high_outliers (weight 0.20)
+The 1,500 instances of the above with 50/75/90% added outliers.
+Metrics: `median_rotation_error_deg` (primary), `p90_rotation_error_deg`,
+`success_rate_1deg`.
 
-## robust_alignment_high_outliers
-Measures robustness on the hardest clutter settings only. This experiment uses
-the same released dataset, but restricts evaluation to configurations `B5`,
-`B6`, and `B7`, where the source set contains 50%, 75%, and 90% outliers.
+## spherical_image_alignment_all (weight 0.10)
+A 360x180 world-map image (rendered from a public GeoJSON) is the template;
+each source adds random rectangles/ellipses covering 0/5/10/15/19.3% of the
+sphere, is rotated and re-rasterised. Both images are converted to point sets
+(pixels with intensity > 0.21) by the evaluator. 5 levels x 100 rotations.
+Metrics: `median_rotation_error_deg` (primary), `mean_rotation_error_deg`,
+`success_rate_1deg`.
 
-The recorded metrics are:
-- `median_rotation_error_deg`
-- `p90_rotation_error_deg`
-- `success_rate_1deg`
-- `std_rotation_error_deg`
+## spherical_image_alignment_high_clutter (weight 0.05)
+The 100 image instances with ~19.3% clutter.
+Metrics: `median_rotation_error_deg` (primary), `max_rotation_error_deg`.
 
-This experiment exists because the paper's central claim is not only low
-overall error, but also strong performance under severe outlier corruption.
+## sparse_alignment (weight 0.20)
+Template and source are independent 1,000- or 3,000-point samples of the same
+pattern (no shared points); the source also gets 0.01 noise and 10% uniform
+outliers. 5 patterns x 2 sizes x 50 rotations = 500.
+Metrics: `median_rotation_error_deg` (primary), `mean_rotation_error_deg`,
+`success_rate_5deg`.
 
-## computational_complexity
-Measures the paper's separate runtime-scaling claim on the fixed `A3/B3`
-synthetic setup. Each method is timed on the released rotation set while the
-number of points scales from `10^3` through `10^7`; the scored summary keeps
-the two largest settings that matter for practical asymptotics.
-
-The recorded metrics are:
-- `time_at_1e6_points_s`
-- `time_at_1e7_points_s`
+## Not scored
+Wall-clock runtime and its scaling with the number of points
+(`scripts/complexity.sh`, written to `outputs/`) are machine-dependent and
+reported only as diagnostics; compute is constrained by the CPU budget instead.

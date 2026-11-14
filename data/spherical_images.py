@@ -1,8 +1,10 @@
-"""Utilities for the paper's spherical-image adaptation experiment.
+"""Developer helpers for the spherical-image task (world-map substitute).
 
-This module stays method-agnostic: it generates the spherical-image benchmark
-inputs and converts images to spherical point clouds without importing from
-``method/``.
+Method-agnostic: renders the public world-map GeoJSON to a 360x180 image, adds
+rectangle/ellipse clutter, and converts images <-> spherical point sets
+(intensity threshold 0.21), so a method can be developed and visualised.
+The evaluators in eval/train and eval/test carry their own copies of this
+logic (and verify the GeoJSON hash); editing this file does not change scoring.
 """
 
 from __future__ import annotations

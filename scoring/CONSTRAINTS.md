@@ -1,29 +1,38 @@
 # Scientist Constraints
 
-## Problem Setup
-Work on correspondence-free rotation estimation between two sets of 3D unit vectors on the unit sphere. The task is to recover the source-to-template rotation without access to ground-truth point matches.
+## Problem setup
+Correspondence-free rotation estimation between two unordered sets of 3D unit
+vectors. A method is a function `(template (N,3), source (M,3)) -> R (3x3)`
+with `source ~= template @ R.T`, registered in a `METHODS` dict in a module
+under `method/` (see `briefing/evaluation.md`).
 
-## Data
-Use the released Robust Vector Alignment Dataset through [data/dataset.py](/home/user/data/dataset.py). The scored benchmark holds fixed:
-- all 5 template patterns `A1` through `A5`
-- all 7 source configurations `B1` through `B7`
-- all 100 released rotations from `RandomRotation100.pkl`
+## Held fixed by the evaluators (do not try to change them)
+- Instances, ground truth, corruption levels, clutter, sample sizes, the number
+  of instances, the 1 deg / 5 deg success thresholds and the image intensity
+  threshold are all generated inside `eval/`; the hidden test uses fresh secret
+  realisations.
+- Errors are recomputed from your returned matrices; nothing your code writes
+  is read. Invalid matrices (non-finite, non-orthonormal, det != +1),
+  exceptions and crashes fail the whole run (worst values everywhere).
+- Compute budget: 1 CPU-second per instance (OS-measured, BLAS threads pinned
+  to 1) per instance group. Exceeding it fails the run.
 
-No external training data, synthetic replacement benchmark, or filtered subset may replace this scored evaluation.
+## Data you may use
+The public pattern dataset via `data/dataset.py` (5 templates, the released
+source sets and rotations) and `data/spherical_images.py` (world-map rendering,
+clutter and image/point conversion helpers) for development. The hidden test
+does not reuse those specific realisations or rotations.
 
-## Outputs
-Each method must output a 3x3 rotation matrix in `SO(3)` for each source/template pair. Scoring assumes the same rotation-matrix convention used by the current evaluator.
+## Prohibited
+- Reading anything under `eval/`, the hidden-test secret, or evaluator memory
+  while your method runs; tampering with `data/downloads/` (the evaluators
+  verify SHA-256 hashes and fail every method if an asset changed).
+- Hard-coding answers or fingerprints of the public instances.
+- Using any information beyond the two point sets passed to the function.
 
-## Evaluation Rules
-- Use the geodesic rotation error in degrees: `arccos((trace(R_true^T R_est) - 1) / 2)`.
-- Measure runtime on the same inputs used for accuracy evaluation.
-- For the complexity experiment, hold fixed the paper's `A3/B3` setup, the released `RandomRotation100.pkl` rotations, and the scale list `10^3, 10^4, 10^5, 10^6, 10^7`.
-- Report results under the same experiment names and metric names used in `scoring/reference.json` and `scoring/scores.json`.
-
-## Prohibited Shortcuts
-- No use of point correspondences, nearest-neighbor matches, or injected pair labels during the scored benchmark.
-- No hardcoding of known rotations or any other information derived from the benchmark answers.
-- No changing the benchmark distribution by removing difficult patterns or outlier settings.
-
-## Allowed Freedom
-Scientists may change the representation, objective, optimizer, model family, or implementation details, provided the constraints above remain fixed and the method stays within the same correspondence-free rotation-estimation problem.
+## Allowed
+Any correspondence-free estimator: histogram / correlation methods, moment
+methods, robust optimisation, search over rotations, learned components
+(trained only on data you generate or the public data), point-to-point
+matching computed by the method itself, subsampling, multiple hypotheses -
+as long as it fits the CPU budget and returns a proper rotation.

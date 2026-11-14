@@ -16,8 +16,10 @@ The paper addresses rotation estimation between two sets of points on a unit sph
 - Robust point cloud registration on ModelNet40 with overlap as low as 65%
 
 ## Reproduction Status
-- Reproduced the released Experiment 1 benchmark end to end on the paper's dataset for all 5 patterns, 7 outlier configurations, and 100 rotations per configuration
-- Reproduced `spmc_frs` at **0.597°** median error overall and **0.621°** on the high-outlier subset, both better than the paper's reported values for the same experiment
-- Reproduced the separate computational-complexity scaling study, with canonical scores for the `10^6` and `10^7` point settings recorded in `scoring/scores.json`
-- Added a reproducible spherical-image benchmark path this turn, but it still needs a fresh compute-side run before the checked-in scores can claim that experiment
-- The packaged gym still does **not** reproduce the paper's point-cloud-registration adaptation, so the workspace scope remains narrower than the full paper
+- SPMC, FRS and SPMC+FRS are implemented in `method/spherical_registration.py` (a faithful NumPy port of the released code) and registered in its `METHODS` dict.
+- Experiment 1 (released dataset, 5 patterns x 7 configurations x 100 rotations): SPMC+FRS **0.597 deg** median on the public instances and **0.587 deg** on the hidden test (fresh realisations of the same protocol); per-configuration medians match the paper's Fig. 4 (A1 row identical; A5 SPMC 0.24 -> 11.32 deg). The hybrid beats SPMC and FRS alone, as the paper claims.
+- Experiment 3 (spherical images, public world-map substitute): SPMC+FRS **0.69 / 0.87 deg** median (train / hidden test) vs. the paper's 0.89 deg; Img5 median 1.34 / 1.19 deg vs. 1.32 deg.
+- The paper's runtime study (Fig. 6) was reproduced in earlier iterations (git history); runtime is no longer a ranked metric (machine-dependent). Compute is constrained by a 1 CPU-second-per-instance budget; SPMC+FRS uses ~0.07 s.
+- Added beyond the paper: `sparse_alignment` (independent 1k/3k-point samples), where the reference fails grossly on ~26% of instances.
+- Not reproduced: the FPFH+QUASAR comparator and the point-cloud-registration experiments (ModelNet40 / 3DMatch / KITTI).
+- Evaluation was hardened in the final iteration (see `HARDENING.md`): the hidden test runs every registered method itself on secret instances.

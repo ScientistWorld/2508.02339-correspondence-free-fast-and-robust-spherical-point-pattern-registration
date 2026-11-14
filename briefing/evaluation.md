@@ -1,53 +1,55 @@
 # Evaluation
 
-## Metrics
+## What you submit
 
-### Primary Metric: Rotational Angular Error
-The angular error between the estimated rotation matrix R_est and ground truth rotation matrix R_true. Computed as:
+Put a Python module in `method/` (any `method/<name>.py`) that defines a
+dictionary `METHODS` mapping a method name to a function
+
+```python
+def estimate(template: np.ndarray, source: np.ndarray) -> np.ndarray:
+    """template (N,3), source (M,3): float64 unit vectors, no correspondences,
+    arbitrary point order. Return a 3x3 rotation R with source ~= template @ R.T
+    (R rotates the template onto the source)."""
 ```
-error = arccos((trace(R_true^T * R_est) - 1) / 2) * (180/pi)
-```
-This gives the minimum rotation angle (in degrees) needed to go from R_est to R_true. Lower is better.
 
-### Secondary Metric: Computation Time
-Wall-clock time in seconds to compute the rotation estimate. Lower is better.
+Every entry of every `METHODS` dict on disk is scored; you may register several.
+A module without `METHODS` is treated as a helper and ignored. The evaluators
+run each method in a separate process, feed it point sets one instance at a
+time, and compute every number themselves from the returned matrices. Nothing a
+method prints or writes to disk is read.
 
-### Constraint: Outlier Handling
-The method must maintain accuracy across varying outlier ratios (0% to 90%) and noise levels (Gaussian noise with std 0.01).
+- `bash scripts/evaluate_train.sh` → `scoring/scores_train.json` (public instances, use it while developing)
+- `bash scripts/evaluate_test.sh` → `scoring/scores_test.json` (hidden test: same generators, fresh secret realisations; this is what is ranked)
 
-## Baselines and Targets
+Both take no arguments, use the same metrics and the same rules.
 
-Based on the paper's reported results:
-- **Feature-matching baseline**: Median angular error varies widely (0.04° to >100°) depending on dataset difficulty; median computation is on the order of tens of seconds
-- **Paper-reported top method**: Median angular error below 1° across the full robust-alignment benchmark; runtime under 1 second
-- **Random baseline**: For random rotation guesses, median error would be roughly tens of degrees and far worse than the reported methods
+## Error measure
 
-## Evaluation Protocol
+Geodesic rotation error in degrees between the returned `R` and the ground truth:
+`arccos((trace(R_true^T R) - 1) / 2)`, in [0, 180].
 
-### Scored Gym Benchmark: Released Spherical Pattern Registration
-- 5 template spherical patterns (A1–A5) with distinct characteristics
-- 7 source configurations per template (B1–B7):
-  - B1: no noise, no outliers (one-to-one correspondence)
-  - B2: Gaussian noise (std=0.01), no outliers
-  - B3: 10% outliers + noise
-  - B4: 25% outliers + noise
-  - B5: 50% outliers + noise
-  - B6: 75% outliers + noise
-  - B7: 90% outliers + noise
-- 100 random rotations (R100) applied per configuration
-- Total: 5 × 7 × 100 = 3500 evaluations per method
-- Report median and distribution of angular errors across all configurations
+## Validity, failures, compute
 
-### Additional Paper Experiment: Point Cloud Registration (ModelNet40)
-- Complete-to-complete (Comp2Comp): both source and target have 2500 points from same object
-- Partial-to-complete (Part2Comp): source is partial view, target is complete object
-- Report rotation error (degrees) and translation error (meters)
+- Each returned matrix must be finite, 3x3, orthonormal (max |RᵀR − I| ≤ 1e-4) and have determinant +1. Matrices are never repaired.
+- **Any** invalid output, exception, import error, empty `METHODS` dict, or process crash marks the method's whole run as **failed**: every metric of every experiment gets its worst value (180° for error metrics, 0 for success rates). Skipping hard instances therefore never pays.
+- **Compute budget:** each method gets 1 CPU-second per instance (plus 60 s start-up) per instance group, measured by the operating system on the method's process tree, BLAS threads pinned to 1. Exceeding it fails the run. This is the problem's speed requirement (registration well under a second per case, linear in the number of points); no metric depends on wall-clock time.
 
-### Additional Paper Experiment: Spherical Image Rotation Estimation
-- Template: 2D world map projected onto sphere
-- Source: same image with added clutter (0% to ~19%) and random rotations
-- Report median angular error
+## Experiments and metrics
 
-## Current Reusable Gym Scope
+All instances: a template point set and a rotated, corrupted source; rotations are uniform on SO(3).
 
-The packaged scoring and reusable evaluation scripts in this workspace already cover the released spherical-pattern registration benchmark and the separate complexity study. This turn also adds a reusable spherical-image benchmark path (`scripts/spherical_images.sh` plus raw/eval support), but its fresh compute-side results are still pending, so it is not yet part of the checked-in scored artifact set. The point-cloud experiment remains documented for paper context only.
+| Experiment | Instances | Metrics (direction) |
+|---|---|---|
+| `robust_alignment_all` (weight 0.45) | 5 spherical patterns × 7 corruption levels × 100 rotations = 3,500 | median error ↓ (primary), mean error ↓, success rate ≤1° ↑, 95th-percentile error ↓, max error ↓ |
+| `robust_alignment_high_outliers` (0.20) | the 1,500 instances with 50/75/90% added outliers | median ↓ (primary), 90th percentile ↓, success ≤1° ↑ |
+| `spherical_image_alignment_all` (0.10) | world-map image vs cluttered, rotated, re-rasterised copies; 5 clutter levels (0–19.3% of the sphere) × 100 | median ↓ (primary), mean ↓, success ≤1° ↑ |
+| `spherical_image_alignment_high_clutter` (0.05) | the 100 instances with ~19.3% clutter | median ↓ (primary), max ↓ |
+| `sparse_alignment` (0.20) | template and source are independent 1,000- or 3,000-point samples of a pattern (no shared points), source with noise and 10% outliers; 5 patterns × 2 sizes × 50 | median ↓ (primary), mean ↓, success ≤5° ↑ |
+
+Corruption levels of the pattern experiments: B1 none (source = template points, shuffled); B2 Gaussian noise σ = 0.01 on each coordinate then renormalised; B3–B7 the same noise plus 10/25/50/75/90% (of the template size) points drawn uniformly on the sphere. Image point sets are the pixels of a 360×180 equirectangular image whose intensity exceeds 0.21 (pixel centres mapped to the sphere); the evaluator does this conversion.
+
+Train uses the public released pattern dataset (`data/downloads/vector_alignment_dataset`, the 7 released source sets per pattern and the released 100 rotations), one public clutter realisation per image level, and public seeds for the sparse samples. The hidden test regenerates every source, clutter mask, subsample and rotation from a secret seed, so instance-specific tuning to the public data does not transfer.
+
+## Ranking
+
+Each scored metric's improvement over the stored reference (in its better direction), divided by its spread across ranked attempts, times its coefficient in `scoring/reference.json` and the experiment weight, summed. Coefficients set importance, not units.

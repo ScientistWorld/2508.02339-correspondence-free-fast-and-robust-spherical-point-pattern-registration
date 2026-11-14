@@ -1,8 +1,11 @@
 """Data access helpers for the Robust Vector Alignment Dataset.
 
 This module is method-agnostic. It exposes the paper's released spherical
-registration dataset so both baselines and future methods can use the same
-inputs without importing from ``method/``.
+registration dataset (templates A1-A5, released source sets B1-B7, released
+rotations R100) for development. The evaluators load these files themselves
+and verify their SHA-256; the hidden test does not reuse the released source
+sets or rotations. Convention: the released instance is
+``source = get_source(p, c) @ R.T`` for ``R`` in ``get_rotations()``.
 """
 
 from __future__ import annotations
