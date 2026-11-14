@@ -1,0 +1,182 @@
+[
+  {
+    "experiment": "robust_alignment_all",
+    "metric": "median_rotation_error_deg",
+    "coefficient_magnitude": 1.0,
+    "experiment_weight": 0.45,
+    "higher_is_better": false,
+    "reference_value": 0.6002368407699923,
+    "best_physical_bound": 0.0,
+    "at_best_bound": false
+  },
+  {
+    "experiment": "robust_alignment_all",
+    "metric": "mean_rotation_error_deg",
+    "coefficient_magnitude": 0.3,
+    "experiment_weight": 0.45,
+    "higher_is_better": false,
+    "reference_value": 0.6596905976129118,
+    "best_physical_bound": 0.0,
+    "at_best_bound": false
+  },
+  {
+    "experiment": "robust_alignment_all",
+    "metric": "median_time_s",
+    "coefficient_magnitude": 0.1,
+    "experiment_weight": 0.45,
+    "higher_is_better": false,
+    "reference_value": 0.30929874104913324,
+    "best_physical_bound": 0.0,
+    "at_best_bound": false
+  },
+  {
+    "experiment": "robust_alignment_all",
+    "metric": "success_rate_1deg",
+    "coefficient_magnitude": 0.4,
+    "experiment_weight": 0.45,
+    "higher_is_better": true,
+    "reference_value": 0.8321428571428572,
+    "best_physical_bound": 1.0,
+    "at_best_bound": false
+  },
+  {
+    "experiment": "robust_alignment_all",
+    "metric": "std_rotation_error_deg",
+    "coefficient_magnitude": 0.2,
+    "experiment_weight": 0.45,
+    "higher_is_better": false,
+    "reference_value": 0.428824910784478,
+    "best_physical_bound": 0.0,
+    "at_best_bound": false
+  },
+  {
+    "experiment": "robust_alignment_all",
+    "metric": "p95_rotation_error_deg",
+    "coefficient_magnitude": 0.4,
+    "experiment_weight": 0.45,
+    "higher_is_better": false,
+    "reference_value": 1.419609100578502,
+    "best_physical_bound": 0.0,
+    "at_best_bound": false
+  },
+  {
+    "experiment": "robust_alignment_all",
+    "metric": "max_rotation_error_deg",
+    "coefficient_magnitude": 0.15,
+    "experiment_weight": 0.45,
+    "higher_is_better": false,
+    "reference_value": 2.6516422119135985,
+    "best_physical_bound": 0.0,
+    "at_best_bound": false
+  },
+  {
+    "experiment": "robust_alignment_high_outliers",
+    "metric": "median_rotation_error_deg",
+    "coefficient_magnitude": 1.0,
+    "experiment_weight": 0.15,
+    "higher_is_better": false,
+    "reference_value": 0.6312245399527444,
+    "best_physical_bound": 0.0,
+    "at_best_bound": false
+  },
+  {
+    "experiment": "robust_alignment_high_outliers",
+    "metric": "p90_rotation_error_deg",
+    "coefficient_magnitude": 0.5,
+    "experiment_weight": 0.15,
+    "higher_is_better": false,
+    "reference_value": 1.3061299852061135,
+    "best_physical_bound": 0.0,
+    "at_best_bound": false
+  },
+  {
+    "experiment": "robust_alignment_high_outliers",
+    "metric": "success_rate_1deg",
+    "coefficient_magnitude": 0.4,
+    "experiment_weight": 0.15,
+    "higher_is_better": true,
+    "reference_value": 0.795,
+    "best_physical_bound": 1.0,
+    "at_best_bound": false
+  },
+  {
+    "experiment": "robust_alignment_high_outliers",
+    "metric": "std_rotation_error_deg",
+    "coefficient_magnitude": 0.2,
+    "experiment_weight": 0.15,
+    "higher_is_better": false,
+    "reference_value": 0.4514177886493411,
+    "best_physical_bound": 0.0,
+    "at_best_bound": false
+  },
+  {
+    "experiment": "computational_complexity",
+    "metric": "time_at_1e6_points_s",
+    "coefficient_magnitude": 0.5,
+    "experiment_weight": 0.15,
+    "higher_is_better": false,
+    "reference_value": 0.8895606929436326,
+    "best_physical_bound": 0.0,
+    "at_best_bound": false
+  },
+  {
+    "experiment": "computational_complexity",
+    "metric": "time_at_1e7_points_s",
+    "coefficient_magnitude": 0.5,
+    "experiment_weight": 0.15,
+    "higher_is_better": false,
+    "reference_value": 10.019579956540838,
+    "best_physical_bound": 0.0,
+    "at_best_bound": false
+  },
+  {
+    "experiment": "spherical_image_alignment_all",
+    "metric": "median_rotation_error_deg",
+    "coefficient_magnitude": 1.0,
+    "experiment_weight": 0.15,
+    "higher_is_better": false,
+    "reference_value": null,
+    "best_physical_bound": 0.0,
+    "at_best_bound": null
+  },
+  {
+    "experiment": "spherical_image_alignment_all",
+    "metric": "mean_rotation_error_deg",
+    "coefficient_magnitude": 0.3,
+    "experiment_weight": 0.15,
+    "higher_is_better": false,
+    "reference_value": null,
+    "best_physical_bound": 0.0,
+    "at_best_bound": null
+  },
+  {
+    "experiment": "spherical_image_alignment_all",
+    "metric": "median_time_s",
+    "coefficient_magnitude": 0.1,
+    "experiment_weight": 0.15,
+    "higher_is_better": false,
+    "reference_value": null,
+    "best_physical_bound": 0.0,
+    "at_best_bound": null
+  },
+  {
+    "experiment": "spherical_image_alignment_high_clutter",
+    "metric": "median_rotation_error_deg",
+    "coefficient_magnitude": 1.0,
+    "experiment_weight": 0.1,
+    "higher_is_better": false,
+    "reference_value": null,
+    "best_physical_bound": 0.0,
+    "at_best_bound": null
+  },
+  {
+    "experiment": "spherical_image_alignment_high_clutter",
+    "metric": "max_rotation_error_deg",
+    "coefficient_magnitude": 0.4,
+    "experiment_weight": 0.1,
+    "higher_is_better": false,
+    "reference_value": null,
+    "best_physical_bound": 0.0,
+    "at_best_bound": null
+  }
+]

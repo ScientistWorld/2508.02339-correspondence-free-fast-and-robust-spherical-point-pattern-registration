@@ -1,0 +1,26 @@
+Audit validation (after all runs, before completion commit):
+better_fft: train=0, test=0, score_written=True
+better_resolution: train=0, test=0, score_written=True
+reference_seed0: train=0, test=0, score_written=True
+reference_seed1: train=0, test=0, score_written=True
+reference_seed2: train=0, test=0, score_written=True
+shortcut_answer_enumeration: train=0, test=0, score_written=True
+shortcut_empty: train=0, test=0, score_written=True
+shortcut_fabricated_zero: train=0, test=0, score_written=True
+shortcut_filter_easy: train=0, test=0, score_written=True
+shortcut_fixed_rotations: train=0, test=0, score_written=True
+shortcut_impossible_negative: train=0, test=0, score_written=True
+shortcut_missing_accuracy: train=0, test=0, score_written=True
+shortcut_nan: train=0, test=0, score_written=True
+shortcut_null: train=1, test=1, score_written=False
+shortcut_short_arrays: train=1, test=1, score_written=False
+shortcut_stale_identity: train=0, test=0, score_written=True
+shortcut_write_final: train=0, test=0, score_written=True
+weaker_identity: train=0, test=0, score_written=True
+weaker_spmc: train=0, test=0, score_written=True
+Nine numerical cases each contain 35*100 errors and five scales*20 timed registrations.
+FFT and reference: all 3500 core errors identical.
+All tracked benchmark files in method/baseline/data/eval/scoring/environment/briefing/scripts match iteration-start commit dcc5efe.
+Downloaded rotations restored: SHA256 a57435e765f1261717bc46b93a91a5bd1717be7a06828bf8236bac8823aabd3c
+No temporary extra method or interrupted-run restoration state remains.
+No emitted reference metric is at its best physical bound.

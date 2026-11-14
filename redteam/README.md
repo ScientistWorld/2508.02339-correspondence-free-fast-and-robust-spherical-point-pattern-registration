@@ -19,9 +19,13 @@ of the rubric and checked-in scores; no shortcut reads either. The raw-artifact
 shortcuts reuse freshly generated `reference_seed0` outputs, which a future
 improve-mode agent can produce itself, rather than depending on unavailable
 checked-in raw scoring files. From-scratch shortcuts such as fabricated zeros,
-missing accuracy, and public-answer enumeration do not require those values;
-the common harness loads them only to reset the comparison consistently.
+missing accuracy, and public-answer enumeration do not require reference values.
 
 Every shortcut is explicitly named `shortcut_*`. Known-invalid artifacts are
-retained as evidence, not recommendations. Full results and limitations will be
-written to `/home/user/REDTEAM.md` after the bundled job finishes.
+retained as evidence, not recommendations. Full results and limitations are in
+`/home/user/REDTEAM.md`. `summarize.py` uses the specified coefficient/direction
+rule and a declared finite audit cohort; the future ranking cohort is unknown.
+The accepted NaN artifact is left unranked because no nonfinite-value ranking
+policy is supplied. Completed `status.json` files are skipped by `run_all.sh`;
+to repeat a case, use its `run.sh` directly. It regenerates scores from saved raw
+checkpoints; remove that case's raw JSON files first to remeasure the method.

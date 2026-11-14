@@ -9,3 +9,10 @@ the job was cancelled. There was no numerical or method failure in these logs.
 The resumed bundle preserves completed case results, runs the fast artifact
 checks first, and resumes partial numerical benchmarks. A persistent input-file
 backup restores ordinary workspace files if a worker dies during a case.
+
+The second CPU job, 1141bd20-aac, finished with exit code 0. It was preempted
+once and resumed automatically; checkpoints preserved all work. All 19 cases
+completed, including the two deliberately invalid artifacts whose evaluator
+exits were nonzero. Every real numerical variant used all original core cases
+and all five point-count scales. Only documentation and stdlib aggregation
+were performed on the interactive node.

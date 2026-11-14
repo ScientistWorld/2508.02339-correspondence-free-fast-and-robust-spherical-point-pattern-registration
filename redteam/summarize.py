@@ -32,16 +32,23 @@ for p in sorted(ROOT.glob('*/status.json')):
 
 flat = {name: values(scores) for name, scores in attempts.items()}
 flat['checked_reference'] = values(CHECKED)
+finite_cohort = {name: vals for name, vals in flat.items()
+                 if all(not isinstance(v, (int, float)) or math.isfinite(v)
+                        for v in vals.values())}
 scales = {}
 for exp, spec in SPEC.items():
     for metric in spec['metrics']:
         k = exp, metric
-        vals = [v[k] for v in flat.values() if isinstance(v.get(k), (int, float)) and math.isfinite(v[k])]
+        vals = [v[k] for v in finite_cohort.values() if isinstance(v.get(k), (int, float))]
         scales[k] = statistics.pstdev(vals) if len(vals)>1 else 0.0
 
 
 def rank(vals, anchor):
     total, contributions = 0., {}
+    # The supplied rule only skips missing values. Nonfinite output has no
+    # defensible scalar rank without an additional downstream ranking policy.
+    if any(isinstance(v, (int, float)) and not math.isfinite(v) for v in vals.values()):
+        return None, {}
     for exp, spec in SPEC.items():
         for metric, desc in spec['metrics'].items():
             k = exp, metric
@@ -57,16 +64,19 @@ def rank(vals, anchor):
     return total, contributions
 
 
-summary = {'normalization': 'population standard deviation across successful audit attempts plus checked reference; NaNs excluded',
-           'cohort': list(flat), 'standard_deviations': {'/'.join(k):v for k,v in scales.items()},
+summary = {'normalization': 'population standard deviation across finite successful audit attempts plus checked reference; missing values skipped; NaN attempt excluded from normalization and left unranked',
+           'cohort': list(finite_cohort), 'standard_deviations': {'/'.join(k):v for k,v in scales.items()},
            'attempts': {}}
 for name in statuses:
     entry = dict(statuses[name])
+    entry['score_file_written'] = (ROOT/name/'scores_test.json').exists()
+    entry['missing_metrics'] = ['/'.join((exp, metric)) for exp, spec in SPEC.items()
+                                for metric in spec['metrics']
+                                if (exp, metric) not in flat.get(name, {})]
     if name in flat:
         entry['rank_vs_checked_reference'], entry['contributions_vs_checked_reference'] = rank(flat[name], flat['checked_reference'])
         entry['rank_vs_fresh_reference'], entry['contributions_vs_fresh_reference'] = rank(flat[name], flat.get('reference_seed0', flat['checked_reference']))
         entry['metrics'] = {'/'.join(k): v for k,v in flat[name].items()}
-        entry['missing_metrics'] = ['/'.join((exp,metric)) for exp,spec in SPEC.items() for metric in spec['metrics'] if (exp,metric) not in flat[name]]
     summary['attempts'][name] = entry
 seeds = [flat.get(f'reference_seed{i}', {}) for i in range(3)]
 spread = {}

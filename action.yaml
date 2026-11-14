@@ -1,5 +1,5 @@
-action: submit
+action: done
 gpus: 0
 test: false
 milestone: secondary_claims
-notes: "Resume scoring audit checkpoints after worker loss: remaining weaker and finer variants, public-answer enumeration and 12 shortcut checks. Completed 3 seeds and exact FFT improvement retained."
+notes: "Audit complete: 19 runs, 3 reference seeds, honest ordering checked, 6 shortcuts meet or tie stored reference; report and evidence committed, benchmark files restored."

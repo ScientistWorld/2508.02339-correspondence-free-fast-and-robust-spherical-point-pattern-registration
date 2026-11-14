@@ -1,0 +1,1 @@
+The untouched hidden evaluator exited 1 and wrote no scoring/scores_test.json. See test.log. No worst-value score artifact was emitted.
